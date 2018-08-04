@@ -47,10 +47,12 @@ package tk.twilightlemon.lemonapp;
  *                                                            *
  **************************************************************
  */
+import android.app.DownloadManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -65,6 +67,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -75,6 +78,8 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import static android.content.Context.DOWNLOAD_SERVICE;
 
 //layout/first_fragment_layout.xml的交互逻辑
 public class FirstFragment extends Fragment {
@@ -254,7 +259,31 @@ public class FirstFragment extends Fragment {
                                     ListData.Data.add(md);}catch (Exception e){}
                                 i++;
                             }
-                            MusicListAdapter ad=new MusicListAdapter(getActivity(),ListData);
+                            MusicListAdapter ad=new MusicListAdapter(getActivity(), ListData, new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    try{
+                                        RelativeLayout PATENT= (RelativeLayout)view.getParent();
+                                        int index= Integer.parseInt(((TextView)PATENT.findViewById(R.id.MusicList_index)).getText().toString());
+                                        final InfoHelper.Music Data=ListData.Data.get(index);
+                                        String MusicID=Data.MusicID;
+                                        MainActivity.GetUrl(MusicID,new Handler(){
+                                            @Override
+                                            public void handleMessage(Message msg){
+                                                String name=(Data.MusicName+"-"+Data.Singer+".mp3").replace("\\","").replace("/","");
+                                                DownloadManager downloadManager = (DownloadManager)getActivity().getSystemService(DOWNLOAD_SERVICE);
+                                                DownloadManager.Request request = new
+                                                        DownloadManager.Request(Uri.parse(msg.obj.toString()));
+                                                request.setDestinationInExternalPublicDir("LemonApp/MusicDownload", name);
+                                                request.setTitle(name);
+                                                request.setDescription("小萌音乐正在下载中");
+                                                request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                                                downloadManager.enqueue(request);
+                                                MainActivity.sdm("正在下载:"+name,getActivity());
+                                            }
+                                        }); }catch(Exception e){}
+                                }
+                            });
                             lv.setAdapter(ad);
                             setListViewHeightBasedOnChildren(lv);
                         } catch (JSONException e) {

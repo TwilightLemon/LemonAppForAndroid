@@ -1,10 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="horizontal"
-    android:padding="5dip" >
+    android:padding="5dip">
 
+    <TextView
+        android:id="@+id/MusicList_index"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:text="Title"
+        android:textColor="#0b0b0b"
+        android:textSize="15dip"
+        android:textStyle="bold"
+        android:typeface="sans"
+        android:visibility="invisible" />
     <TextView
         android:id="@+id/MusicList_title"
         android:layout_width="wrap_content"
@@ -27,4 +40,15 @@
         android:layout_marginTop="1dip"
         android:text="Mss" />
 
+    <ImageView
+        android:id="@+id/MusicDownload"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_marginRight="10dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="10dp"
+        app:srcCompat="@drawable/downloadicon"
+        tools:ignore="VectorDrawableCompat" />
 </RelativeLayout>

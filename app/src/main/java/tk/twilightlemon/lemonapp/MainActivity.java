@@ -89,7 +89,6 @@ public class MainActivity extends AppCompatActivity {
     InfoHelper.Music Musicdt=null;
     Handler mHandler = new Handler();
     Runnable r = new Runnable() {
-
         @Override
         public void run() {
             SeekBar MseekBar=findViewById(R.id.MusicSeek);
@@ -158,11 +157,12 @@ public class MainActivity extends AppCompatActivity {
                 });
         PlayBottom_title.setText(Musicdt.MusicName);
         PlayBottom_mss.setText(Musicdt.Singer);
-        HttpHelper.PostWeb("http://lab.mkblog.cn/music/api.php", "types=url&id=" + Musicdt.MusicID + "&source=tencent", new Handler() {
+
+        GetUrl(Musicdt.MusicID,new Handler() {
             @Override
             public void handleMessage(Message msg) {
                 try {
-                    String url = new JSONObject(msg.obj.toString()).getString("url");
+                    String url = msg.obj.toString();
                     mp.setDataSource(url);
                     mp.prepare();
                     mp.start();
@@ -424,10 +424,24 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+    public void OnShareClick(View view){
+        Intent share_intent = new Intent();
+        share_intent.setAction(Intent.ACTION_SEND);
+        share_intent.setType("text/plain");
+        share_intent.putExtra(Intent.EXTRA_SUBJECT, "小萌音乐分享");
+        share_intent.putExtra(Intent.EXTRA_TEXT, Musicdt.MusicName+" - "+Musicdt.Singer+": http://suo.im/api.php?url=https://i.y.qq.com/v8/playsong.html?songmid="+Musicdt.MusicID);
+        //创建分享的Dialog
+        share_intent = Intent.createChooser(share_intent, "小萌音乐分享");
+        startActivity(share_intent);
+    }
     ///////加载区end//////
     //////功能区//////
     public static String FindByAb(String all, String a, String b) {
         return all.substring(all.indexOf(a) + a.length(), all.indexOf(b));
+    }
+    public static void sdm(String m,Context co){
+        Toast.makeText(co, m,
+                Toast.LENGTH_SHORT).show();
     }
     public void SendMessageBox(String msg) {
         AlertDialog.Builder dlg = new AlertDialog.Builder(MainActivity.this);
@@ -528,18 +542,50 @@ public class MainActivity extends AppCompatActivity {
     }
     public String parserLine(String str,ArrayList<String> times,ArrayList<String>texs,HashMap<String,String> data){
         if (!str.startsWith("[ti:")&&!str.startsWith("[ar:")&&!str.startsWith("[al:")&&!str.startsWith("[by:")&&!str.startsWith("[offset:")){
-            String TimeData=FindByAb(str,"[","]")+"0";
-            times.add(TimeData);
-            String INFO=FindByAb(str,"[","]");
-            String io="["+INFO+"]";
+            String TimeData=FindByAb(str,"[","]");
+            String unTimeData=TimeData.substring(0,TimeData.length()-1)+"0";
+            times.add(unTimeData);
+            String io="["+TimeData+"]";
             String TexsData=str.replace(io,"");
             texs.add(TexsData);
-            data.put(TimeData,TexsData);
-            return TimeData+"     "+TexsData;
+            data.put(unTimeData,TexsData);
+            return unTimeData+"     "+TexsData;
         }else return "";
     }
     public String escapeHtml(String str){
         return str.replace("&apos;","'").replace("&nbsp;"," ");
+    }
+    public static void GetUrl(final String Musicid,final Handler handler) {
+        //通过Musicid获取mid
+        final HashMap<String,String> hdata=new HashMap<String,String>();
+        hdata.put("Connection", "keep-alive");
+        hdata.put("CacheControl", "max-age=0");
+        hdata.put("Upgrade", "1");
+        hdata.put("UserAgent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.110 Safari/537.36");
+        hdata.put("Accept", "*/*");
+        hdata.put("Referer","https://y.qq.com/portal/player.html");
+        hdata.put("Host" , "c.y.qq.com");
+        hdata.put("AcceptLanguage", "zh-CN,zh;q=0.8");
+        hdata.put("Cookie", "pgv_pvi=1693112320; RK=DKOGai2+wu; pgv_pvid=1804673584; ptcz=3a23e0a915ddf05c5addbede97812033b60be2a192f7c3ecb41aa0d60912ff26; pgv_si=s4366031872; _qpsvr_localtk=0.3782697029073365; ptisp=ctc; luin=o2728578956; lskey=00010000863c7a430b79e2cf0263ff24a1e97b0694ad14fcee720a1dc16ccba0717d728d32fcadda6c1109ff; pt2gguin=o2728578956; uin=o2728578956; skey=@PjlklcXgw; p_uin=o2728578956; p_skey=ROnI4JEkWgKYtgppi3CnVTETY3aHAIes-2eDPfGQcVg_; pt4_token=wC-2b7WFwI*8aKZBjbBb7f4Am4rskj11MmN7bvuacJQ_; p_luin=o2728578956; p_lskey=00040000e56d131f47948fb5a2bec49de6174d7938c2eb45cb224af316b053543412fd9393f83ee26a451e15; ts_refer=ui.ptlogin2.qq.com/cgi-bin/login; ts_last=y.qq.com/n/yqq/playlist/2591355982.html; ts_uid=1420532256; yqq_stat=0");
+        HttpHelper.GetWeb(new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                try {
+                    final String mid = new JSONObject(msg.obj.toString()).getJSONArray("data").getJSONObject(0).getJSONObject("file").getString("media_mid");
+                    //固定GUID(随机)
+                    final String guid = "365305415";
+                    HttpHelper.GetWeb(new Handler() {
+                        @Override
+                        public void handleMessage(Message msg) {
+                            try {
+                                String key = new JSONObject(msg.obj.toString()).getString("key");
+                                Message ms=new Message();
+                                ms.obj="https://dl.stream.qqmusic.qq.com/M800"+mid+".mp3?vkey="+key+"&guid="+guid+"&uid=0&fromtag=30";
+                                handler.sendMessage(ms);
+                            }catch (Exception e){}
+                        }},"https://c.y.qq.com/base/fcgi-bin/fcg_musicexpress.fcg?json=3&guid="+guid+"&format=json",hdata);
+                }catch (Exception e){}
+            }},"https://c.y.qq.com/v8/fcg-bin/fcg_play_single_song.fcg?songmid="+Musicid+"&platform=yqq&format=json",hdata);
     }
     //////功能区end////
 }
