@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="5dip" >
+
+    <TextView
+        android:id="@+id/MusicList_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Title"
+        android:textColor="#0b0b0b"
+        android:typeface="sans"
+        android:textSize="15dip"
+        android:layout_marginLeft="10dp"
+        android:textStyle="bold"/>
+
+    <TextView
+        android:id="@+id/MusicList_mss"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/MusicList_title"
+        android:textColor="#5b5b5b"
+        android:layout_marginLeft="10dp"
+        android:textSize="10dip"
+        android:layout_marginTop="1dip"
+        android:text="Mss" />
+
+</RelativeLayout>

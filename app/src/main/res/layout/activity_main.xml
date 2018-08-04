@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+    <include
+        android:id="@+id/LyricView"
+        layout="@layout/lyriclayout"
+        android:visibility="gone" />
+
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="106dp"
+        android:theme="@style/AppTheme.AppBarOverlay">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="106dp"
+                android:scaleType="centerCrop"
+                android:src="@mipmap/bg"
+                android:contentDescription="TODO" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="20dp">
+
+                <ImageView
+                    android:id="@+id/USERTX"
+                    android:layout_width="35dp"
+                    android:layout_height="56dp"
+                    android:layout_marginLeft="15dp"
+                    android:src="@drawable/ic_usertx" />
+
+                <TextView
+                    android:id="@+id/USERNAME"
+                    android:layout_width="fill_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginLeft="60dp"
+                    android:gravity="center_vertical"
+                    android:text="立即登录"
+                    android:textSize="16dp" />
+            </RelativeLayout>
+
+            <android.support.design.widget.TabLayout
+                android:id="@+id/tabLayout"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:layout_marginTop="76dp">
+
+                <android.support.design.widget.TabItem
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="我的" />
+
+                <android.support.design.widget.TabItem
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="音乐馆" />
+
+
+                <!--android.support.design.widget.TabItem
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="电台" /TODO:等待下一个栏目开启.......-->
+            </android.support.design.widget.TabLayout>
+
+        </RelativeLayout>
+
+    </android.support.design.widget.AppBarLayout>
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/view_pager"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:baselineAligned="false"></android.support.v4.view.ViewPager>
+
+    <RelativeLayout
+        android:id="@+id/PlayBottom"
+        android:layout_width="match_parent"
+        android:background="#f1f1f1"
+        android:layout_height="50dp">
+
+        <ImageView
+            android:id="@+id/PlayBottom_img"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginLeft="20dp"
+            android:background="@mipmap/ic_launcher_round" />
+
+        <TextView
+            android:id="@+id/PlayBottom_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Title"
+            android:textColor="#0b0b0b"
+            android:typeface="sans"
+            android:layout_marginTop="5dp"
+            android:textSize="15dip"
+            android:layout_marginLeft="70dp"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:id="@+id/PlayBottom_mss"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/PlayBottom_title"
+            android:textColor="#5b5b5b"
+            android:layout_marginLeft="70dp"
+            android:textSize="10dip"
+            android:text="Mss" />
+
+        <ImageButton
+            android:id="@+id/PlayBottom_ControlBtn"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="30dp"
+            android:scaleType="fitCenter"
+            android:background="#f1f1f1"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="20dp" />
+
+    </RelativeLayout>
+</LinearLayout>

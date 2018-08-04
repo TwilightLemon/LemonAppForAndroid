@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <RelativeLayout
+        android:id="@+id/MusicPage"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <RelativeLayout
+            android:id="@+id/MImageBackground"
+            android:background="@drawable/music_background"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <RelativeLayout
+                android:id="@+id/BlurBlackPage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#5F000000" />
+        </RelativeLayout>
+        <RelativeLayout android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <RelativeLayout
+                android:id="@+id/MImage"
+                android:layout_marginBottom="100dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true">
+
+                <ImageButton
+                    android:id="@+id/E"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignTop="@+id/MusicTitle"
+                    android:layout_marginRight="10dp"
+                    android:background="#00000000"
+                    android:src="@drawable/ic_share" />
+
+                <ImageButton
+                    android:id="@+id/M_back"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignTop="@+id/MusicTitle"
+                    android:layout_marginLeft="10dp"
+                    android:background="#00000000"
+                    app:srcCompat="@drawable/ic_back"
+                    tools:ignore="VectorDrawableCompat" />
+
+                <ImageView
+                    android:id="@+id/MUSICZJ"
+                    android:layout_width="245dp"
+                    android:layout_height="245dp"
+                    android:layout_below="@+id/MusicMss"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="10dp"
+                    app:srcCompat="@mipmap/ic_launcher_round" />
+
+                <tk.twilightlemon.lemonapp.LrcView
+                    android:id="@+id/lrc"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginTop="350dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    app:lrcAnimationDuration="500"
+                    app:lrcCurrentTextColor="#04e2b3"
+                    app:lrcDividerHeight="20dp"
+                    app:lrcLabel="小萌音乐"
+                    app:lrcNormalTextColor="#F8F8F8"
+                    app:lrcPadding="16dp"
+                    app:lrcTextSize="16sp" />
+
+                <TextView
+                    android:id="@+id/MusicTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_marginLeft="50dp"
+                    android:layout_marginRight="50dp"
+                    android:layout_marginTop="30dp"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:singleLine="true"
+                    android:text="title"
+                    android:textColor="#FFFFFF"
+                    android:textSize="20dp" />
+
+                <TextView
+                    android:id="@+id/MusicMss"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_marginLeft="50dp"
+                    android:layout_marginRight="50dp"
+                    android:layout_marginTop="60dp"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:singleLine="true"
+                    android:text="singer"
+                    android:textColor="#99FFFFFF"
+                    android:textSize="16dp" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_alignParentBottom="true"
+                android:layout_marginBottom="10dp"
+                android:layout_height="90dp">
+
+                <SeekBar
+                    android:id="@+id/MusicSeek"
+                    android:layout_width="match_parent"
+                    android:layout_height="20dp"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentLeft="true"
+                    android:minHeight="20dp"
+                    android:maxHeight="20dp"
+                    android:layout_marginBottom="70dp" />
+
+                <ImageButton
+                    android:id="@+id/musiclike"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_alignBottom="@+id/MButton"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginLeft="40dp"
+                    android:layout_toRightOf="@+id/musicnext"
+                    android:background="#00000000"
+                    android:src="@drawable/ic_like" />
+
+                <ImageButton
+                    android:id="@+id/musicxh"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_alignBottom="@+id/MButton"
+                    android:layout_toLeftOf="@+id/musicnexts"
+                    android:layout_marginRight="40dp"
+                    android:layout_marginBottom="10dp"
+                    android:background="#00000000"
+                    app:srcCompat="@drawable/ic_musiclb"
+                    tools:ignore="VectorDrawableCompat" />
+
+                <ImageButton
+                    android:id="@+id/musicnexts"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_alignBottom="@+id/MButton"
+                    android:layout_marginBottom="7dp"
+                    android:layout_marginEnd="40dp"
+                    android:layout_marginRight="40dp"
+                    android:layout_toLeftOf="@+id/MButton"
+                    android:layout_toStartOf="@+id/MButton"
+                    android:background="#00000000"
+                    app:srcCompat="@drawable/ic_musiclast"
+                    tools:ignore="VectorDrawableCompat" />
+
+                <ImageButton
+                    android:id="@+id/musicnext"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_alignBottom="@+id/MButton"
+                    android:layout_marginBottom="7dp"
+                    android:layout_marginLeft="40dp"
+                    android:layout_marginStart="40dp"
+                    android:layout_toEndOf="@+id/MButton"
+                    android:layout_toRightOf="@+id/MButton"
+                    android:background="#00000000"
+                    app:srcCompat="@drawable/ic_musicnext"
+                    tools:ignore="VectorDrawableCompat" />
+
+                <ImageButton
+                    android:id="@+id/MButton"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_alignParentBottom="true"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginBottom="8dp"
+                    android:background="#00000000"
+                    app:srcCompat="@drawable/ic_playbtn"
+                    tools:ignore="VectorDrawableCompat" />
+            </RelativeLayout>
+        </RelativeLayout>
+
+    </RelativeLayout>
+</RelativeLayout>
