@@ -104,6 +104,8 @@
             android:text="Title"
             android:textColor="#0b0b0b"
             android:typeface="sans"
+            android:ellipsize="marquee"
+            android:singleLine="true"
             android:layout_marginTop="5dp"
             android:textSize="15dip"
             android:layout_marginLeft="70dp"
@@ -112,6 +114,8 @@
         <TextView
             android:id="@+id/PlayBottom_mss"
             android:layout_width="fill_parent"
+            android:ellipsize="marquee"
+            android:singleLine="true"
             android:layout_height="wrap_content"
             android:layout_below="@id/PlayBottom_title"
             android:textColor="#5b5b5b"
