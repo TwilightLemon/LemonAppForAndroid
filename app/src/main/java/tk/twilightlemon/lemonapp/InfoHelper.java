@@ -44,4 +44,12 @@ public class InfoHelper {
         public String id ="";
         public String sub="";
     }
+    ///排行版列表数据
+    public class MusicTop
+    {
+        public String Name ="";
+        public String Photo ="";
+        public String ID ="";
+        public ArrayList<Music> Data  = new ArrayList<>();
+    }
 }
