@@ -250,58 +250,7 @@ public class FirstFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position,
                                     long id) {
-                Settings.ListData =Settings.data.get(position);
-                if(!Settings.ListData.name.contains("歌单:"))
-                    Settings.ListData.name ="歌单:"+Settings.ListData.name;
-                final HashMap<String,String> data=new HashMap<String,String>();/////start   加载歌单列表
-                data.put("Connection", "keep-alive");
-                data.put("CacheControl", "max-age=0");
-                data.put("Upgrade", "1");
-                data.put("UserAgent" , "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.110 Safari/537.36");
-                data.put("Accept", "*/*");
-                data.put("Referer" , "https://y.qq.com/portal/player.html");
-                data.put("Host" , "c.y.qq.com");
-                data.put("AcceptLanguage", "zh-CN,zh;q=0.8");
-                data.put("Cookie","pgv_pvi=1693112320; RK=DKOGai2+wu; pgv_pvid=1804673584; ptcz=3a23e0a915ddf05c5addbede97812033b60be2a192f7c3ecb41aa0d60912ff26; pgv_si=s4366031872; _qpsvr_localtk=0.3782697029073365; ptisp=ctc; luin=o2728578956; lskey=00010000863c7a430b79e2cf0263ff24a1e97b0694ad14fcee720a1dc16ccba0717d728d32fcadda6c1109ff; pt2gguin=o2728578956; uin=o2728578956; skey=@PjlklcXgw; p_uin=o2728578956; p_skey=ROnI4JEkWgKYtgppi3CnVTETY3aHAIes-2eDPfGQcVg_; pt4_token=wC-2b7WFwI*8aKZBjbBb7f4Am4rskj11MmN7bvuacJQ_; p_luin=o2728578956; p_lskey=00040000e56d131f47948fb5a2bec49de6174d7938c2eb45cb224af316b053543412fd9393f83ee26a451e15; ts_refer=ui.ptlogin2.qq.com/cgi-bin/login; ts_last=y.qq.com/n/yqq/playlist/2591355982.html; ts_uid=1420532256; yqq_stat=0");
-                HttpHelper.GetWeb(new Handler() {
-                    @Override
-                    public void handleMessage(Message msg) {
-                        super.handleMessage(msg);
-                        switch (msg.what) {
-                            case 0:
-                                String json= (String) msg.obj;
-                                try {
-                                    JSONObject jo = new JSONObject(json);
-                                    int i=0;
-                                    while (i < jo.getJSONArray("cdlist").getJSONObject(0).getJSONArray("songlist") .length()) {
-                                        JSONArray ja = jo.getJSONArray("cdlist").getJSONObject(0).getJSONArray("songlist");
-                                        JSONObject obj = ja.getJSONObject(i);
-                                        InfoHelper.Music md=new InfoHelper().new Music();
-                                        md.MusicName=obj.getString("songname");
-                                        String Singer="";
-                                        for (int osxc = 0; osxc != obj.getJSONArray("singer").length(); ++osxc)
-                                        { Singer +=  obj.getJSONArray("singer").getJSONObject(osxc).getString("name")+ "&"; }
-                                        md.Singer=Singer.substring(0, Singer.lastIndexOf("&"));
-                                        md.GC=obj.getString("songid");
-                                        try{md.MusicID=obj.getString("songmid");
-                                            md.ImageUrl = "http://y.gtimg.cn/music/photo_new/T002R300x300M000"+obj.getString("albummid")+".jpg";
-                                            Settings.ListData.Data.add(md);}catch (Exception e){}
-                                        i++;
-                                    }
-                                    Intent intent = new Intent(getActivity(), MusicListPage.class);
-                                    getActivity().startActivityForResult(intent, 1000);
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
-                                break;
-
-                            default:
-                                break;
-                        }
-                    }
-
-                }, "https://c.y.qq.com/qzone/fcg-bin/fcg_ucc_getcdinfo_byids_cp.fcg?type=1&json=1&utf8=1&onlysong=0&disstid="+Settings.ListData.id+"&format=json&g_tk=1157737156&loginUin={qq}&hostUin=0&format=json&inCharset=utf8&outCharset=utf-8&notice=0&platform=yqq&needNewCode=0".replace("{qq}",Settings.qq),data);
-                /////end/////
+                MainActivity.GetGDbyID(Settings.data.get(position),getActivity());
             }
         });
     }

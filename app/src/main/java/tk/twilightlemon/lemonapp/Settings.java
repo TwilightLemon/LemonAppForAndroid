@@ -30,4 +30,5 @@ public class Settings {
     public static ArrayList<InfoHelper.MusicGData> data=new ArrayList<>();
     public static InfoHelper.MusicGData ListData=new InfoHelper().new MusicGData();
     public static Handler Callback_PlayMusic=null;
+    public static InfoHelper.AdaptiveData AdapData=new InfoHelper().new AdaptiveData();
 }

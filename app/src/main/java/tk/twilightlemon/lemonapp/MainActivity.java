@@ -27,6 +27,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -47,6 +48,7 @@ import android.os.Message;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -76,6 +78,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -131,8 +134,8 @@ public class MainActivity extends AppCompatActivity {
         SetTitle();
         LoadSettings();
         SetLoginPage();
+        MainActivity.Loading(findViewById(R.id.USERTX));
         LoadMusicControls();
-
     }
 
     @Override
@@ -148,6 +151,7 @@ public class MainActivity extends AppCompatActivity {
     int REQUEST_STORAGE_PERMISSION = 1;
 
     public void PlayMusic() {
+        MainActivity.Loading(findViewById(R.id.USERTX));
         mp.stop();
         mHandler.removeCallbacks(r);
         mp = new MediaPlayer();
@@ -180,7 +184,7 @@ public class MainActivity extends AppCompatActivity {
         PlayBottom_title.setText(Musicdt.MusicName);
         PlayBottom_mss.setText(Musicdt.Singer);
 
-        GetUrl(Musicdt.MusicID, new Handler() {
+        MusicLib.GetUrl(Musicdt.MusicID, new Handler() {
             @Override
             public void handleMessage(Message msg) {
                 try {
@@ -188,7 +192,7 @@ public class MainActivity extends AppCompatActivity {
                     mp.setDataSource(url);
                     mp.prepare();
                     mp.start();
-                    GetMusicLyric(Musicdt.MusicID);
+                    MusicLib.GetMusicLyric(Musicdt.MusicID,lrcBig);
                     mHandler.postDelayed(r, 1000);
 
                     TextView Title = findViewById(R.id.MusicTitle);
@@ -478,206 +482,15 @@ public class MainActivity extends AppCompatActivity {
                 Toast.LENGTH_SHORT).show();
     }
 
-    public void SendMessageBox(String msg) {
-        AlertDialog.Builder dlg = new AlertDialog.Builder(MainActivity.this);
-        dlg.setTitle("提示");
-        dlg.setMessage(msg);
-        dlg.setPositiveButton("确定", null);
-        dlg.show();
+    public static void Loading(View view){
+        Snackbar.make(view, "加载中...", Snackbar.LENGTH_LONG)
+                .setAction("Loading...", null).show();
     }
 
     private void restartApplication() {
         final Intent intent = getPackageManager().getLaunchIntentForPackage(getPackageName());
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
-    }
-
-    private void GetMusicLyric(String ID) {
-        lrcBig.reset();
-        lrcBig.initEntryList();
-        lrcBig.initNextTime();
-
-        HashMap<String, String> data = new HashMap<>();
-        data.put("User-Agent", " Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.139 Safari/537.36");
-        data.put("Accept", "*/*");
-        data.put("Referer", "https://y.qq.com/portal/player.html");
-        data.put("Cookie", "yqq_stat=0; pgv_info=ssid=s5197017565; pgv_pvid=507491580; ts_uid=5941690444; pgv_pvi=1047845888; pgv_si=s4656565248; yq_index=0; player_exist=1; yq_playschange=0; yq_playdata=; qqmusic_fromtag=66; ts_last=y.qq.com/portal/player.html; yplayer_open=1");
-        data.put("Host", "c.y.qq.com");
-        HttpHelper.GetWeb(new Handler() {
-                              @Override
-                              public void handleMessage(Message msg) {
-                                  try {
-                                      super.handleMessage(msg);
-                                      String Ct = msg.obj.toString();
-                                      String Ctlyric = Ct.substring(Ct.indexOf("\"lyric\":\"") + 9, Ct.indexOf("\",\""));
-                                      String lyricdata = escapeHtml(new String(Base64.decode(Ctlyric.getBytes(), Base64.DEFAULT)));
-                                      String Cttrans = Ct.substring(Ct.indexOf("\"trans\":\"") + 9, Ct.indexOf("\"})"));
-                                      String transdata = new String(Base64.decode(Cttrans.getBytes(), Base64.DEFAULT));
-                                      if (Ct.contains("\"trans\":\"\"})")) {
-                                          try{
-                                          List<LrcEntry> list = new ArrayList<>();
-                                          String[] dt = lyricdata.split("[\n]");
-                                          for (String x : dt) {
-                                              ArrayList<String> line = parserLine(x, null, null, null);
-                                              if(line!=null)if(line.get(1)!="")list.add(new LrcEntry(strToTime(line.get(0)), line.get(1)));
-                                          }
-                                          lrcBig.reset();
-                                          lrcBig.onLrcLoaded(list);
-                                          lrcBig.initEntryList();
-                                          lrcBig.initNextTime();}catch (Exception e){}
-                                      } else {
-                                          // SendMessageBox(lyricdata +transdata);
-                                          ArrayList<String> datatimes = new ArrayList<String>();
-                                          ArrayList<String> datatexs = new ArrayList<String>();
-                                          HashMap<String, String> gcdata = new HashMap<String, String>();
-                                          String[] dt = lyricdata.split("[\n]");
-                                          for (String x : dt) {
-                                              parserLine(x, datatimes, datatexs, gcdata);
-                                          }
-                                          //sdm("d1");
-                                          ArrayList<String> dataatimes = new ArrayList<String>();
-                                          ArrayList<String> dataatexs = new ArrayList<String>();
-                                          HashMap<String, String> fydata = new HashMap<String, String>();
-                                          String[] dta = transdata.split("[\n]");
-                                          for (String x : dta) {
-                                              parserLine(x, dataatimes, dataatexs, fydata);
-                                          }
-                                          //  sdm("d2");
-                                          ArrayList<String> KEY = new ArrayList<String>();
-                                          HashMap<String, String> gcfydata = new HashMap<String, String>();
-                                          List<LrcEntry> list = new ArrayList<>();
-                                          for (String x : datatimes) {
-                                              KEY.add(x);
-                                              gcfydata.put(x, "");
-                                          }
-                                          //sdm("d3");
-                                          for (String x : dataatimes) {
-                                              if (!KEY.contains(x)) {
-                                                  KEY.add(x);
-                                                  gcfydata.put(x, "");
-                                              }
-                                          }
-                                          //sdm("d4");
-                                          for (int i = 0; i != gcfydata.size(); i++) {
-                                              try {
-                                                  gcfydata.put(KEY.get(i), gcdata.get(KEY.get(i)) + "^" + fydata.get(KEY.get(i)));
-                                              } catch (Exception e) {
-                                              }
-                                          }
-                                          //sdm("d5   "+dataatexs.size()+"   "+dataatimes.size()+"   "+datatexs.size()+"   "+datatimes.size()+"   "+KEY.size());
-                                          for (int i = 0; i != KEY.size(); i++) {
-                                              try {
-                                                  long key = strToTime(KEY.get(i));
-                                                  String value = gcfydata.get(KEY.get(i));
-                                                  list.add(new LrcEntry(key, value.replace("^", "\n").replace("//", "").replace("null", "")));
-                                              } catch (Exception e) {
-                                              }
-                                          }
-                                          lrcBig.reset();
-                                          lrcBig.onLrcLoaded(list);
-                                          lrcBig.initEntryList();
-                                          lrcBig.initNextTime();
-                                      }
-                                  } catch (Exception e) {
-                                  }
-
-                              }
-                          }
-                , "https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg?callback=MusicJsonCallback_lrc&pcachetime=1532863605625&songmid=" + ID + "&g_tk=5381&jsonpCallback=MusicJsonCallback_lrc&loginUin=0&hostUin=0&format=jsonp&inCharset=utf8&outCharset=utf-8&notice=0&platform=yqq&needNewCode=0", data);
-    }
-
-    private long strToTime(String ts) {
-        long time = 0;
-        Matcher timeMatcher = Pattern.compile("(\\d\\d):(\\d\\d)\\.(\\d\\d)").matcher(ts);
-        while (timeMatcher.find()) {
-            long min = Long.parseLong(timeMatcher.group(1));
-            long sec = Long.parseLong(timeMatcher.group(2));
-            long mil = Long.parseLong(timeMatcher.group(3));
-            time = min * DateUtils.MINUTE_IN_MILLIS + sec * DateUtils.SECOND_IN_MILLIS + mil * 10;
-        }
-        return time;
-    }
-
-    public ArrayList<String> parserLine(String str, ArrayList<String> times, ArrayList<String> texs, HashMap<String, String> data) {
-        if (!str.startsWith("[ti:") && !str.startsWith("[ar:") && !str.startsWith("[al:") && !str.startsWith("[by:") && !str.startsWith("[offset:")) {
-            String TimeData = FindByAb(str, "[", "]");
-            String unTimeData = TimeData.substring(0, TimeData.length() - 1) + "0";
-            String io = "[" + TimeData + "]";
-            String TexsData = str.replace(io, "");
-            if (times != null) {
-                times.add(unTimeData);
-                texs.add(TexsData);
-                data.put(unTimeData, TexsData);
-            }
-            ArrayList<String> line = new ArrayList<>();
-            line.add(unTimeData);
-            line.add(TexsData);
-            return line;
-        } else return null;
-    }
-
-    public String escapeHtml(String str) {
-        return str.replace("&apos;", "'").replace("&nbsp;", " ");
-    }
-
-    public static void GetUrl(final String Musicid, final Handler handler) {
-        //通过Musicid获取mid
-        final HashMap<String, String> hdata = new HashMap<String, String>();
-        hdata.put("Connection", "keep-alive");
-        hdata.put("CacheControl", "max-age=0");
-        hdata.put("Upgrade", "1");
-        hdata.put("UserAgent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.110 Safari/537.36");
-        hdata.put("Accept", "*/*");
-        hdata.put("Referer", "https://y.qq.com/portal/player.html");
-        hdata.put("Host", "c.y.qq.com");
-        hdata.put("AcceptLanguage", "zh-CN,zh;q=0.8");
-        hdata.put("Cookie", "pgv_pvi=1693112320; RK=DKOGai2+wu; pgv_pvid=1804673584; ptcz=3a23e0a915ddf05c5addbede97812033b60be2a192f7c3ecb41aa0d60912ff26; pgv_si=s4366031872; _qpsvr_localtk=0.3782697029073365; ptisp=ctc; luin=o2728578956; lskey=00010000863c7a430b79e2cf0263ff24a1e97b0694ad14fcee720a1dc16ccba0717d728d32fcadda6c1109ff; pt2gguin=o2728578956; uin=o2728578956; skey=@PjlklcXgw; p_uin=o2728578956; p_skey=ROnI4JEkWgKYtgppi3CnVTETY3aHAIes-2eDPfGQcVg_; pt4_token=wC-2b7WFwI*8aKZBjbBb7f4Am4rskj11MmN7bvuacJQ_; p_luin=o2728578956; p_lskey=00040000e56d131f47948fb5a2bec49de6174d7938c2eb45cb224af316b053543412fd9393f83ee26a451e15; ts_refer=ui.ptlogin2.qq.com/cgi-bin/login; ts_last=y.qq.com/n/yqq/playlist/2591355982.html; ts_uid=1420532256; yqq_stat=0");
-        HttpHelper.GetWeb(new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                try {
-                    final String mid = new JSONObject(msg.obj.toString()).getJSONArray("data").getJSONObject(0).getJSONObject("file").getString("media_mid");
-                    //固定GUID(随机)
-                    final String guid = "365305415";
-                    HttpHelper.GetWeb(new Handler() {
-                        @Override
-                        public void handleMessage(Message msg) {
-                            try {
-                                final int[] scr = {0};
-                                final ArrayList<String[]>MData=new ArrayList<>();
-                                MData.add(new String[]{"M800", "mp3"});
-                                MData.add(new String[]{"C600", "m4a"});
-                                MData.add(new String[]{"M500", "mp3"});
-                                MData.add(new String[]{"C400", "m4a"});
-                                MData.add(new String[]{"M200", "m4a"});
-                                MData.add(new String[]{"M100", "m4a"});
-                                final String key = new JSONObject(msg.obj.toString()).getString("key");
-                                new Thread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        try {
-                                            while (true) {
-                                                String uri = "https://dl.stream.qqmusic.qq.com/" + MData.get(scr[0])[0] + mid + "." + MData.get(scr[0])[1] + "?vkey=" + key + "&guid=" + guid + "&uid=0&fromtag=30";
-                                                HttpGet httpGet = new HttpGet(uri);
-                                                HttpResponse response = new DefaultHttpClient().execute(httpGet);
-                                                if (response.getStatusLine().getStatusCode() == 200) {
-                                                    Message ms = new Message();
-                                                    ms.obj = uri;
-                                                    handler.sendMessage(ms);
-                                                    break;
-                                                }else ++scr[0];
-                                            }
-                                        }catch (Exception e){}
-                                    }
-                                }).start();
-                            } catch (Exception e) {
-                            }
-                        }
-                    }, "https://c.y.qq.com/base/fcgi-bin/fcg_musicexpress.fcg?json=3&guid=" + guid + "&format=json", hdata);
-                } catch (Exception e) {
-                }
-            }
-        }, "https://c.y.qq.com/v8/fcg-bin/fcg_play_single_song.fcg?songmid=" + Musicid + "&platform=yqq&format=json", hdata);
     }
     //////功能区end////
 }

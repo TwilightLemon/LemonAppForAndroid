@@ -40,7 +40,7 @@ public class MusicListPage extends AppCompatActivity {
                     int index= Integer.parseInt(((TextView)PATENT.findViewById(R.id.MusicList_index)).getText().toString());
                     final InfoHelper.Music Data=Settings.ListData.Data.get(index);
                     String MusicID=Data.MusicID;
-                    MainActivity.GetUrl(MusicID,new Handler(){
+                    MusicLib.GetUrl(MusicID,new Handler(){
                         @Override
                         public void handleMessage(Message msg){
                             String name=(Data.MusicName+"-"+Data.Singer+".mp3").replace("\\","").replace("/","");
@@ -93,7 +93,7 @@ public class MusicListPage extends AppCompatActivity {
             for(int index= 0;index!=Settings.ListData.Data.size()-1;++index){
             final InfoHelper.Music Data=Settings.ListData.Data.get(index);
             String MusicID=Data.MusicID;
-            MainActivity.GetUrl(MusicID,new Handler(){
+            MusicLib.GetUrl(MusicID,new Handler(){
                 @Override
                 public void handleMessage(Message msg){
                     String name=(Data.MusicName+"-"+Data.Singer+".mp3").replace("\\","").replace("/","");

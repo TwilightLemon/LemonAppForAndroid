@@ -19,6 +19,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".MusicListPage"></activity>
+        <activity android:name=".Adaptivelayout"></activity>
     </application>
 
 </manifest>

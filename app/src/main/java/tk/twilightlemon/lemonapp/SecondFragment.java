@@ -46,10 +46,11 @@ import org.json.JSONObject;
 
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 //layout/second_fragment_layout.xml的交互逻辑
 public class SecondFragment extends Fragment {
-
+    private ListView Top_list;
      public static Fragment newInstance(){
          SecondFragment fragment = new SecondFragment();
          return fragment;
@@ -58,8 +59,11 @@ public class SecondFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.second_fragment_layout,null);
-        LoadTopList((ListView) view.findViewById(R.id.Top_list));
+        Top_list=view.findViewById(R.id.Top_list);
+        LoadTopList(Top_list,2);
+        LoadFLGDList((ListView)view.findViewById(R.id.FLGD_list));
         LoadSearchTab(view);
+        LoadMoreBtns(view);
         return view;
     }
     public void LoadSearchTab(View view){
@@ -113,7 +117,8 @@ public class SecondFragment extends Fragment {
     }
     @SuppressLint("HandlerLeak")
     ArrayList<String> Top_idList=new ArrayList<>();
-    public void LoadTopList(final ListView lv){
+    @SuppressLint("HandlerLeak")
+    public void LoadTopList(final ListView lv, final int forni){
          HttpHelper.GetWeb(new Handler() {
              @Override
              public void handleMessage(Message msg) {
@@ -122,6 +127,8 @@ public class SecondFragment extends Fragment {
                      String jsondata = "{\"data\":" + msg.obj.toString().replace("jsonCallback(", "").replace("}]\n)", "") + "}]" + "}";
                      JSONObject o = new JSONObject(jsondata);
                      ArrayList<InfoHelper.MusicTop> data = new ArrayList<>();
+                     Top_idList.clear();
+                     int igne=forni;
                      for (int dat = 0; dat < o.getJSONArray("data").length(); ++dat) {
                          for (int i = 0; i < o.getJSONArray("data").getJSONObject(dat).getJSONArray("List").length(); ++i) {
                              JSONObject json = o.getJSONArray("data").getJSONObject(dat).getJSONArray("List").getJSONObject(i);
@@ -133,7 +140,11 @@ public class SecondFragment extends Fragment {
                              dt.Photo = json.getString("pic_v12");
                              data.add(dt);
                              Top_idList.add(dt.ID);
+                             if(igne!=-1&&i==igne)
+                                 break;
                          }
+                         if(igne!=-1)
+                             break;
                      }
                      TopItemsAdapter tia=new TopItemsAdapter(getActivity(),data);
                      lv.setAdapter(tia);
@@ -142,18 +153,109 @@ public class SecondFragment extends Fragment {
              }
          },"https://c.y.qq.com/v8/fcg-bin/fcg_v8_toplist_opt.fcg?page=index&format=html&tpl=macv4&v8debug=1",null);
 
-         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-             @Override
-             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                 InfoHelper.MusicGData dt= new InfoHelper().new MusicGData();
-                 InfoHelper.MusicTop dat=((TopItemsAdapter)lv.getAdapter()).getMdata().get(Top_idList.get(i));
-                 dt.Data=dat.Data;
-                 dt.name=dat.Name;
-                 Settings.ListData =dt;
-                 Intent intent = new Intent(getActivity(), MusicListPage.class);
-                 getActivity().startActivityForResult(intent, 1000);
-             }
-         });
+         if(forni!=-1) {
+             lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                 @Override
+                 public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                     InfoHelper.MusicGData dt = new InfoHelper().new MusicGData();
+                     InfoHelper.MusicTop dat = ((TopItemsAdapter) lv.getAdapter()).getMdata().get(Top_idList.get(i));
+                     dt.Data = dat.Data;
+                     dt.name = dat.Name;
+                     Settings.ListData = dt;
+                     Intent intent = new Intent(getActivity(), MusicListPage.class);
+                     getActivity().startActivityForResult(intent, 1000);
+                 }
+             });
+         }
+    }
+    ArrayList<InfoHelper.MusicGData> FLGDdata = new ArrayList<>();
+    ArrayList<InfoHelper.MusicGData> FLGDdat=new ArrayList<>();
+    public void LoadFLGDList(final ListView lv){
+        MusicLib.GetFLGDItems("10000000",new Handler(){
+            @Override
+            public void handleMessage(Message msg){
+                FLGDdata= (ArrayList<InfoHelper.MusicGData>) msg.obj;
+                GDListAdapter ga = new GDListAdapter(getActivity(), FLGDdata);
+                lv.setAdapter(ga);
+                FirstFragment.setListViewHeightBasedOnChildren(lv);
+            }
+        });
+        lv.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position,
+                                    long id) {
+                MusicLib.GetGDbyID(FLGDdata.get(position),getActivity());
+            }
+        }); }
+    boolean Top_moreindex=false;
+    public void LoadMoreBtns(View view){
+        view.findViewById(R.id.Top_moreBtn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {MainActivity.Loading(view);if(Top_moreindex)LoadTopList(Top_list,2);else LoadTopList(Top_list,-1); Top_moreindex=!Top_moreindex;}});
+        view.findViewById(R.id.FLGD_moreBtn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final HashMap<String,String> data=new HashMap<String,String>();
+                data.put("Connection", "keep-alive");
+                data.put("CacheControl", "max-age=0");
+                data.put("Upgrade", "1");
+                data.put("UserAgent" , "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.110 Safari/537.36");
+                data.put("Accept", "*/*");
+                data.put("Referer" , "https://y.qq.com/portal/player.html");
+                data.put("Host" , "c.y.qq.com");
+                data.put("AcceptLanguage", "zh-CN,zh;q=0.8");
+                data.put("Cookie","pgv_pvi=1693112320; RK=DKOGai2+wu; pgv_pvid=1804673584; ptcz=3a23e0a915ddf05c5addbede97812033b60be2a192f7c3ecb41aa0d60912ff26; pgv_si=s4366031872; _qpsvr_localtk=0.3782697029073365; ptisp=ctc; luin=o2728578956; lskey=00010000863c7a430b79e2cf0263ff24a1e97b0694ad14fcee720a1dc16ccba0717d728d32fcadda6c1109ff; pt2gguin=o2728578956; uin=o2728578956; skey=@PjlklcXgw; p_uin=o2728578956; p_skey=ROnI4JEkWgKYtgppi3CnVTETY3aHAIes-2eDPfGQcVg_; pt4_token=wC-2b7WFwI*8aKZBjbBb7f4Am4rskj11MmN7bvuacJQ_; p_luin=o2728578956; p_lskey=00040000e56d131f47948fb5a2bec49de6174d7938c2eb45cb224af316b053543412fd9393f83ee26a451e15; ts_refer=ui.ptlogin2.qq.com/cgi-bin/login; ts_last=y.qq.com/n/yqq/playlist/2591355982.html; ts_uid=1420532256; yqq_stat=0");
+                HttpHelper.GetWeb(new Handler(){
+                    @Override
+                    public void handleMessage(Message msg) {
+                        try {
+                            JSONArray o = new JSONObject(msg.obj.toString()).getJSONObject("data").getJSONArray("categories");
+                            final InfoHelper.MusicFLGDIndexItemsList data = new InfoHelper().new MusicFLGDIndexItemsList();
+                            InfoHelper.MusicFLGDIndexItems item = new InfoHelper().new MusicFLGDIndexItems();
+                            ArrayList<String> idList = new ArrayList<>();
+                            item.id = "10000000";
+                            item.name = "全部";
+                            data.Data.add(item);
+                            idList.add(item.name);
+                            for (int csr = 0; csr < o.length(); ++csr) {
+                                for (int i = 0; i < o.getJSONObject(csr).getJSONArray("items").length(); ++i) {//lauch
+                                    JSONObject js = o.getJSONObject(csr).getJSONArray("items").getJSONObject(i);
+                                    InfoHelper.MusicFLGDIndexItems ite = new InfoHelper().new MusicFLGDIndexItems();
+                                    ite.id = js.getString("categoryId");
+                                    ite.name = js.getString("categoryName");
+                                    data.Data.add(ite);
+                                    idList.add(item.name);
+                                }
+                            }
+                            InfoHelper.AdaptiveData aData = new InfoHelper().new AdaptiveData();
+                            aData.ChooseData = (String[]) idList.toArray();
+                            aData.title = "分类歌单";
+                            aData.ChooseCallBack = new Handler() {
+                                @Override
+                                public void handleMessage(Message msg) {
+                                    FLGDdat = (ArrayList<InfoHelper.MusicGData>) msg.obj;
+                                    MusicLib.GetFLGDItems("10000000", new Handler() {
+                                        @Override
+                                        public void handleMessage(Message msg) {
+                                            ListView lv = (ListView) msg.obj;
+                                            GDListAdapter ga = new GDListAdapter(getActivity(), FLGDdat);
+                                            lv.setAdapter(ga);
+                                            FirstFragment.setListViewHeightBasedOnChildren(lv);
+                                        }
+                                    });
+                                }
+                            };
+                            aData.ListOnClick = new AdapterView.OnItemClickListener() {
+                                @Override
+                                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                                    MusicLib.GetGDbyID(FLGDdat.get(i), getActivity());
+                                }
+                            };
+                        }catch (Exception e){}
+                    }
+                },"https://c.y.qq.com/splcloud/fcgi-bin/fcg_get_diss_tag_conf.fcg?g_tk=1206122277&loginUin="+Settings.qq+"&hostUin=0&format=json&inCharset=utf8&outCharset=utf-8&notice=0&platform=yqq&needNewCode=0",data);
+            }
+        });
     }
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
