@@ -149,7 +149,7 @@ public class HttpHelper {
             }
         }).start();
     }
-    public static void GetWebImage(String filename, String Url, Context t, final Handler handler){
+    public static void GetWebImage(String filename, String Url, final boolean t, final Handler handler){
         final File f = new File(MainActivity.SDPATH + "LemonApp/UserCache/" + filename);
         if (f.exists()) {
             Bitmap cacha = BitmapFactory.decodeFile(f.toString());
@@ -177,9 +177,9 @@ public class HttpHelper {
                         InputStream inputStream = response.body().byteStream();
                         BitmapFactory.Options opts=new BitmapFactory.Options();
                         opts.inTempStorage = new byte[100 * 1024];
-                        opts.inPreferredConfig = Bitmap.Config.RGB_565;
                         opts.inPurgeable = true;
-                        opts.inSampleSize = 4;
+                        if(t)
+                         opts.inSampleSize = 2;
                         opts.inInputShareable = true;
                         Bitmap bit = BitmapFactory.decodeStream(inputStream,null, opts);
                         Message msg = Message.obtain();

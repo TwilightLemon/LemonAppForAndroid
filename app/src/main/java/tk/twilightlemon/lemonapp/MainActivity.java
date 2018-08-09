@@ -165,7 +165,7 @@ public class MainActivity extends AppCompatActivity {
         PlayBottom_ControlBtn.setImageDrawable(ic);
         ImageButton MButton = findViewById(R.id.MButton);
         MButton.setImageDrawable(ic);
-        HttpHelper.GetWebImage("Music" + Musicdt.MusicID + ".jpg", Musicdt.ImageUrl, MainActivity.this,
+        HttpHelper.GetWebImage("Music" + Musicdt.MusicID + ".jpg", Musicdt.ImageUrl, false,
                 new Handler() {
                     @Override
                     public void handleMessage(Message msg) {
@@ -249,7 +249,7 @@ public class MainActivity extends AppCompatActivity {
         if (sp.contains("name")) {
             ((TextView) findViewById(R.id.USERNAME)).setText(sp.getString("name", ""));
             final String nu = sp.getString("qq", "");
-            HttpHelper.GetWebImage(nu + ".jpg", "http://q2.qlogo.cn/headimg_dl?bs=qq&dst_uin=" + nu + "&spec=100", MainActivity.this,
+            HttpHelper.GetWebImage(nu + ".jpg", "http://q2.qlogo.cn/headimg_dl?bs=qq&dst_uin=" + nu + "&spec=100", false,
                     new Handler() {
                         @Override
                         public void handleMessage(Message msg) {
@@ -279,7 +279,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int which) {
                         try {
                             final String nu = qq.getText().toString();
-                            HttpHelper.GetWebImage(nu + ".jpg", "http://q2.qlogo.cn/headimg_dl?bs=qq&dst_uin=" + nu + "&spec=100", MainActivity.this,
+                            HttpHelper.GetWebImage(nu + ".jpg", "http://q2.qlogo.cn/headimg_dl?bs=qq&dst_uin=" + nu + "&spec=100", false,
                                     new Handler() {
                                         @Override
                                         public void handleMessage(Message msg) {

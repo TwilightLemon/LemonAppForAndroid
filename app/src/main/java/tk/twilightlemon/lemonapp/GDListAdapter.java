@@ -49,7 +49,7 @@ public class GDListAdapter extends BaseAdapter {
         TextView text = itemView.findViewById(R.id.gd_mss);
         text.setText(data.sub);
         final ImageView img = itemView.findViewById(R.id.gd_image);
-        HttpHelper.GetWebImage("GD" +data.id+ ".jpg",data.pic,ac,
+        HttpHelper.GetWebImage("GD" +data.id+ ".jpg",data.pic,true,
                 new Handler() {
                     @Override
                     public void handleMessage(Message msg) {

@@ -89,7 +89,7 @@ public class TopItemsAdapter extends BaseAdapter{
             },"https://c.y.qq.com/v8/fcg-bin/fcg_v8_toplist_cp.fcg?tpl=3&page=detail&topid="+data.ID+"&type=top&song_begin=0&song_num=30&g_tk=1206122277&loginUin="+Settings.qq+"&hostUin=0&format=json&inCharset=utf8&outCharset=utf-8&notice=0&platform=yqq&needNewCode=0",null);
         }
         final ImageView img = itemView.findViewById(R.id.top_image);
-        HttpHelper.GetWebImage("GD" +data.ID+ ".jpg",data.Photo,ac,
+        HttpHelper.GetWebImage("GD" +data.ID+ ".jpg",data.Photo,true,
                 new Handler() {
                     @Override
                     public void handleMessage(Message msg) {
