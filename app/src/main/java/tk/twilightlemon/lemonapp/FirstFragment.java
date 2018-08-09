@@ -201,7 +201,7 @@ public class FirstFragment extends Fragment {
                                         int index= Integer.parseInt(((TextView)PATENT.findViewById(R.id.MusicList_index)).getText().toString());
                                         final InfoHelper.Music Data=ListData.Data.get(index);
                                         String MusicID=Data.MusicID;
-                                        MainActivity.GetUrl(MusicID,new Handler(){
+                                        MusicLib.GetUrl(MusicID,new Handler(){
                                             @Override
                                             public void handleMessage(Message msg){
                                                 String name=(Data.MusicName+"-"+Data.Singer+".mp3").replace("\\","").replace("/","");
@@ -250,7 +250,7 @@ public class FirstFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position,
                                     long id) {
-                MainActivity.GetGDbyID(Settings.data.get(position),getActivity());
+                MusicLib.GetGDbyID(Settings.data.get(position),getActivity());
             }
         });
     }

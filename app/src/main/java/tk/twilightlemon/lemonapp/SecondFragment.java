@@ -179,7 +179,7 @@ public class SecondFragment extends Fragment {
                 lv.setAdapter(ga);
                 FirstFragment.setListViewHeightBasedOnChildren(lv);
             }
-        });
+        },4);
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener(){
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position,
@@ -193,6 +193,7 @@ public class SecondFragment extends Fragment {
             @Override
             public void onClick(View view) {MainActivity.Loading(view);if(Top_moreindex)LoadTopList(Top_list,2);else LoadTopList(Top_list,-1); Top_moreindex=!Top_moreindex;}});
         view.findViewById(R.id.FLGD_moreBtn).setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("HandlerLeak")
             @Override
             public void onClick(View view) {
                 final HashMap<String,String> data=new HashMap<String,String>();
@@ -211,12 +212,7 @@ public class SecondFragment extends Fragment {
                         try {
                             JSONArray o = new JSONObject(msg.obj.toString()).getJSONObject("data").getJSONArray("categories");
                             final InfoHelper.MusicFLGDIndexItemsList data = new InfoHelper().new MusicFLGDIndexItemsList();
-                            InfoHelper.MusicFLGDIndexItems item = new InfoHelper().new MusicFLGDIndexItems();
-                            ArrayList<String> idList = new ArrayList<>();
-                            item.id = "10000000";
-                            item.name = "全部";
-                            data.Data.add(item);
-                            idList.add(item.name);
+                            final ArrayList<String> idList = new ArrayList<>();
                             for (int csr = 0; csr < o.length(); ++csr) {
                                 for (int i = 0; i < o.getJSONObject(csr).getJSONArray("items").length(); ++i) {//lauch
                                     JSONObject js = o.getJSONObject(csr).getJSONArray("items").getJSONObject(i);
@@ -224,33 +220,44 @@ public class SecondFragment extends Fragment {
                                     ite.id = js.getString("categoryId");
                                     ite.name = js.getString("categoryName");
                                     data.Data.add(ite);
-                                    idList.add(item.name);
+                                    idList.add(ite.name);
                                 }
                             }
-                            InfoHelper.AdaptiveData aData = new InfoHelper().new AdaptiveData();
-                            aData.ChooseData = (String[]) idList.toArray();
-                            aData.title = "分类歌单";
-                            aData.ChooseCallBack = new Handler() {
+                            MusicLib.GetFLGDItems("10000000", new Handler() {
                                 @Override
                                 public void handleMessage(Message msg) {
-                                    FLGDdat = (ArrayList<InfoHelper.MusicGData>) msg.obj;
-                                    MusicLib.GetFLGDItems("10000000", new Handler() {
+                                    final InfoHelper.AdaptiveData aData = new InfoHelper().new AdaptiveData();
+                                    aData.ChooseData = idList.toArray(new String[idList.size()]);
+                                    aData.title = "分类歌单";
+                                    aData.ChooseCallBack = new Handler() {
                                         @Override
                                         public void handleMessage(Message msg) {
-                                            ListView lv = (ListView) msg.obj;
-                                            GDListAdapter ga = new GDListAdapter(getActivity(), FLGDdat);
-                                            lv.setAdapter(ga);
-                                            FirstFragment.setListViewHeightBasedOnChildren(lv);
+                                            final ListView lv = (ListView) msg.obj;
+                                            MusicLib.GetFLGDItems(data.Data.get(msg.what).id, new Handler() {
+                                                @Override
+                                                public void handleMessage(Message msg) {
+                                                    FLGDdat = (ArrayList<InfoHelper.MusicGData>) msg.obj;
+                                                    GDListAdapter ga = new GDListAdapter(getActivity(), FLGDdat);
+                                                    lv.setAdapter(ga);
+                                                    FirstFragment.setListViewHeightBasedOnChildren(lv);
+                                                }
+                                            },-1);
                                         }
-                                    });
+                                    };
+                                    aData.ListOnClick = new AdapterView.OnItemClickListener() {
+                                        @Override
+                                        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                                            MusicLib.GetGDbyID(FLGDdat.get(i), getActivity());
+                                        }
+                                    };
+                                    FLGDdat = (ArrayList<InfoHelper.MusicGData>) msg.obj;
+                                    GDListAdapter ga = new GDListAdapter(getActivity(), FLGDdat);
+                                    aData.CSData=ga;
+                                    Settings.AdapData=aData;
+                                    Intent intent = new Intent(getActivity(), Adaptivelayout.class);
+                                    getActivity().startActivityForResult(intent, 1000);
                                 }
-                            };
-                            aData.ListOnClick = new AdapterView.OnItemClickListener() {
-                                @Override
-                                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                                    MusicLib.GetGDbyID(FLGDdat.get(i), getActivity());
-                                }
-                            };
+                            },-1);
                         }catch (Exception e){}
                     }
                 },"https://c.y.qq.com/splcloud/fcgi-bin/fcg_get_diss_tag_conf.fcg?g_tk=1206122277&loginUin="+Settings.qq+"&hostUin=0&format=json&inCharset=utf8&outCharset=utf-8&notice=0&platform=yqq&needNewCode=0",data);

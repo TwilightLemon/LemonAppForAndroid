@@ -23,7 +23,9 @@ package tk.twilightlemon.lemonapp;
  */
 
 import android.os.Handler;
+import android.widget.Adapter;
 import android.widget.AdapterView;
+import android.widget.ListAdapter;
 
 import java.util.ArrayList;
 
@@ -34,6 +36,7 @@ public class InfoHelper {
         public String title="";
         public String[] ChooseData;
         public Handler ChooseCallBack;
+        public ListAdapter CSData;
         public AdapterView.OnItemClickListener ListOnClick;
     }
     ///音乐播放信息

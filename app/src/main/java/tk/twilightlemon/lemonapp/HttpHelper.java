@@ -172,23 +172,31 @@ public class HttpHelper {
                 }
 
                 @Override
-                public void onResponse(Call call, Response response) throws IOException {
-                    InputStream inputStream = response.body().byteStream();
-                    Bitmap bit = BitmapFactory.decodeStream(inputStream);
-                    Message msg = Message.obtain();
-                    msg.obj = bit;
-                    msg.what = 1000;
-                    handler.sendMessage(msg);
-                    //将图片保存到本地存储卡中
-                    FileOutputStream fileOutputStream = new FileOutputStream(f);
-                    byte[] temp = new byte[128];
-                    int length;
-                    while ((length = inputStream.read(temp)) != -1) {
-                        fileOutputStream.write(temp, 0, length);
-                    }
-                    fileOutputStream.flush();
-                    fileOutputStream.close();
-                    inputStream.close();
+                public void onResponse(Call call, Response response){
+                    try {
+                        InputStream inputStream = response.body().byteStream();
+                        BitmapFactory.Options opts=new BitmapFactory.Options();
+                        opts.inTempStorage = new byte[100 * 1024];
+                        opts.inPreferredConfig = Bitmap.Config.RGB_565;
+                        opts.inPurgeable = true;
+                        opts.inSampleSize = 4;
+                        opts.inInputShareable = true;
+                        Bitmap bit = BitmapFactory.decodeStream(inputStream,null, opts);
+                        Message msg = Message.obtain();
+                        msg.obj = bit;
+                        msg.what = 1000;
+                        handler.sendMessage(msg);
+                        //将图片保存到本地存储卡中
+                        FileOutputStream fileOutputStream = new FileOutputStream(f);
+                        byte[] temp = new byte[128];
+                        int length;
+                        while ((length = inputStream.read(temp)) != -1) {
+                            fileOutputStream.write(temp, 0, length);
+                        }
+                        fileOutputStream.flush();
+                        fileOutputStream.close();
+                        inputStream.close();
+                    }catch (Exception e){}
                 }
             });
         }

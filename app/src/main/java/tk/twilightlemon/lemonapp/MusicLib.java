@@ -264,7 +264,7 @@ public class MusicLib {
 
     }
 
-    public static void GetFLGDItems(String id, final Handler handler){
+    public static void GetFLGDItems(String id, final Handler handler, final int maxValue){
         final HashMap<String,String> data=new HashMap<String,String>();
         data.put("Connection", "keep-alive");
         data.put("CacheControl", "max-age=0");
@@ -281,7 +281,7 @@ public class MusicLib {
                 try {
                     JSONObject o = new JSONObject(msg.obj.toString());
                     ArrayList<InfoHelper.MusicGData> FLGDdata = new ArrayList<>();
-                    for (int i = 0; i < 5; ++i) {
+                    for (int i = 0; i < o.getJSONObject("data").getJSONArray("list").length(); ++i) {
                         InfoHelper.MusicGData md = new InfoHelper().new MusicGData();
                         JSONObject jo = o.getJSONObject("data").getJSONArray("list").getJSONObject(i);
                         md.name = jo.getString("dissname");
@@ -289,6 +289,8 @@ public class MusicLib {
                         md.id = jo.getString("dissid");
                         md.sub = jo.getJSONObject("creator").getString("name");
                         FLGDdata.add(md);
+                        if(maxValue!=-1&&i==maxValue)
+                            break;
                     }
                     Message ms=new Message();
                     ms.obj=FLGDdata;

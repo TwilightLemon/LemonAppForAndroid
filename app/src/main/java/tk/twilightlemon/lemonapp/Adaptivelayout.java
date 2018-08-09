@@ -15,6 +15,7 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.RadioButton;
+import android.widget.TextView;
 
 public class Adaptivelayout extends AppCompatActivity {
     private InfoHelper.AdaptiveData adaptData;
@@ -43,9 +44,14 @@ public class Adaptivelayout extends AppCompatActivity {
         }
     }
     public void LoadControls(){
+        TextView Adaptive_title=findViewById(R.id.Adaptive_title);
+        Adaptive_title.setText(adaptData.title);
         final ListView lv=findViewById(R.id.Adaptive_list);
         lv.setOnItemClickListener(adaptData.ListOnClick);
+        lv.setAdapter(adaptData.CSData);
+        FirstFragment.setListViewHeightBasedOnChildren(lv);
         final RadioButton choose=findViewById(R.id.Adaptive_Choose);
+        choose.setText(adaptData.ChooseData[0]);
         choose.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
