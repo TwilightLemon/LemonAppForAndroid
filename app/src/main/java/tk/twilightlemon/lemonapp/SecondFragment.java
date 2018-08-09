@@ -31,7 +31,6 @@ import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
@@ -62,6 +61,8 @@ public class SecondFragment extends Fragment {
         Top_list=view.findViewById(R.id.Top_list);
         LoadTopList(Top_list,2);
         LoadFLGDList((ListView)view.findViewById(R.id.FLGD_list));
+        LoadSingerList((ListView)view.findViewById(R.id.Singer_list));
+        LoadRadioList((ListView)view.findViewById(R.id.Radio_list));
         LoadSearchTab(view);
         LoadMoreBtns(view);
         return view;
@@ -79,38 +80,8 @@ public class SecondFragment extends Fragment {
                 builder.setPositiveButton("搜索", new DialogInterface.OnClickListener() {
                     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
                     public void onClick(DialogInterface dialog, int which) {
-                        try{
-                        String url="http://59.37.96.220/soso/fcgi-bin/client_search_cp?format=json&t=0&inCharset=GB2312&outCharset=utf-8&qqmusic_ver=1302&catZhida=0&p=1&n=20&w="+ URLEncoder.encode(qq.getText().toString(), "utf-8")+"&flag_qc=0&remoteplace=sizer.newclient.song&new_json=1&lossless=0&aggr=1&cr=1&sem=0&force_zonghe=0";
-                        HttpHelper.GetWeb(new Handler(){
-                            @Override
-                            public void handleMessage(Message msg){
-                                try{
-                                    String json = msg.obj.toString().replace("<em>","").replace("</em>","");
-                                    JSONObject jo = new JSONObject(json);
-                                    InfoHelper.MusicGData Data=new InfoHelper().new MusicGData();
-                                    Data.name="搜索:"+qq.getText();
-                                    for (int i=0;i < jo.getJSONObject("data").getJSONObject("song").getJSONArray("list") .length();++i)
-                                    {
-                                        InfoHelper.Music dt=new InfoHelper().new Music();
-                                        JSONObject jos=jo.getJSONObject("data").getJSONObject("song").getJSONArray("list").getJSONObject(i);
-                                        dt.MusicName=jos.getString("name");
-                                        String isx="";
-                                        for(int ix=0;ix!=jos.getJSONArray("singer").length();ix++){
-                                            isx+=jos.getJSONArray("singer").getJSONObject(ix).getString("name")+"&";
-                                        }
-                                        dt.Singer=isx.substring(0, isx.lastIndexOf("&"));
-                                        dt.MusicID=jos.getString("mid");
-                                        dt.ImageUrl="http://y.gtimg.cn/music/photo_new/T002R300x300M000"+jos.getJSONObject("album").getString("mid")+".jpg";
-                                        dt.GC=jos.getJSONObject("action").getString("alert");
-                                        Data.Data.add(dt);
-                                    }
-                                    Settings.ListData=Data;
-                                    Intent intent = new Intent(getActivity(), MusicListPage.class);
-                                    getActivity().startActivityForResult(intent, 1000);
-                                }catch(Exception e){}
-                            }
-                        },url,null);
-                    }catch(Exception e){}}});
+                        MusicLib.Search(getActivity(),qq.getText().toString());
+                    }});
                 builder.show();
             }
         });
@@ -227,9 +198,9 @@ public class SecondFragment extends Fragment {
                                 @Override
                                 public void handleMessage(Message msg) {
                                     final InfoHelper.AdaptiveData aData = new InfoHelper().new AdaptiveData();
-                                    aData.ChooseData = idList.toArray(new String[idList.size()]);
+                                    aData.ChooseData.add(idList.toArray(new String[idList.size()]));
                                     aData.title = "分类歌单";
-                                    aData.ChooseCallBack = new Handler() {
+                                    aData.ChooseCallBack.add(new Handler() {
                                         @Override
                                         public void handleMessage(Message msg) {
                                             final ListView lv = (ListView) msg.obj;
@@ -243,7 +214,7 @@ public class SecondFragment extends Fragment {
                                                 }
                                             },-1);
                                         }
-                                    };
+                                    });
                                     aData.ListOnClick = new AdapterView.OnItemClickListener() {
                                         @Override
                                         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -261,6 +232,172 @@ public class SecondFragment extends Fragment {
                         }catch (Exception e){}
                     }
                 },"https://c.y.qq.com/splcloud/fcgi-bin/fcg_get_diss_tag_conf.fcg?g_tk=1206122277&loginUin="+Settings.qq+"&hostUin=0&format=json&inCharset=utf8&outCharset=utf-8&notice=0&platform=yqq&needNewCode=0",data);
+            }
+        });
+        view.findViewById(R.id.Singer_moreBtn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                MusicLib.GetSingerByTag("all_all_all",new Handler(){
+                    @Override
+                    public void handleMessage(Message msg){
+                        SingerData=(ArrayList<InfoHelper.SingerAndRadioData>) msg.obj;
+                        SingerAndRadioListAdapter sla=new SingerAndRadioListAdapter(getActivity(),SingerData);
+                        InfoHelper.AdaptiveData aData=new InfoHelper().new AdaptiveData();
+                        aData.CSData=sla;
+                        aData.title="歌手";
+                        final String[] cData=new String[]{"热门","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z","#"};
+                        aData.ChooseData.add(new String[]{"全部","华语男","华语女","华语组合","韩国男","韩国女","韩国组合","日本男","日本女","日本组合","欧美男","欧美女","欧美组合","乐团","演奏家","作曲家","指挥家","其他"});
+                        aData.ChooseData.add(cData);
+                        final String[] zData=new String[]{"all_all_","cn_man_","cn_woman_","cn_team_","k_man_","k_woman_","k_team_","j_man_","j_woman_","j_team_","eu_man_","eu_woman_","eu_team_","c_orchestra_","c_performer_","c_composer_","c_cantor_","other_other_"};
+                        aData.ChooseCallBack.add(new Handler(){
+                            @Override
+                            public void handleMessage(Message msg){
+                                final ListView lv=(ListView) msg.obj;
+                                SingerKey1=zData[msg.what];
+                                MusicLib.GetSingerByTag(SingerKey1+SingerKey2,new Handler(){
+                                    @Override
+                                    public void handleMessage(Message msg){
+
+                                        SingerData.clear();
+                                        SingerData=(ArrayList<InfoHelper.SingerAndRadioData>) msg.obj;
+                                        lv.setAdapter(new SingerAndRadioListAdapter(getActivity(), SingerData));
+                                        FirstFragment.setListViewHeightBasedOnChildren(lv);
+                                    }
+                                },50);
+                            }
+                        });
+                        aData.ChooseCallBack.add(new Handler(){
+                            @Override
+                            public void handleMessage(Message msg){
+                                final ListView lv=(ListView) msg.obj;
+                                SingerKey2=cData[msg.what].replace("热门","all").replace("#","9");
+                                MusicLib.GetSingerByTag(SingerKey1+SingerKey2,new Handler(){
+                                    @Override
+                                    public void handleMessage(Message msg){
+                                        SingerData.clear();
+                                        SingerData=(ArrayList<InfoHelper.SingerAndRadioData>) msg.obj;
+                                        lv.setAdapter(new SingerAndRadioListAdapter(getActivity(), SingerData));
+                                        FirstFragment.setListViewHeightBasedOnChildren(lv);
+                                    }
+                                },50);
+                            }
+                        });
+                        aData.ListOnClick=new AdapterView.OnItemClickListener() {
+                            @Override
+                            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                                MusicLib.Search(getActivity(), SingerData.get(i).name);
+                            }
+                        };
+                        Settings.AdapData=aData;
+                        Intent intent = new Intent(getActivity(), Adaptivelayout.class);
+                        getActivity().startActivityForResult(intent, 1000);
+                    }
+                },-1);
+            }
+        });
+
+        view.findViewById(R.id.Radio_moreBtn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                MusicLib.GetRadioListByTag(new Handler(){
+                    @Override
+                    public void handleMessage(Message msg){
+                        final ArrayList<ArrayList<InfoHelper.SingerAndRadioData>> data= (ArrayList<ArrayList<InfoHelper.SingerAndRadioData>>) msg.obj;
+                        InfoHelper.AdaptiveData aData=new InfoHelper().new AdaptiveData();
+                        aData.ChooseData.add(new String[]{"热门","下午","情感","主题","场景","曲风","语言","人群","乐器","地区"});
+                        aData.title="电台";
+                        RadioMData=data.get(0);
+                        aData.CSData=new SingerAndRadioListAdapter(getActivity(),RadioMData);
+                        aData.ChooseCallBack.add(new Handler(){
+                            @Override
+                            public void handleMessage(Message msg){
+                                ListView lv= (ListView) msg.obj;
+                                RadioMData=data.get(msg.what);
+                                lv.setAdapter(new SingerAndRadioListAdapter(getActivity(),RadioMData));
+                            }
+                        });
+                        aData.ListOnClick=new AdapterView.OnItemClickListener() {
+                            @Override
+                            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                                MusicLib.GetRadioMusicById(RadioMData.get(i).id,new Handler(){
+                                    @Override
+                                    public void handleMessage(Message msg){
+                                        InfoHelper.MusicGData GData=new InfoHelper().new MusicGData();
+                                        GData.Data.add((InfoHelper.Music) msg.obj);
+                                        Settings.ListData=GData;
+                                        Message message = new Message();
+                                        message.what = 0;
+                                        message.obj = 0;
+                                        Settings.Callback_PlayMusic.sendMessage(message);
+                                        Settings.Callback_Close.sendMessage(new Message());
+                                    }
+                                });
+                            }
+                        };
+                        Settings.AdapData=aData;
+                        Intent intent = new Intent(getActivity(), Adaptivelayout.class);
+                        getActivity().startActivityForResult(intent, 1000);
+                    }
+                },-1);
+            }
+        });
+    }
+
+    String SingerKey1="all_all_";
+    String SingerKey2="all";
+    ArrayList<InfoHelper.SingerAndRadioData> SingerData;
+    public void LoadSingerList(final ListView lv){
+        MusicLib.GetSingerByTag("all_all_all",new Handler(){
+            @Override
+            public void handleMessage(Message msg){
+                lv.setAdapter(new SingerAndRadioListAdapter(getActivity(),(ArrayList<InfoHelper.SingerAndRadioData>) msg.obj));
+                FirstFragment.setListViewHeightBasedOnChildren(lv);
+            }
+        },4);
+        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, final int i, long l) {
+                MusicLib.GetSingerByTag("all_all_all",new Handler(){
+                    @Override
+                    public void handleMessage(Message msg){
+                        MusicLib.Search(getActivity(), ((ArrayList<InfoHelper.SingerAndRadioData>) msg.obj).get(i).name);
+                    }
+                },4);
+            }
+        });
+    }
+
+    ArrayList<InfoHelper.SingerAndRadioData> RadioMData=new ArrayList<>();
+    public void LoadRadioList(final ListView lv){
+        MusicLib.GetRadioListByTag(new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                ArrayList<ArrayList<InfoHelper.SingerAndRadioData>> data = (ArrayList<ArrayList<InfoHelper.SingerAndRadioData>>) msg.obj;
+                lv.setAdapter(new SingerAndRadioListAdapter(getActivity(),data.get(0)));
+                FirstFragment.setListViewHeightBasedOnChildren(lv);
+            }
+        },4);
+
+        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, final int i, long l) {
+                MusicLib.GetRadioListByTag(new Handler(){
+                    @Override
+                    public void handleMessage(Message msg) {
+                        final ArrayList<ArrayList<InfoHelper.SingerAndRadioData>> data = (ArrayList<ArrayList<InfoHelper.SingerAndRadioData>>) msg.obj;
+                        MusicLib.GetRadioMusicById(data.get(0).get(i).id, new Handler() {
+                            @Override
+                            public void handleMessage(Message msg) {
+                                InfoHelper.MusicGData GData = new InfoHelper().new MusicGData();
+                                GData.Data.add((InfoHelper.Music) msg.obj);
+                                Settings.ListData = GData;
+                                Message message = new Message();
+                                message.what = 0;
+                                message.obj = 0;
+                                Settings.Callback_PlayMusic.sendMessage(message);
+                            }
+                        });
+                    }},4);
             }
         });
     }

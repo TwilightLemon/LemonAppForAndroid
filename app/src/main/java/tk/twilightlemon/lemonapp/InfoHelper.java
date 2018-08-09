@@ -1,29 +1,28 @@
 package tk.twilightlemon.lemonapp;
 /**
- * _ooOoo_
- * o8888888o
- * 88" . "88
- * (| -_- |)
- * O\  =  /O
- * ____/`---'\____
- * .'  \\|     |//  `.
- * /  \\|||  :  |||//  \
- * /  _||||| -:- |||||-  \
- * |   | \\\  -  /// |   |
- * | \_|  ''\---/''  |   |
- * \  .-\__  `-`  ___/-. /
- * ___`. .'  /--.--\  `. . __
- * ."" '<  `.___\_<|>_/___.'  >'"".
- * | | :  `- \`.;`\ _ /`;.`/ - ` : | |
- * \  \ `-.   \_ __\ /__ _/   .-` /  /
- * ======`-.____`-.___\_____/___.-`____.-'======
- * `=---='
- * ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- * 佛祖保佑        永无BUG
- */
+ *                             _ooOoo_
+ *                            o8888888o
+ *                            88" . "88
+ *                            (| -_- |)
+ *                            O\  =  /O
+ *                         ____/`---'\____
+ *                       .'  \\|     |//  `.
+ *                      /  \\|||  :  |||//  \
+ *                     /  _||||| -:- |||||-  \
+ *                     |   | \\\  -  /// |   |
+ *                     | \_|  ''\---/''  |   |
+ *                     \  .-\__  `-`  ___/-. /
+ *                   ___`. .'  /--.--\  `. . __
+ *                ."" '<  `.___\_<|>_/___.'  >'"".
+ *               | | :  `- \`.;`\ _ /`;.`/ - ` : | |
+ *               \  \ `-.   \_ __\ /__ _/   .-` /  /
+ *          ======`-.____`-.___\_____/___.-`____.-'======
+ *                             `=---='
+ *          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ *                     佛祖保佑        永无BUG
+*/
 
 import android.os.Handler;
-import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ListAdapter;
 
@@ -32,10 +31,9 @@ import java.util.ArrayList;
 public class InfoHelper {
     public class AdaptiveData{
         public AdaptiveData(){}
-
         public String title="";
-        public String[] ChooseData;
-        public Handler ChooseCallBack;
+        public ArrayList<String[]> ChooseData=new ArrayList<>();
+        public ArrayList<Handler> ChooseCallBack=new ArrayList<>();
         public ListAdapter CSData;
         public AdapterView.OnItemClickListener ListOnClick;
     }
@@ -80,4 +78,11 @@ public class InfoHelper {
         public String name;
         public String id;
     }
+
+    public class SingerAndRadioData {
+        public String name;
+        public String url;
+        public String id;
+    }
+
 }

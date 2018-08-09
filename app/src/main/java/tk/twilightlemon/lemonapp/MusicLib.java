@@ -1,6 +1,7 @@
 package tk.twilightlemon.lemonapp;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
@@ -9,11 +10,13 @@ import android.util.Base64;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.utils.URIUtils;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -147,6 +150,41 @@ public class MusicLib {
 
     public static String escapeHtml(String str) {
         return str.replace("&apos;", "'").replace("&nbsp;", " ");
+    }
+
+    public static void Search(final Activity activity, final String text){
+        try {
+            String url = "http://59.37.96.220/soso/fcgi-bin/client_search_cp?format=json&t=0&inCharset=GB2312&outCharset=utf-8&qqmusic_ver=1302&catZhida=0&p=1&n=20&w=" + URLEncoder.encode(text, "utf-8") + "&flag_qc=0&remoteplace=sizer.newclient.song&new_json=1&lossless=0&aggr=1&cr=1&sem=0&force_zonghe=0";
+            HttpHelper.GetWeb(new Handler() {
+                @Override
+                public void handleMessage(Message msg) {
+                    try {
+                        String json = msg.obj.toString().replace("<em>", "").replace("</em>", "");
+                        JSONObject jo = new JSONObject(json);
+                        InfoHelper.MusicGData Data = new InfoHelper().new MusicGData();
+                        Data.name = "搜索:" + text;
+                        for (int i = 0; i < jo.getJSONObject("data").getJSONObject("song").getJSONArray("list").length(); ++i) {
+                            InfoHelper.Music dt = new InfoHelper().new Music();
+                            JSONObject jos = jo.getJSONObject("data").getJSONObject("song").getJSONArray("list").getJSONObject(i);
+                            dt.MusicName = jos.getString("name");
+                            String isx = "";
+                            for (int ix = 0; ix != jos.getJSONArray("singer").length(); ix++) {
+                                isx += jos.getJSONArray("singer").getJSONObject(ix).getString("name") + "&";
+                            }
+                            dt.Singer = isx.substring(0, isx.lastIndexOf("&"));
+                            dt.MusicID = jos.getString("mid");
+                            dt.ImageUrl = "http://y.gtimg.cn/music/photo_new/T002R300x300M000" + jos.getJSONObject("album").getString("mid") + ".jpg";
+                            dt.GC = jos.getJSONObject("action").getString("alert");
+                            Data.Data.add(dt);
+                        }
+                        Settings.ListData = Data;
+                        Intent intent = new Intent(activity, MusicListPage.class);
+                        activity.startActivityForResult(intent, 1000);
+                    } catch (Exception e) {
+                    }
+                }
+            }, url, null);
+        }catch (Exception e){}
     }
 
     public static void GetUrl(final String Musicid, final Handler handler) {
@@ -299,5 +337,108 @@ public class MusicLib {
             }
         },"https://c.y.qq.com/splcloud/fcgi-bin/fcg_get_diss_by_tag.fcg?picmid=1&rnd=0.38615680484561965&g_tk=5381&loginUin=0&hostUin=0&format=json&inCharset=utf8&outCharset=utf-8&notice=0&platform=yqq&needNewCode=0&categoryId="+id+"&sortId=5&sin=0&ein=29",data);
 
+    }
+
+    public static void GetSingerByTag(String tag, final Handler handler,final int maxValue){
+        HttpHelper.GetWeb(new Handler(){
+            @Override
+            public void handleMessage(Message msg){
+                try {
+                    JSONObject o = new JSONObject(msg.obj.toString());
+                    ArrayList<InfoHelper.SingerAndRadioData> list = new ArrayList<>();
+                    for (int i = 0; i < o.getJSONObject("data").getJSONArray("list").length(); i++) {
+                        InfoHelper.SingerAndRadioData sd = new InfoHelper().new SingerAndRadioData();
+                        JSONObject jo = o.getJSONObject("data").getJSONArray("list").getJSONObject(i);
+                        sd.name = jo.getString("Fsinger_name");
+                        sd.url = "https://y.gtimg.cn/music/photo_new/T001R150x150M000" + jo.getString("Fsinger_mid") + ".jpg?max_age=2592000";
+                        list.add(sd);
+                        if(maxValue!=-1&&i==maxValue)
+                            break;
+                    }
+                    Message ms = new Message();
+                    ms.obj = list;
+                    handler.sendMessage(ms);
+                }catch (Exception e){}
+            }
+        },"https://c.y.qq.com/v8/fcg-bin/v8.fcg?channel=singer&page=list&key="+tag+"&pagesize=100&pagenum=1&g_tk=5381&loginUin=0&hostUin=0&format=json&inCharset=utf8&outCharset=utf-8&notice=0&platform=yqq&needNewCode=0",null);
+    }
+
+    public static void GetRadioListByTag(final Handler handler, final int maxValue){
+        HttpHelper.GetWeb(new Handler(){
+            @Override
+            public void handleMessage(Message msg){
+                try {
+                    ArrayList<ArrayList<InfoHelper.SingerAndRadioData>> Data=new ArrayList<>();
+                    JSONObject o = new JSONObject(msg.obj.toString());
+                    for (int csr = 0; csr < o.getJSONObject("data").getJSONObject("data").getJSONArray("groupList").length(); csr++) {
+                        ArrayList<InfoHelper.SingerAndRadioData> Mdata=new ArrayList<>();
+                        for (int i = 0; i < o.getJSONObject("data").getJSONObject("data").getJSONArray("groupList").getJSONObject(csr).getJSONArray("radioList").length(); i++) {
+                            JSONObject jo = o.getJSONObject("data").getJSONObject("data").getJSONArray("groupList").getJSONObject(csr).getJSONArray("radioList").getJSONObject(i);
+                            InfoHelper.SingerAndRadioData rd = new InfoHelper().new SingerAndRadioData();
+                            rd.name = jo.getString("radioName");
+                            rd.id = jo.getString("radioId");
+                            rd.url = jo.getString("radioImg");
+                            Mdata.add(rd);
+                            if(maxValue!=-1&&i==maxValue)
+                                break;
+                        }
+                        Data.add(Mdata);
+                        if(maxValue!=-1)
+                            break;
+                    }
+                    Message ms = new Message();
+                    ms.obj = Data;
+                    handler.sendMessage(ms);
+                }catch (Exception e){}
+            }
+        },"https://c.y.qq.com/v8/fcg-bin/fcg_v8_radiolist.fcg?channel=radio&format=json&page=index&tpl=wk&new=1&p=0.8663229811059507&g_tk=5381&loginUin=0&hostUin=0&format=json&inCharset=utf8&outCharset=utf-8&notice=0&platform=yqq&needNewCode=0",null);
+    }
+
+    public static void GetRadioMusicById(String id, final Handler handler){
+        if(id.length()==2){
+            HttpHelper.GetWeb(new Handler(){
+                @Override
+                public void handleMessage(Message msg) {
+                    try {
+                        JSONObject o = new JSONObject(msg.obj.toString()).getJSONArray("songlist").getJSONObject(0);
+                        String Singer = "";
+                        for (int osxc = 0; osxc != o.getJSONArray("singer").length(); osxc++) {
+                            Singer += o.getJSONArray("singer").getJSONObject(osxc).getString("name") + "&";
+                        }
+                        InfoHelper.Music m = new InfoHelper().new Music();
+                        m.MusicName = o.getString("name");
+                        m.MusicID = o.getString("mid");
+                        m.GC = o.getString("mid");
+                        m.Singer = Singer.substring(0,Singer.length()-1);
+                        m.ImageUrl = "http://y.gtimg.cn/music/photo_new/T002R300x300M000" + o.getJSONObject("album").getString("mid") + ".jpg";
+                        Message ms = new Message();
+                        ms.obj = m;
+                        handler.sendMessage(ms);
+                    }catch (Exception e){}
+                }
+            },"https://c.y.qq.com/rcmusic2/fcgi-bin/fcg_guess_youlike_pc.fcg?g_tk=1206122277&loginUin="+Settings.qq+"&hostUin=0&format=json&inCharset=utf8&outCharset=utf-8&notice=0&platform=yqq&needNewCode=0&cid=703&uin="+Settings.qq,null);
+        }else{
+            HttpHelper.GetWeb(new Handler(){
+                @Override
+                public void handleMessage(Message msg) {
+                    try {
+                        JSONObject o = new JSONObject(msg.obj.toString()).getJSONObject("songlist").getJSONObject("data").getJSONArray("track_list").getJSONObject(0);
+                        String Singer = "";
+                        for (int osxc = 0; osxc != o.getJSONArray("singer").length(); osxc++) {
+                            Singer += o.getJSONArray("singer").getJSONObject(osxc).getString("name") + "&";
+                        }
+                        InfoHelper.Music m = new InfoHelper().new Music();
+                        m.MusicName = o.getString("name");
+                        m.MusicID = o.getString("mid");
+                        m.GC = o.getString("mid");
+                        m.Singer = Singer.substring(0,Singer.length()-1);
+                        m.ImageUrl = "http://y.gtimg.cn/music/photo_new/T002R300x300M000" + o.getJSONObject("album").getString("mid") + ".jpg";
+                        Message ms = new Message();
+                        ms.obj = m;
+                        handler.sendMessage(ms);
+                    }catch (Exception e){}
+                }
+            },"https://u.y.qq.com/cgi-bin/musicu.fcg?g_tk=1206122277&loginUin="+Settings.qq+"&hostUin=0&format=json&inCharset=utf8&outCharset=utf-8&notice=0&platform=yqq&needNewCode=0&data="+ URLEncoder.encode("{\"songlist\":{\"module\":\"pf.radiosvr\",\"method\":\"GetRadiosonglist\",\"param\":{\"id\":"+id+",\"firstplay\":1,\"num\":10}},\"radiolist\":{\"module\":\"pf.radiosvr\",\"method\":\"GetRadiolist\",\"param\":{\"ct\":\"24\"}},\"comm\":{\"ct\":\"24\"}}"),null);
+        }
     }
 }

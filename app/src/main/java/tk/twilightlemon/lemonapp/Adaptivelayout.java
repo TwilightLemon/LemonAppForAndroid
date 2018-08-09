@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.TextView;
@@ -25,6 +26,7 @@ public class Adaptivelayout extends AppCompatActivity {
         setContentView(R.layout.adaptivelayout);
         SetWindow();
         adaptData=Settings.AdapData;
+        Settings.AdapData=null;
         LoadControls();
     }
     public void SetWindow(){
@@ -44,34 +46,42 @@ public class Adaptivelayout extends AppCompatActivity {
         }
     }
     public void LoadControls(){
+        Settings.Callback_Close=new Handler(){
+            @Override
+            public void handleMessage(Message msg){finish();}
+        };
         TextView Adaptive_title=findViewById(R.id.Adaptive_title);
         Adaptive_title.setText(adaptData.title);
         final ListView lv=findViewById(R.id.Adaptive_list);
         lv.setOnItemClickListener(adaptData.ListOnClick);
         lv.setAdapter(adaptData.CSData);
         FirstFragment.setListViewHeightBasedOnChildren(lv);
-        final RadioButton choose=findViewById(R.id.Adaptive_Choose);
-        choose.setText(adaptData.ChooseData[0]);
-        choose.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(Adaptivelayout.this);
-                builder.setTitle(adaptData.title);
-                final String[] cie = adaptData.ChooseData;
-                builder.setItems(cie, new DialogInterface.OnClickListener()
-                {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which)
-                    {
-                        choose.setText(cie[which]);
-                        Message msg=new Message();
-                        msg.what=which;
-                        msg.obj=lv;
-                        adaptData.ChooseCallBack.sendMessage(msg);
-                    }
-                });
-                builder.show();
-            }
-        });
+        LinearLayout ll=findViewById(R.id.Chooses);
+        for(int i=0;i<adaptData.ChooseData.size();i++) {
+            final RadioButton choose = new RadioButton(this);
+            choose.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+            choose.setText(adaptData.ChooseData.get(i)[0]);
+            final int finalI = i;
+            choose.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(Adaptivelayout.this);
+                    builder.setTitle(adaptData.title);
+                    final String[] cie = adaptData.ChooseData.get(finalI);
+                    builder.setItems(cie, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            choose.setText(cie[which]);
+                            Message msg = new Message();
+                            msg.what = which;
+                            msg.obj = lv;
+                            adaptData.ChooseCallBack.get(finalI).sendMessage(msg);
+                        }
+                    });
+                    builder.show();
+                }
+            });
+            ll.addView(choose);
+        }
     }
 }
