@@ -1,4 +1,4 @@
-package tk.twilightlemon.lemonapp;
+package tk.twilightlemon.lemonapp.Helpers.Lrc;
 
 import android.content.Context;
 class LrcUtils {

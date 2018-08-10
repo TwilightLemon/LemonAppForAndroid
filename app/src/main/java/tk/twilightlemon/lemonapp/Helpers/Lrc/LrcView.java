@@ -1,4 +1,4 @@
-package tk.twilightlemon.lemonapp;
+package tk.twilightlemon.lemonapp.Helpers.Lrc;
 
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
@@ -20,6 +20,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import tk.twilightlemon.lemonapp.R;
 
 public class LrcView extends View {
     private List<LrcEntry> mLrcEntryList = new ArrayList<>();
@@ -62,7 +64,6 @@ public class LrcView extends View {
         mLabel = TextUtils.isEmpty(mLabel) ? "暂无歌词" : mLabel;
         mLrcPadding = ta.getDimension(R.styleable.LrcView_lrcPadding, 0);
         ta.recycle();
-
         mPaint.setAntiAlias(true);
         mPaint.setTextSize(mTextSize);
         mPaint.setTextAlign(Paint.Align.LEFT);
@@ -77,15 +78,11 @@ public class LrcView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-
         canvas.translate(0, mAnimateOffset);
-
-        // 中心Y坐标
+// 中心Y坐标
         float centerY = getHeight() / 2;
-
         mPaint.setColor(mCurrentColor);
-
-        // 无歌词文件
+// 无歌词文件
         if (!hasLrc()) {
             @SuppressLint("DrawAllocation")
             StaticLayout staticLayout = new StaticLayout(mLabel, mPaint, (int) getLrcWidth(),
@@ -93,32 +90,26 @@ public class LrcView extends View {
             drawText(canvas, staticLayout, centerY - staticLayout.getLineCount() * mTextSize / 2);
             return;
         }
-
-        // 画当前行
+// 画当前行
         float currY = centerY - mLrcEntryList.get(mCurrentLine).getTextHeight() / 2;
         drawText(canvas, mLrcEntryList.get(mCurrentLine).getStaticLayout(), currY);
-
-        // 画当前行上面的
+// 画当前行上面的
         mPaint.setColor(mNormalColor);
         float upY = currY;
         for (int i = mCurrentLine - 1; i >= 0; i--) {
             upY -= mDividerHeight + mLrcEntryList.get(i).getTextHeight();
             drawText(canvas, mLrcEntryList.get(i).getStaticLayout(), upY);
-
             if (upY <= 0) {
                 break;
             }
         }
-
-        // 画当前行下面的
+// 画当前行下面的
         float downY = currY + mLrcEntryList.get(mCurrentLine).getTextHeight() + mDividerHeight;
         for (int i = mCurrentLine + 1; i < mLrcEntryList.size(); i++) {
             drawText(canvas, mLrcEntryList.get(i).getStaticLayout(), downY);
-
             if (downY + mLrcEntryList.get(i).getTextHeight() >= getHeight()) {
                 break;
             }
-
             downY += mLrcEntryList.get(i).getTextHeight() + mDividerHeight;
         }
     }
@@ -157,7 +148,6 @@ public class LrcView extends View {
             @Override
             public void run() {
                 reset();
-
                 setFlag(lrcFile);
                 new AsyncTask<File, Integer, List<LrcEntry>>() {
                     @Override
@@ -187,7 +177,6 @@ public class LrcView extends View {
             @Override
             public void run() {
                 reset();
-
                 setFlag(lrcText);
                 new AsyncTask<String, Integer, List<LrcEntry>>() {
                     @Override
@@ -212,7 +201,6 @@ public class LrcView extends View {
             mLrcEntryList.clear();
             mLrcEntryList.addAll(entryList);
         }
-
         if (hasLrc()) {
             initEntryList();
             initNextTime();
@@ -229,7 +217,7 @@ public class LrcView extends View {
         runOnUi(new Runnable() {
             @Override
             public void run() {
-                // 避免重复绘制
+// 避免重复绘制
                 if (time < mNextTime) {
                     return;
                 }
@@ -240,7 +228,7 @@ public class LrcView extends View {
                         newlineAnimation(i);
                         break;
                     } else if (i == mLrcEntryList.size() - 1) {
-                        // 最后一行
+// 最后一行
                         mCurrentLine = mLrcEntryList.size() - 1;
                         mNextTime = Long.MAX_VALUE;
                         newlineAnimation(i);
@@ -290,7 +278,6 @@ public class LrcView extends View {
         mLrcEntryList.clear();
         mCurrentLine = 0;
         mNextTime = 0L;
-
         stopAnimation();
         invalidate();
     }
@@ -299,9 +286,7 @@ public class LrcView extends View {
         if (getWidth() == 0) {
             return;
         }
-
         Collections.sort(mLrcEntryList);
-
         for (LrcEntry lrcEntry : mLrcEntryList) {
             lrcEntry.init(mPaint, (int) getLrcWidth());
         }
@@ -321,7 +306,6 @@ public class LrcView extends View {
      */
     private void newlineAnimation(int index) {
         stopAnimation();
-
         mAnimator = ValueAnimator.ofFloat(mLrcEntryList.get(index).getTextHeight() + mDividerHeight, 0.0f);
         mAnimator.setDuration(mAnimationDuration * mLrcEntryList.get(index).getStaticLayout().getLineCount());
         mAnimator.setInterpolator(new LinearInterpolator());

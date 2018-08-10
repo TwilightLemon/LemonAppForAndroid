@@ -1,4 +1,4 @@
-package tk.twilightlemon.lemonapp;
+package tk.twilightlemon.lemonapp.layouts;
 
 import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
@@ -12,30 +12,36 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
+import tk.twilightlemon.lemonapp.Fragments.FirstFragment;
+import tk.twilightlemon.lemonapp.Helpers.InfoHelper;
+import tk.twilightlemon.lemonapp.R;
+import tk.twilightlemon.lemonapp.Helpers.Settings;
+
 public class Adaptivelayout extends AppCompatActivity {
     private InfoHelper.AdaptiveData adaptData;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.adaptivelayout);
         SetWindow();
-        adaptData=Settings.AdapData;
-        Settings.AdapData=null;
+        adaptData = Settings.AdapData;
+        Settings.AdapData = null;
         LoadControls();
     }
-    public void SetWindow(){
-        /////配置沉浸式窗口
+
+    public void SetWindow() {
+/////配置沉浸式窗口
         getWindow().setSoftInputMode
-                (WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN|
+                (WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN |
                         WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Window window = getWindow();
             window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS
                     | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
@@ -45,19 +51,24 @@ public class Adaptivelayout extends AppCompatActivity {
             window.setStatusBarColor(Color.TRANSPARENT);
         }
     }
-    public void LoadControls(){
-        Settings.Callback_Close=new Handler(){
+
+    public void LoadControls() {
+        Settings.Callback_Close = new Handler() {
             @Override
-            public void handleMessage(Message msg){finish();}
+            public void handleMessage(Message msg) {
+                adaptData = null;
+                Settings.AdapData = null;
+                finish();
+            }
         };
-        TextView Adaptive_title=findViewById(R.id.Adaptive_title);
+        TextView Adaptive_title = findViewById(R.id.Adaptive_title);
         Adaptive_title.setText(adaptData.title);
-        final ListView lv=findViewById(R.id.Adaptive_list);
+        final ListView lv = findViewById(R.id.Adaptive_list);
         lv.setOnItemClickListener(adaptData.ListOnClick);
         lv.setAdapter(adaptData.CSData);
         FirstFragment.setListViewHeightBasedOnChildren(lv);
-        LinearLayout ll=findViewById(R.id.Chooses);
-        for(int i=0;i<adaptData.ChooseData.size();i++) {
+        LinearLayout ll = findViewById(R.id.Chooses);
+        for (int i = 0; i < adaptData.ChooseData.size(); i++) {
             final RadioButton choose = new RadioButton(this);
             choose.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
             choose.setText(adaptData.ChooseData.get(i)[0]);

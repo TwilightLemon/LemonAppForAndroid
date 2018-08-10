@@ -1,4 +1,4 @@
-package tk.twilightlemon.lemonapp;
+package tk.twilightlemon.lemonapp.Helpers.Lrc;
 
 import android.text.Layout;
 import android.text.StaticLayout;
@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-class LrcEntry implements Comparable<LrcEntry> {
+public class LrcEntry implements Comparable<LrcEntry> {
     private long time;
     private String text;
     private StaticLayout staticLayout;
