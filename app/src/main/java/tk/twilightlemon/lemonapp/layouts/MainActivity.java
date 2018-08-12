@@ -102,6 +102,7 @@ public class MainActivity extends AppCompatActivity {
             if (findViewById(R.id.LyricView).getVisibility() == View.VISIBLE)
                 lrcBig.updateTime(in);
             if (isplaying && MseekBar.getProgress() + 2000 >= MseekBar.getMax()) {
+                isplaying=false;
                 mHandler.removeCallbacks(r);
                 MseekBar.setProgress(0);
                 if (xhindex == 0) {
@@ -130,8 +131,7 @@ public class MainActivity extends AppCompatActivity {
                     Musicdt = Settings.ListData.Data.get(PlayListIndex);
                     PlayMusic();
                 }
-            }
-            mHandler.postDelayed(this, 1000);
+            }else mHandler.postDelayed(this, 1000);
         }
     };
 
@@ -168,7 +168,6 @@ public class MainActivity extends AppCompatActivity {
         mp.stop();
         mHandler.removeCallbacks(r);
         mp = new MediaPlayer();
-        isplaying = true;
         lrcBig.updateTime(0);
         final ImageView PlayBottom_img = findViewById(R.id.PlayBottom_img);
         TextView PlayBottom_title = findViewById(R.id.PlayBottom_title);
@@ -211,6 +210,7 @@ public class MainActivity extends AppCompatActivity {
                     Title.setText(Musicdt.MusicName);
                     TextView Mss = findViewById(R.id.MusicMss);
                     Mss.setText(Musicdt.Singer);
+                    isplaying = true;
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
