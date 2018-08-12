@@ -64,6 +64,8 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.baidu.mobstat.StatService;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -137,6 +139,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //TODO:百度app统计
+        StatService.start(this);
         Lv();
         SetWindow();
         SetTitle();
@@ -159,6 +163,7 @@ public class MainActivity extends AppCompatActivity {
     int REQUEST_STORAGE_PERMISSION = 1;
 
     public void PlayMusic() {
+        StatService.onEvent(this, "tw_Play", "播放音乐", 1);
         MainActivity.Loading(findViewById(R.id.USERTX));
         mp.stop();
         mHandler.removeCallbacks(r);
@@ -283,6 +288,7 @@ public class MainActivity extends AppCompatActivity {
                     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
                     public void onClick(DialogInterface dialog, int which) {
                         try {
+                            StatService.onEvent(MainActivity.this, "tw_Login", "活跃用户", 1);
                             final String nu = qq.getText().toString();
                             BitmapUtils bu=new BitmapUtils();
                             Handler hl=new Handler() {
