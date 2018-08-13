@@ -98,13 +98,8 @@ public class MainActivity extends AppCompatActivity {
     Runnable r = new Runnable() {
         @Override
         public void run() {
-///更新播放进度
             SeekBar MseekBar = findViewById(R.id.MusicSeek);
-            int in = mp.getCurrentPosition();
-            MseekBar.setProgress(in);
             MseekBar.setMax(mp.getDuration());
-            if (findViewById(R.id.LyricView).getVisibility() == View.VISIBLE)
-                lrcBig.updateTime(in);
             if (isplaying && MseekBar.getProgress() + 2000 >= MseekBar.getMax()) {
                 isplaying=false;
                 mHandler.removeCallbacks(r);
@@ -135,7 +130,12 @@ public class MainActivity extends AppCompatActivity {
                     Musicdt = Settings.ListData.Data.get(PlayListIndex);
                     PlayMusic();
                 }
-            }else mHandler.postDelayed(this, 1000);
+            }else{
+                int in = mp.getCurrentPosition();
+                MseekBar.setProgress(in);
+                if (findViewById(R.id.LyricView).getVisibility() == View.VISIBLE)
+                    lrcBig.updateTime(in);
+                mHandler.postDelayed(this, 1000);}
         }
     };
 
@@ -555,6 +555,13 @@ public class MainActivity extends AppCompatActivity {
         final Intent intent = getPackageManager().getLaunchIntentForPackage(getPackageName());
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
+    }
+    public static void SendMessageBox(String msg,Context context) {
+        AlertDialog.Builder dlg = new AlertDialog.Builder(context);
+        dlg.setTitle("提示");
+        dlg.setMessage(msg);
+        dlg.setPositiveButton("确定", null);
+        dlg.show();
     }
 //////功能区end////
 }

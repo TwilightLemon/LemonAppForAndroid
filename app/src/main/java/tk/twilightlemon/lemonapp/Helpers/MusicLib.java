@@ -181,9 +181,12 @@ public class MusicLib {
                             dt.GC = jos.getJSONObject("action").getString("alert");
                             Data.Data.add(dt);
                         }
+                        if(Data.Data.size()!=0){
                         Settings.ListData = Data;
                         Intent intent = new Intent(activity, MusicListPage.class);
-                        activity.startActivityForResult(intent, 1000);
+                        activity.startActivityForResult(intent, 1000);}else{
+                            MainActivity.SendMessageBox("什么都没有搜索到哦o(≧口≦)o",activity);
+                        }
                     } catch (Exception e) {
                     }
                 }

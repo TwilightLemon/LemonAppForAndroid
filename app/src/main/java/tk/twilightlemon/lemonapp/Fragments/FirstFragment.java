@@ -303,10 +303,12 @@ public class FirstFragment extends Fragment {
             return;
         }
         int totalHeight = 0;
-        View listItem = listAdapter.getView(0, null, listView);
-        for (int i = 0, len = listAdapter.getCount(); i < len; i++) {
-            listItem.measure(0, 0);
-            totalHeight += listItem.getMeasuredHeight();
+        if(listAdapter.getCount()!=0) {
+            View listItem = listAdapter.getView(0, null, listView);
+            for (int i = 0, len = listAdapter.getCount(); i < len; i++) {
+                listItem.measure(0, 0);
+                totalHeight += listItem.getMeasuredHeight();
+            }
         }
         ViewGroup.LayoutParams params = listView.getLayoutParams();
         params.height = totalHeight + (listView.getDividerHeight() * (listAdapter.getCount() - 1));
