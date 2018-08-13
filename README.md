@@ -18,4 +18,5 @@ Android 6.0 ~ Android 8.0:完美运行
 本应用中的歌曲和API来自QQ音乐(y.qq.com),请支持正版音乐！
 
 #### 下载
+[Coding](https://coding.net/u/twilightlemon/p/Updata/git/raw/master/app-release.apk)
 [Gitee](https://gitee.com/TwilightLemon/Updata/raw/master/app-release.apk)
