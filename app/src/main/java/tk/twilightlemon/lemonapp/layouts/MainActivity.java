@@ -37,6 +37,7 @@ import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -66,9 +67,12 @@ import android.widget.Toast;
 
 import com.baidu.mobstat.StatService;
 
+import org.json.JSONObject;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import tk.twilightlemon.lemonapp.Adapters.MyFragmentAdapter;
@@ -143,6 +147,7 @@ public class MainActivity extends AppCompatActivity {
         StatService.start(this);
         Lv();
         SetWindow();
+        Updata();
         SetTitle();
         LoadSettings();
         SetLoginPage();
@@ -479,6 +484,44 @@ public class MainActivity extends AppCompatActivity {
                         REQUEST_STORAGE_PERMISSION);
             }
         }
+    }
+
+    public void Updata(){
+        HashMap<String,String> data=new HashMap<>();
+        data.put("Accept","text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
+        data.put("Accept-Language","zh-CN,zh;q=0.9");
+        data.put("Cache-Control","max-age=0");
+        data.put("Connection","keep-alive");
+        data.put("Host","coding.net");
+        data.put("Referer","https://coding.net/u/twilightlemon/p/Updata/git/blob/master/AndroidUpdata.json");
+        data.put("Upgrade-Insecure-Requests","1");
+        data.put("User-Agent","Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36");
+        HttpHelper.GetWeb(new Handler(){
+            @Override
+            public void handleMessage(Message msg){
+                try {
+                    JSONObject o = new JSONObject(msg.obj.toString());
+                    if (Integer.parseInt(o.getString("version").replace(".", "")) > MainActivity.this.getPackageManager().
+                            getPackageInfo(MainActivity.this.getPackageName(), 0).versionCode) {
+                        final TextView tv=new TextView(MainActivity.this);
+                        tv.setText("       新版本:"+o.getString("version")+"\n"+o.getString("description"));
+                        final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                        builder.setTitle("小萌有新版本啦").setView(tv)
+                                .setNegativeButton("关闭", null);
+                        builder.setPositiveButton("更新", new DialogInterface.OnClickListener() {
+                            @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
+                            public void onClick(DialogInterface dialog, int which) {
+                                Intent intent = new Intent();
+                                intent.setAction("android.intent.action.VIEW");
+                                Uri content_url = Uri.parse("https://coding.net/u/twilightlemon/p/Updata/git/raw/master/app-release.apk");
+                                intent.setData(content_url);
+                                startActivity(intent);
+                            }});
+                        builder.show();
+                    }
+                }catch (Exception e){}
+            }
+        },"https://coding.net/u/twilightlemon/p/Updata/git/raw/master/AndroidUpdata.json",data);
     }
 
     public void OnShareClick(View view) {
