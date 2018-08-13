@@ -156,7 +156,7 @@ public class FirstFragment extends Fragment {
                                 df.id = obj.getString("dissid");
                                 df.sub = obj.getString("subtitle");
                                 df.name = obj.getString("title");
-                                if (obj.getString("picurl") != "")
+                                if (obj.getString("picurl").length()>10)
                                     df.pic = obj.getString("picurl");
                                 else
                                     df.pic = "https://y.gtimg.cn/mediastyle/global/img/cover_playlist.png?max_age=31536000";
