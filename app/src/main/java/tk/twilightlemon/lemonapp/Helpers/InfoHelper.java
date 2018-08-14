@@ -22,7 +22,11 @@ package tk.twilightlemon.lemonapp.Helpers;
  *                     佛祖保佑        永无BUG
 */
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Handler;
+import android.os.Message;
 import android.widget.AdapterView;
 import android.widget.ListAdapter;
 
@@ -85,4 +89,18 @@ public class InfoHelper {
         public String id;
     }
 
+    public class NotificationBCR extends BroadcastReceiver {
+
+        public static final String ACTION_LAST = "ACTION_LAST";
+        public static final String ACTION_PRESS = "ACTION_PRESS";
+        public static final String ACTION_NEXT="ACTION_NEXT";
+
+        @Override
+        public void onReceive(Context context, Intent intent)
+        {
+            Message msg=new Message();
+            msg.obj=intent.getAction();
+            Settings.ACTIONCALLBACK.sendMessage(msg);
+        }
+    }
 }

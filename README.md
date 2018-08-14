@@ -8,8 +8,8 @@ LemonApp 是一款开源的基于QQ音乐的在线音乐播放器，采用Materi
 ![播放界面](https://raw.githubusercontent.com/TwilightLemon/Data/master/PlayPage.jpg)
 
 ### 运行环境
-Android 4.4 ~ Android 5.1:可以运行 无法播放/下载 （努力修复中）
-Android 6.0 ~ Android 8.0:完美运行
+Android 4.4 ~ Android 7.1：完美运行
+Android 8.0：可以使用但无法启用通知栏(1.0.5 Updata)
 
 #### 版权
 本应用由 [Twilight./Lemon(https://lemonapp.tk)](https://lemonapp.tk) 开发，您可以随意修改、使用、转载。使用或转载时请保留原网址和版权信息

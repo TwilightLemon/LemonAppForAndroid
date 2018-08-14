@@ -14,6 +14,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -196,7 +199,6 @@ public class MusicLib {
     }
 
     public static void GetUrl(final String Musicid, final Handler handler) {
-//通过Musicid获取mid
         final HashMap<String, String> hdata = new HashMap<String, String>();
         hdata.put("Connection", "keep-alive");
         hdata.put("CacheControl", "max-age=0");
@@ -229,21 +231,22 @@ public class MusicLib {
                                 new Thread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        try {
                                             while (true) {
                                                 String uri = "https://dl.stream.qqmusic.qq.com/" + MData.get(scr[0])[0] + mid + "." + MData.get(scr[0])[1] + "?vkey=" + key + "&guid=" + guid + "&uid=0&fromtag=30";
-                                                HttpGet httpGet = new HttpGet(uri);
-                                                HttpResponse response = new DefaultHttpClient().execute(httpGet);
-                                                if (response.getStatusLine().getStatusCode() == 200) {
-                                                    Message ms = new Message();
-                                                    ms.obj = uri;
-                                                    handler.sendMessage(ms);
-                                                    break;
-                                                } else ++scr[0];
+                                                HttpURLConnection conn=null;
+                                                try {
+                                                    URL url = new URL(uri);
+                                                    conn = (HttpURLConnection) url.openConnection();
+                                                    conn.setRequestMethod("GET");
+                                                    if (conn.getResponseCode() == 200) {
+                                                        Message ms = new Message();
+                                                        ms.obj = uri;
+                                                        handler.sendMessage(ms);
+                                                        break;
+                                                    } else ++scr[0];
+                                                }catch (Exception e){}
                                             }
                                             MData.clear();
-                                        } catch (Exception e) {
-                                        }
                                     }
                                 }).start();
                             } catch (Exception e) {

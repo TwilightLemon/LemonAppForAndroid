@@ -26,13 +26,19 @@ import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -47,6 +53,7 @@ import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
@@ -61,6 +68,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.RemoteViews;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -153,6 +161,7 @@ public class MainActivity extends AppCompatActivity {
         SetLoginPage();
         MainActivity.Loading(findViewById(R.id.USERTX));
         LoadMusicControls();
+        LoadNotification();
     }
 
     @Override
@@ -192,6 +201,7 @@ public class MainActivity extends AppCompatActivity {
                 ImageView MUSICZJ = findViewById(R.id.MUSICZJ);
                 MUSICZJ.setImageDrawable(RBD);
                 PlayBottom_img.setImageDrawable(RBD);
+                remoteViews.setImageViewBitmap(R.id.Notification_ImageView,bmp);
                 RelativeLayout MImageBackground = findViewById(R.id.MImageBackground);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
                     MImageBackground.setBackground(new BitmapDrawable(BlurBitmap.blur(MainActivity.this, bmp)));
@@ -215,7 +225,11 @@ public class MainActivity extends AppCompatActivity {
                     Title.setText(Musicdt.MusicName);
                     TextView Mss = findViewById(R.id.MusicMss);
                     Mss.setText(Musicdt.Singer);
+                    remoteViews.setTextViewText(R.id.Notification_SongName,Musicdt.MusicName);
+                    remoteViews.setTextViewText(R.id.Notification_Singer,Musicdt.Singer);
+                    remoteViews.setImageViewResource(R.id.Notification_OpenBtn,R.drawable.ic_not_stop);
                     isplaying = true;
+                    notificationManager.notify(2, notification);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -336,6 +350,8 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private ImageButton PlayBottom_ControlBtn;
+    private ImageButton MButton;
     public void LoadMusicControls() {
 ///播放回调
         Settings.Callback_PlayMusic = new Handler() {
@@ -352,28 +368,36 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         };
+        //Notification控制回调
+        Settings.ACTIONCALLBACK=new Handler(){
+            @Override
+            public void handleMessage(Message msg){
+                String code=msg.obj.toString();
+                switch (code) {
+                    case InfoHelper.NotificationBCR.ACTION_LAST:
+                        Music_Last();
+                        break;
+                    case InfoHelper.NotificationBCR.ACTION_PRESS:
+                        Music_Press();
+                        break;
+                    case InfoHelper.NotificationBCR.ACTION_NEXT:
+                        Music_Next();
+                        break;
+                }
+            }
+        };
 ///一些控件
         lrcBig = findViewById(R.id.lrc);
-        final ImageButton PlayBottom_ControlBtn = findViewById(R.id.PlayBottom_ControlBtn);
-        final ImageButton MButton = findViewById(R.id.MButton);
+        PlayBottom_ControlBtn = findViewById(R.id.PlayBottom_ControlBtn);
+        MButton = findViewById(R.id.MButton);
+        ((ImageView)findViewById(R.id.PlayBottom_img)).setImageDrawable(getResources().getDrawable(R.mipmap.ic_launcher_round));
         Drawable playic = getResources().getDrawable(R.drawable.ic_playbtn);
         PlayBottom_ControlBtn.setImageDrawable(playic);
         MButton.setImageDrawable(playic);
         View.OnClickListener lister = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Drawable ic = null;
-                if (isplaying) {
-                    ic = getResources().getDrawable(R.drawable.ic_playbtn);
-                    isplaying = false;
-                    mp.pause();
-                } else {
-                    ic = getResources().getDrawable(R.drawable.ic_unplaybtn);
-                    isplaying = true;
-                    mp.start();
-                }
-                PlayBottom_ControlBtn.setImageDrawable(ic);
-                MButton.setImageDrawable(ic);
+                Music_Press();
             }
         };
         PlayBottom_ControlBtn.setOnClickListener(lister);
@@ -426,39 +450,13 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.musicnexts).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(Settings.ListData.name!="Radio") {
-                    if (PlayListIndex == 0)
-                        PlayListIndex = Settings.ListData.Data.size() - 1;
-                    else --PlayListIndex;
-                    Musicdt = Settings.ListData.Data.get(PlayListIndex);
-                    PlayMusic();
-                }
+                Music_Last();
             }
         });
         findViewById(R.id.musicnext).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(Settings.ListData.name=="Radio") {
-                    MusicLib.GetRadioMusicById(Settings.ListData.id, new Handler() {
-                        @Override
-                        public void handleMessage(Message msg) {
-                            PlayListIndex = 0;
-                            InfoHelper.MusicGData GData = new InfoHelper().new MusicGData();
-                            GData.Data.add((InfoHelper.Music) msg.obj);
-                            GData.name="Radio";
-                            GData.id=Settings.ListData.id;
-                            Settings.ListData = GData;
-                            Musicdt = Settings.ListData.Data.get(PlayListIndex);
-                            PlayMusic();
-                        }
-                    });
-                }else {
-                    if (PlayListIndex == Settings.ListData.Data.size() - 1)
-                        PlayListIndex = 0;
-                    else ++PlayListIndex;
-                    Musicdt = Settings.ListData.Data.get(PlayListIndex);
-                    PlayMusic();
-                }
+                Music_Next();
             }
         });
         final ImageButton musicxh = findViewById(R.id.musicxh);
@@ -533,6 +531,99 @@ public class MainActivity extends AppCompatActivity {
 //创建分享的Dialog
         share_intent = Intent.createChooser(share_intent, "小萌音乐分享");
         startActivity(share_intent);
+    }
+
+    private NotificationManager notificationManager = null;
+    private InfoHelper.NotificationBCR myBroadcastReceiver = null;
+    private RemoteViews remoteViews=null;
+    private Notification notification=null;
+    public void LoadNotification(){
+        notificationManager = (NotificationManager)
+                getSystemService(Context.NOTIFICATION_SERVICE);
+        myBroadcastReceiver = new InfoHelper().new NotificationBCR();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(InfoHelper.NotificationBCR.ACTION_LAST);
+        intentFilter.addAction(InfoHelper.NotificationBCR.ACTION_PRESS);
+        intentFilter.addAction(InfoHelper.NotificationBCR.ACTION_NEXT);
+        registerReceiver(myBroadcastReceiver, intentFilter);
+
+        PendingIntent LASTPI = PendingIntent.getBroadcast(this, 0,new Intent(InfoHelper.NotificationBCR.ACTION_LAST), 0);
+        PendingIntent PRESSPI = PendingIntent.getBroadcast(this, 0, new Intent(InfoHelper.NotificationBCR.ACTION_PRESS), 0);
+        PendingIntent NEXTPI = PendingIntent.getBroadcast(this, 0, new Intent(InfoHelper.NotificationBCR.ACTION_NEXT), 0);
+        remoteViews = new RemoteViews(getPackageName(), R.layout.notification);
+        remoteViews.setOnClickPendingIntent(R.id.Notification_LastBtn,LASTPI);
+        remoteViews.setOnClickPendingIntent(R.id.Notification_OpenBtn, PRESSPI);
+        remoteViews.setOnClickPendingIntent(R.id.Notification_NextBtn, NEXTPI);
+        remoteViews.setImageViewResource(R.id.Notification_OpenBtn,R.drawable.ic_not_open);
+
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel("MusicControl", "控制音乐播放", NotificationManager.IMPORTANCE_HIGH);
+        notificationManager.createNotificationChannel(channel);
+        mBuilder.setChannelId("MusicControl");
+        }
+        notification = mBuilder
+                .setContentTitle("Lemon App")
+                .setContentText("Music")
+                .setSmallIcon(R.mipmap.ic_launcher_round)
+                .setLargeIcon(BitmapFactory.decodeResource(getResources(),
+                        R.mipmap.ic_launcher))
+                .setDefaults(NotificationCompat.FLAG_ONLY_ALERT_ONCE)
+                .setContent(remoteViews)
+                .build();
+        notification.flags = Notification.FLAG_ONGOING_EVENT;
+        notificationManager.notify(2, notification);
+    }
+
+    public void Music_Last(){
+        if(Settings.ListData.name!="Radio") {
+            if (PlayListIndex == 0)
+                PlayListIndex = Settings.ListData.Data.size() - 1;
+            else --PlayListIndex;
+            Musicdt = Settings.ListData.Data.get(PlayListIndex);
+            PlayMusic();
+        }
+    }
+    public void Music_Next(){
+        if(Settings.ListData.name=="Radio") {
+            MusicLib.GetRadioMusicById(Settings.ListData.id, new Handler() {
+                @Override
+                public void handleMessage(Message msg) {
+                    PlayListIndex = 0;
+                    InfoHelper.MusicGData GData = new InfoHelper().new MusicGData();
+                    GData.Data.add((InfoHelper.Music) msg.obj);
+                    GData.name="Radio";
+                    GData.id=Settings.ListData.id;
+                    Settings.ListData = GData;
+                    Musicdt = Settings.ListData.Data.get(PlayListIndex);
+                    PlayMusic();
+                }
+            });
+        }else {
+            if (PlayListIndex == Settings.ListData.Data.size() - 1)
+                PlayListIndex = 0;
+            else ++PlayListIndex;
+            Musicdt = Settings.ListData.Data.get(PlayListIndex);
+            PlayMusic();
+        }
+    }
+
+    public void Music_Press(){
+        Drawable ic = null;
+        if (isplaying) {
+            ic = getResources().getDrawable(R.drawable.ic_playbtn);
+            remoteViews.setImageViewResource(R.id.Notification_OpenBtn,R.drawable.ic_not_open);
+            isplaying = false;
+            mp.pause();
+        } else {
+            ic = getResources().getDrawable(R.drawable.ic_unplaybtn);
+            remoteViews.setImageViewResource(R.id.Notification_OpenBtn,R.drawable.ic_not_stop);
+            isplaying = true;
+            mp.start();
+        }
+        PlayBottom_ControlBtn.setImageDrawable(ic);
+        MButton.setImageDrawable(ic);
+        notificationManager.notify(2, notification);
     }
 
     ///////加载区end//////

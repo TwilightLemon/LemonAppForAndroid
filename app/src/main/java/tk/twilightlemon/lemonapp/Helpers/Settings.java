@@ -31,5 +31,6 @@ public class Settings {
     public static InfoHelper.MusicGData ListData=new InfoHelper().new MusicGData();
     public static Handler Callback_PlayMusic=null;
     public static Handler Callback_Close=null;
+    public static Handler ACTIONCALLBACK=null;
     public static InfoHelper.AdaptiveData AdapData=new InfoHelper().new AdaptiveData();
 }
