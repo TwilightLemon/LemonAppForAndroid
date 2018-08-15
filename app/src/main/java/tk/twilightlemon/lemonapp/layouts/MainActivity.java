@@ -26,6 +26,7 @@ import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -42,6 +43,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
@@ -96,54 +98,55 @@ import tk.twilightlemon.lemonapp.Fragments.SecondFragment;
 import tk.twilightlemon.lemonapp.Helpers.Settings;
 
 public class MainActivity extends AppCompatActivity {
-    public static String SDPATH = "";
-    MediaPlayer mp = new MediaPlayer();
-    LrcView lrcBig = null;
-    boolean isplaying = false;
-    int PlayListIndex = -1;
-    InfoHelper.Music Musicdt = null;
-    Handler mHandler = new Handler();
-    Runnable r = new Runnable() {
+    private Bundle bundle = null;
+    private LrcView lrcBig = null;
+    private boolean isplaying = false;
+    private int PlayListIndex = -1;
+    private InfoHelper.Music Musicdt = null;
+    private SeekBar MseekBar = null;
+    private Handler mHandler = new Handler();
+    private Runnable r = new Runnable() {
         @Override
         public void run() {
-            SeekBar MseekBar = findViewById(R.id.MusicSeek);
-            MseekBar.setMax(mp.getDuration());
             if (isplaying && MseekBar.getProgress() + 2000 >= MseekBar.getMax()) {
-                isplaying=false;
+                isplaying = false;
                 mHandler.removeCallbacks(r);
                 MseekBar.setProgress(0);
                 if (xhindex == 0) {
-                    if(Settings.ListData.name=="Radio"){
+                    if (Settings.ListData.name == "Radio") {
                         MusicLib.GetRadioMusicById(Settings.ListData.id, new Handler() {
                             @Override
                             public void handleMessage(Message msg) {
                                 PlayListIndex = 0;
                                 InfoHelper.MusicGData GData = new InfoHelper().new MusicGData();
                                 GData.Data.add((InfoHelper.Music) msg.obj);
-                                GData.name="Radio";
-                                GData.id=Settings.ListData.id;
+                                GData.name = "Radio";
+                                GData.id = Settings.ListData.id;
                                 Settings.ListData = GData;
                                 Musicdt = Settings.ListData.Data.get(PlayListIndex);
                                 PlayMusic();
                             }
                         });
-                    }else {
+                    } else {
                         if (PlayListIndex == Settings.ListData.Data.size() - 1)
                             PlayListIndex = 0;
                         else ++PlayListIndex;
                         Musicdt = Settings.ListData.Data.get(PlayListIndex);
                         PlayMusic();
                     }
-                }else{
+                } else {
                     Musicdt = Settings.ListData.Data.get(PlayListIndex);
                     PlayMusic();
                 }
-            }else{
-                int in = mp.getCurrentPosition();
-                MseekBar.setProgress(in);
-                if (findViewById(R.id.LyricView).getVisibility() == View.VISIBLE)
-                    lrcBig.updateTime(in);
-                mHandler.postDelayed(this, 1000);}
+            } else {
+                try {
+                    int in = Settings.mp.getCurrentPosition();
+                    MseekBar.setProgress(in);
+                    if (findViewById(R.id.LyricView).getVisibility() == View.VISIBLE)
+                        lrcBig.updateTime(in);
+                    mHandler.postDelayed(this, 1000);
+                }catch (Exception E){}
+            }
         }
     };
 
@@ -151,6 +154,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        bundle = savedInstanceState;
         //TODO:百度app统计
         StatService.start(this);
         Lv();
@@ -167,7 +171,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            moveTaskToBack(false);
+            Intent intent = new Intent(Intent.ACTION_MAIN);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.addCategory(Intent.CATEGORY_HOME);
+            startActivity(intent);
             return true;
         }
         return super.onKeyDown(keyCode, event);
@@ -176,13 +183,13 @@ public class MainActivity extends AppCompatActivity {
     int xhindex = 0;
     int REQUEST_STORAGE_PERMISSION = 1;
 
+    @SuppressLint("HandlerLeak")
     public void PlayMusic() {
         StatService.onEvent(this, "tw_Play", "播放音乐", 1);
         MainActivity.Loading(findViewById(R.id.USERTX));
-        mp.stop();
+        Settings.mp.stop();
         mHandler.removeCallbacks(r);
-        mp = new MediaPlayer();
-        lrcBig.updateTime(0);
+        Settings.mp = new MediaPlayer();
         final ImageView PlayBottom_img = findViewById(R.id.PlayBottom_img);
         TextView PlayBottom_title = findViewById(R.id.PlayBottom_title);
         TextView PlayBottom_mss = findViewById(R.id.PlayBottom_mss);
@@ -191,8 +198,8 @@ public class MainActivity extends AppCompatActivity {
         PlayBottom_ControlBtn.setImageDrawable(ic);
         ImageButton MButton = findViewById(R.id.MButton);
         MButton.setImageDrawable(ic);
-        BitmapUtils bu=new BitmapUtils();
-        Handler hl=new Handler() {
+        BitmapUtils bu = new BitmapUtils();
+        Handler hl = new Handler() {
             @Override
             public void handleMessage(Message msg) {
                 Bitmap bmp = (Bitmap) msg.obj;
@@ -201,14 +208,14 @@ public class MainActivity extends AppCompatActivity {
                 ImageView MUSICZJ = findViewById(R.id.MUSICZJ);
                 MUSICZJ.setImageDrawable(RBD);
                 PlayBottom_img.setImageDrawable(RBD);
-                remoteViews.setImageViewBitmap(R.id.Notification_ImageView,bmp);
+                remoteViews.setImageViewBitmap(R.id.Notification_ImageView, bmp);
                 RelativeLayout MImageBackground = findViewById(R.id.MImageBackground);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
                     MImageBackground.setBackground(new BitmapDrawable(BlurBitmap.blur(MainActivity.this, bmp)));
                 }
             }
         };
-        bu.disPlay(hl,Musicdt.ImageUrl);
+        bu.disPlay(hl, Musicdt.ImageUrl);
         PlayBottom_title.setText(Musicdt.MusicName);
         PlayBottom_mss.setText(Musicdt.Singer);
         MusicLib.GetUrl(Musicdt.MusicID, new Handler() {
@@ -216,20 +223,21 @@ public class MainActivity extends AppCompatActivity {
             public void handleMessage(Message msg) {
                 try {
                     String url = msg.obj.toString();
-                    mp.setDataSource(url);
-                    mp.prepare();
-                    mp.start();
+                    Settings.mp.setDataSource(url);
+                    Settings.mp.prepare();
+                    Settings.mp.start();
                     MusicLib.GetMusicLyric(Musicdt.MusicID, lrcBig);
                     mHandler.postDelayed(r, 1000);
                     TextView Title = findViewById(R.id.MusicTitle);
                     Title.setText(Musicdt.MusicName);
                     TextView Mss = findViewById(R.id.MusicMss);
                     Mss.setText(Musicdt.Singer);
-                    remoteViews.setTextViewText(R.id.Notification_SongName,Musicdt.MusicName);
-                    remoteViews.setTextViewText(R.id.Notification_Singer,Musicdt.Singer);
-                    remoteViews.setImageViewResource(R.id.Notification_OpenBtn,R.drawable.ic_not_stop);
+                    remoteViews.setTextViewText(R.id.Notification_SongName, Musicdt.MusicName);
+                    remoteViews.setTextViewText(R.id.Notification_Singer, Musicdt.Singer);
+                    remoteViews.setImageViewResource(R.id.Notification_OpenBtn, R.drawable.ic_not_stop);
                     isplaying = true;
                     notificationManager.notify(2, notification);
+                    MseekBar.setMax(Settings.mp.getDuration());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -268,19 +276,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void LoadSettings() {
-//DATA目录
-        SDPATH = getFilesDir().getPath() + "//";
-        File file = new File(SDPATH);
-        if (!file.exists()) {
-            file.mkdirs();
-        }
 //////读取设置
         SharedPreferences sp = MainActivity.this.getSharedPreferences("Cookie", Context.MODE_PRIVATE);
         if (sp.contains("name")) {
             ((TextView) findViewById(R.id.USERNAME)).setText(sp.getString("name", ""));
             final String nu = sp.getString("qq", "");
-            BitmapUtils bu=new BitmapUtils();
-            Handler hl=new Handler() {
+            BitmapUtils bu = new BitmapUtils();
+            Handler hl = new Handler() {
                 @Override
                 public void handleMessage(Message msg) {
                     RoundedBitmapDrawable RBD = RoundedBitmapDrawableFactory.create(getResources(), (Bitmap) msg.obj);
@@ -288,7 +290,7 @@ public class MainActivity extends AppCompatActivity {
                     ((ImageView) findViewById(R.id.USERTX)).setImageDrawable(RBD);
                 }
             };
-            bu.disPlay(hl,"http://q2.qlogo.cn/headimg_dl?bs=qq&dst_uin=" + nu + "&spec=100");
+            bu.disPlay(hl, "http://q2.qlogo.cn/headimg_dl?bs=qq&dst_uin=" + nu + "&spec=100");
             Settings.qq = nu;
         }
     }
@@ -309,8 +311,8 @@ public class MainActivity extends AppCompatActivity {
                         try {
                             StatService.onEvent(MainActivity.this, "tw_Login", "活跃用户", 1);
                             final String nu = qq.getText().toString();
-                            BitmapUtils bu=new BitmapUtils();
-                            Handler hl=new Handler() {
+                            BitmapUtils bu = new BitmapUtils();
+                            Handler hl = new Handler() {
                                 @Override
                                 public void handleMessage(Message msg) {
                                     RoundedBitmapDrawable RBD = RoundedBitmapDrawableFactory.create(getResources(), (Bitmap) msg.obj);
@@ -318,7 +320,7 @@ public class MainActivity extends AppCompatActivity {
                                     ((ImageView) findViewById(R.id.USERTX)).setImageDrawable(RBD);
                                 }
                             };
-                            bu.disPlay(hl,"http://q2.qlogo.cn/headimg_dl?bs=qq&dst_uin=" + nu + "&spec=100");
+                            bu.disPlay(hl, "http://q2.qlogo.cn/headimg_dl?bs=qq&dst_uin=" + nu + "&spec=100");
                             HttpHelper.GetWeb(new Handler() {
                                 @Override
                                 public void handleMessage(Message msg) {
@@ -334,7 +336,7 @@ public class MainActivity extends AppCompatActivity {
                                             editor.putString("name", name);
                                             editor.commit();
                                             Settings.qq = qq.getText().toString();
-                                            restartApplication();
+                                            SetTitle();
                                             break;
                                         default:
                                             break;
@@ -352,6 +354,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ImageButton PlayBottom_ControlBtn;
     private ImageButton MButton;
+
     public void LoadMusicControls() {
 ///播放回调
         Settings.Callback_PlayMusic = new Handler() {
@@ -369,10 +372,10 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         //Notification控制回调
-        Settings.ACTIONCALLBACK=new Handler(){
+        Settings.ACTIONCALLBACK = new Handler() {
             @Override
-            public void handleMessage(Message msg){
-                String code=msg.obj.toString();
+            public void handleMessage(Message msg) {
+                String code = msg.obj.toString();
                 switch (code) {
                     case InfoHelper.NotificationBCR.ACTION_LAST:
                         Music_Last();
@@ -386,11 +389,38 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         };
+        ///Audio回调
+        AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        audioManager.requestAudioFocus(new AudioManager.OnAudioFocusChangeListener() {
+                                           @Override
+                                           public void onAudioFocusChange(int i) {
+                                               switch (i) {
+                                                   case AudioManager.AUDIOFOCUS_GAIN:
+                                                       if (isplaying) {
+                                                           Settings.mp.start();
+                                                           Settings.mp.setVolume(1.0f, 1.0f);
+                                                       }
+                                                       break;
+                                                   case AudioManager.AUDIOFOCUS_LOSS:
+                                                       if (isplaying) Settings.mp.stop();
+                                                       break;
+                                                   case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
+                                                       if (isplaying) Settings.mp.pause();
+                                                       break;
+                                                   case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
+                                                       if (isplaying) Settings.mp.setVolume(0.1f, 0.1f);
+                                                       break;
+                                               }
+
+                                           }
+                                       }, AudioManager.STREAM_MUSIC,
+                AudioManager.AUDIOFOCUS_GAIN);
 ///一些控件
+        MseekBar = findViewById(R.id.MusicSeek);
         lrcBig = findViewById(R.id.lrc);
         PlayBottom_ControlBtn = findViewById(R.id.PlayBottom_ControlBtn);
         MButton = findViewById(R.id.MButton);
-        ((ImageView)findViewById(R.id.PlayBottom_img)).setImageDrawable(getResources().getDrawable(R.mipmap.ic_launcher_round));
+        ((ImageView) findViewById(R.id.PlayBottom_img)).setImageDrawable(getResources().getDrawable(R.mipmap.ic_launcher_round));
         Drawable playic = getResources().getDrawable(R.drawable.ic_playbtn);
         PlayBottom_ControlBtn.setImageDrawable(playic);
         MButton.setImageDrawable(playic);
@@ -416,20 +446,14 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                mp.seekTo(MseekBar.getProgress());
+                Settings.mp.seekTo(MseekBar.getProgress());
                 isChanging[0] = false;
             }
         });
         findViewById(R.id.PlayBottom).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                View s = findViewById(R.id.LyricView);
-                s.setVisibility(View.VISIBLE);
-                ObjectAnimator animator = ObjectAnimator.ofFloat(s, "translationY", 1200f, 0f);
-                animator.setDuration(200);
-                animator.start();
-                lrcBig.initEntryList();
-                lrcBig.initNextTime();
+                Music_ShowLrc();
             }
         });
         findViewById(R.id.M_back).setOnClickListener(new View.OnClickListener() {
@@ -484,42 +508,45 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void Updata(){
-        HashMap<String,String> data=new HashMap<>();
-        data.put("Accept","text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
-        data.put("Accept-Language","zh-CN,zh;q=0.9");
-        data.put("Cache-Control","max-age=0");
-        data.put("Connection","keep-alive");
-        data.put("Host","coding.net");
-        data.put("Referer","https://coding.net/u/twilightlemon/p/Updata/git/blob/master/AndroidUpdata.json");
-        data.put("Upgrade-Insecure-Requests","1");
-        data.put("User-Agent","Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36");
-        HttpHelper.GetWeb(new Handler(){
+    public void Updata() {
+        HashMap<String, String> data = new HashMap<>();
+        data.put("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
+        data.put("Accept-Language", "zh-CN,zh;q=0.9");
+        data.put("Cache-Control", "max-age=0");
+        data.put("Connection", "keep-alive");
+        data.put("Host", "coding.net");
+        data.put("Referer", "https://coding.net/u/twilightlemon/p/Updata/git/blob/master/AndroidUpdata.json");
+        data.put("Upgrade-Insecure-Requests", "1");
+        data.put("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36");
+        HttpHelper.GetWeb(new Handler() {
             @Override
-            public void handleMessage(Message msg){
+            public void handleMessage(Message msg) {
                 try {
                     JSONObject o = new JSONObject(msg.obj.toString());
                     if (Integer.parseInt(o.getString("version").replace(".", "")) > MainActivity.this.getPackageManager().
                             getPackageInfo(MainActivity.this.getPackageName(), 0).versionCode) {
-                        final TextView tv=new TextView(MainActivity.this);
-                        tv.setText("       新版本:"+o.getString("version")+"\n"+o.getString("description"));
+                        final TextView tv = new TextView(MainActivity.this);
+                        tv.setText("新版本:" + o.getString("version") + "\n" + o.getString("description").replace("@32","\n"));
                         final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
                         builder.setTitle("小萌有新版本啦").setView(tv)
                                 .setNegativeButton("关闭", null);
                         builder.setPositiveButton("更新", new DialogInterface.OnClickListener() {
                             @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
                             public void onClick(DialogInterface dialog, int which) {
+                                StatService.onEvent(MainActivity.this, "tw_updata", "更新数",1);
                                 Intent intent = new Intent();
                                 intent.setAction("android.intent.action.VIEW");
                                 Uri content_url = Uri.parse("https://coding.net/u/twilightlemon/p/Updata/git/raw/master/app-release.apk");
                                 intent.setData(content_url);
                                 startActivity(intent);
-                            }});
+                            }
+                        });
                         builder.show();
                     }
-                }catch (Exception e){}
+                } catch (Exception e) {
+                }
             }
-        },"https://coding.net/u/twilightlemon/p/Updata/git/raw/master/AndroidUpdata.json",data);
+        }, "https://coding.net/u/twilightlemon/p/Updata/git/raw/master/AndroidUpdata.json", data);
     }
 
     public void OnShareClick(View view) {
@@ -535,9 +562,10 @@ public class MainActivity extends AppCompatActivity {
 
     private NotificationManager notificationManager = null;
     private InfoHelper.NotificationBCR myBroadcastReceiver = null;
-    private RemoteViews remoteViews=null;
-    private Notification notification=null;
-    public void LoadNotification(){
+    private RemoteViews remoteViews = null;
+    private Notification notification = null;
+
+    public void LoadNotification() {
         notificationManager = (NotificationManager)
                 getSystemService(Context.NOTIFICATION_SERVICE);
         myBroadcastReceiver = new InfoHelper().new NotificationBCR();
@@ -547,20 +575,23 @@ public class MainActivity extends AppCompatActivity {
         intentFilter.addAction(InfoHelper.NotificationBCR.ACTION_NEXT);
         registerReceiver(myBroadcastReceiver, intentFilter);
 
-        PendingIntent LASTPI = PendingIntent.getBroadcast(this, 0,new Intent(InfoHelper.NotificationBCR.ACTION_LAST), 0);
+        PendingIntent LASTPI = PendingIntent.getBroadcast(this, 0, new Intent(InfoHelper.NotificationBCR.ACTION_LAST), 0);
         PendingIntent PRESSPI = PendingIntent.getBroadcast(this, 0, new Intent(InfoHelper.NotificationBCR.ACTION_PRESS), 0);
         PendingIntent NEXTPI = PendingIntent.getBroadcast(this, 0, new Intent(InfoHelper.NotificationBCR.ACTION_NEXT), 0);
+        PendingIntent ALLSHOWPI = PendingIntent.getActivity(this, 0,new Intent(this, MainActivity.class), 0);
         remoteViews = new RemoteViews(getPackageName(), R.layout.notification);
-        remoteViews.setOnClickPendingIntent(R.id.Notification_LastBtn,LASTPI);
+        remoteViews.setOnClickPendingIntent(R.id.Notification_LastBtn, LASTPI);
         remoteViews.setOnClickPendingIntent(R.id.Notification_OpenBtn, PRESSPI);
         remoteViews.setOnClickPendingIntent(R.id.Notification_NextBtn, NEXTPI);
-        remoteViews.setImageViewResource(R.id.Notification_OpenBtn,R.drawable.ic_not_open);
+        remoteViews.setOnClickPendingIntent(R.id.Notification_Layout, ALLSHOWPI);
+        remoteViews.setImageViewResource(R.id.Notification_OpenBtn, R.drawable.ic_not_open);
 
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this);
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel("MusicControl", "控制音乐播放", NotificationManager.IMPORTANCE_HIGH);
-        notificationManager.createNotificationChannel(channel);
-        mBuilder.setChannelId("MusicControl");
+            NotificationChannel channel = new NotificationChannel("MusicControl", "控制音乐播放", NotificationManager.IMPORTANCE_LOW);
+            channel.setSound(null, null);
+            notificationManager.createNotificationChannel(channel);
+            mBuilder.setChannelId("MusicControl");
         }
         notification = mBuilder
                 .setContentTitle("Lemon App")
@@ -575,8 +606,8 @@ public class MainActivity extends AppCompatActivity {
         notificationManager.notify(2, notification);
     }
 
-    public void Music_Last(){
-        if(Settings.ListData.name!="Radio") {
+    public void Music_Last() {
+        if (Settings.ListData.name != "Radio") {
             if (PlayListIndex == 0)
                 PlayListIndex = Settings.ListData.Data.size() - 1;
             else --PlayListIndex;
@@ -584,22 +615,23 @@ public class MainActivity extends AppCompatActivity {
             PlayMusic();
         }
     }
-    public void Music_Next(){
-        if(Settings.ListData.name=="Radio") {
+
+    public void Music_Next() {
+        if (Settings.ListData.name == "Radio") {
             MusicLib.GetRadioMusicById(Settings.ListData.id, new Handler() {
                 @Override
                 public void handleMessage(Message msg) {
                     PlayListIndex = 0;
                     InfoHelper.MusicGData GData = new InfoHelper().new MusicGData();
                     GData.Data.add((InfoHelper.Music) msg.obj);
-                    GData.name="Radio";
-                    GData.id=Settings.ListData.id;
+                    GData.name = "Radio";
+                    GData.id = Settings.ListData.id;
                     Settings.ListData = GData;
                     Musicdt = Settings.ListData.Data.get(PlayListIndex);
                     PlayMusic();
                 }
             });
-        }else {
+        } else {
             if (PlayListIndex == Settings.ListData.Data.size() - 1)
                 PlayListIndex = 0;
             else ++PlayListIndex;
@@ -608,22 +640,32 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void Music_Press(){
+    public void Music_Press() {
         Drawable ic = null;
         if (isplaying) {
             ic = getResources().getDrawable(R.drawable.ic_playbtn);
-            remoteViews.setImageViewResource(R.id.Notification_OpenBtn,R.drawable.ic_not_open);
+            remoteViews.setImageViewResource(R.id.Notification_OpenBtn, R.drawable.ic_not_open);
             isplaying = false;
-            mp.pause();
+            Settings.mp.pause();
         } else {
             ic = getResources().getDrawable(R.drawable.ic_unplaybtn);
-            remoteViews.setImageViewResource(R.id.Notification_OpenBtn,R.drawable.ic_not_stop);
+            remoteViews.setImageViewResource(R.id.Notification_OpenBtn, R.drawable.ic_not_stop);
             isplaying = true;
-            mp.start();
+            Settings.mp.start();
         }
         PlayBottom_ControlBtn.setImageDrawable(ic);
         MButton.setImageDrawable(ic);
         notificationManager.notify(2, notification);
+    }
+
+    public void Music_ShowLrc() {
+        View s = findViewById(R.id.LyricView);
+        s.setVisibility(View.VISIBLE);
+        ObjectAnimator animator = ObjectAnimator.ofFloat(s, "translationY", 1200f, 0f);
+        animator.setDuration(200);
+        animator.start();
+        lrcBig.initEntryList();
+        lrcBig.initNextTime();
     }
 
     ///////加载区end//////
@@ -642,12 +684,7 @@ public class MainActivity extends AppCompatActivity {
                 .setAction("Loading...", null).show();
     }
 
-    private void restartApplication() {
-        final Intent intent = getPackageManager().getLaunchIntentForPackage(getPackageName());
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(intent);
-    }
-    public static void SendMessageBox(String msg,Context context) {
+    public static void SendMessageBox(String msg, Context context) {
         AlertDialog.Builder dlg = new AlertDialog.Builder(context);
         dlg.setTitle("提示");
         dlg.setMessage(msg);

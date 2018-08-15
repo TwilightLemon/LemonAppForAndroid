@@ -21,12 +21,14 @@ package tk.twilightlemon.lemonapp.Helpers;
  *          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
  *                     佛祖保佑        永无BUG
 */
+import android.media.MediaPlayer;
 import android.os.Handler;
 
 import java.util.ArrayList;
 
 public class Settings {
     public static String qq="";
+    public static MediaPlayer mp = new MediaPlayer();
     public static ArrayList<InfoHelper.MusicGData> data=new ArrayList<>();
     public static InfoHelper.MusicGData ListData=new InfoHelper().new MusicGData();
     public static Handler Callback_PlayMusic=null;

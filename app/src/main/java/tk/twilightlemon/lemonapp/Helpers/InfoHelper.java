@@ -32,6 +32,8 @@ import android.widget.ListAdapter;
 
 import java.util.ArrayList;
 
+import tk.twilightlemon.lemonapp.layouts.MainActivity;
+
 public class InfoHelper {
     public class AdaptiveData{
         public AdaptiveData(){}
@@ -98,8 +100,8 @@ public class InfoHelper {
         @Override
         public void onReceive(Context context, Intent intent)
         {
-            Message msg=new Message();
-            msg.obj=intent.getAction();
+            Message msg = new Message();
+            msg.obj = intent.getAction();
             Settings.ACTIONCALLBACK.sendMessage(msg);
         }
     }
