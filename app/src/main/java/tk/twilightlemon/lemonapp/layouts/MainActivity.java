@@ -383,14 +383,14 @@ public class MainActivity extends AppCompatActivity {
                                            public void onAudioFocusChange(int i) {
                                                switch (i) {
                                                    case AudioManager.AUDIOFOCUS_GAIN:
-                                                       Music_Press(true);
+                                                       Music_Press(false);
                                                        Settings.mp.setVolume(1.0f, 1.0f);
                                                        break;
                                                    case AudioManager.AUDIOFOCUS_LOSS:
-                                                       Music_Press(false);
+                                                       Music_Press(true);
                                                        break;
                                                    case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
-                                                       Music_Press(false);
+                                                       Music_Press(true);
                                                        break;
                                                    case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
                                                        if (isplaying) Settings.mp.setVolume(0.1f, 0.1f);
