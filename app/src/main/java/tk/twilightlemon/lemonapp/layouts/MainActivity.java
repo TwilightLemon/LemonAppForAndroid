@@ -57,7 +57,6 @@ import com.baidu.mobstat.StatService;
 
 import org.json.JSONObject;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -71,14 +70,13 @@ import tk.twilightlemon.lemonapp.Helpers.HttpHelper;
 import tk.twilightlemon.lemonapp.Helpers.InfoHelper;
 import tk.twilightlemon.lemonapp.Helpers.Lrc.LrcView;
 import tk.twilightlemon.lemonapp.Helpers.MusicLib;
-import tk.twilightlemon.lemonapp.MiuiUtils;
+import tk.twilightlemon.lemonapp.Helpers.MiuiUtils;
 import tk.twilightlemon.lemonapp.R;
 import tk.twilightlemon.lemonapp.Fragments.SecondFragment;
 import tk.twilightlemon.lemonapp.Helpers.Settings;
 
 public class MainActivity extends AppCompatActivity {
     private LrcView lrcBig = null;
-    private boolean isActive;
     private boolean isplaying = false;
     private int PlayListIndex = -1;
     private InfoHelper.Music Musicdt = null;
@@ -154,8 +152,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onResume() {
-        if (!isActive) {
-            isActive = true;
+        if (!Settings.isActive) {
+            Settings.isActive = true;
             Updata();
         }
         super.onResume();
@@ -164,7 +162,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         if (!isAppOnForeground())
-            isActive = false;
+            Settings.isActive = false;
         super.onStop();
     }
 
@@ -383,14 +381,18 @@ public class MainActivity extends AppCompatActivity {
                                            public void onAudioFocusChange(int i) {
                                                switch (i) {
                                                    case AudioManager.AUDIOFOCUS_GAIN:
-                                                       Music_Press(false);
-                                                       Settings.mp.setVolume(1.0f, 1.0f);
+                                                       if(isplaying) {
+                                                           Music_Press(false);
+                                                           Settings.mp.setVolume(1.0f, 1.0f);
+                                                       }
                                                        break;
                                                    case AudioManager.AUDIOFOCUS_LOSS:
-                                                       Music_Press(true);
+                                                       if(isplaying)
+                                                          Music_Press(true);
                                                        break;
                                                    case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
-                                                       Music_Press(true);
+                                                       if(isplaying)
+                                                          Music_Press(true);
                                                        break;
                                                    case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
                                                        if (isplaying) Settings.mp.setVolume(0.1f, 0.1f);
