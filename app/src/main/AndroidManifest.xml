@@ -4,15 +4,15 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.DISABLE_KEYGUAR"/>
 
-    <!--Baidu mtj 所使用的权限-->
+    <!--<editor-fold desc="Baidu mtj 所使用的权限">-->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.GET_TASKS" />
-    <uses-permission android:name="android.permission.BLUETOOTH" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!--</editor-fold>-->
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -20,40 +20,36 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <!--<editor-fold desc="百度app统计配置">-->
         <!-- Baidu mtj Key -->
         <meta-data
             android:name="BaiduMobAd_STAT_ID"
             android:value="e960f4591d" />
-
         <!-- 渠道商编号 -->
         <meta-data
             android:name="BaiduMobAd_CHANNEL"
             android:value="Baidu Market" />
-
         <!-- 是否开启错误日志统计-->
         <meta-data
             android:name="BaiduMobAd_EXCEPTION_LOG"
             android:value="true" />
-
         <!-- 日志仅在wifi网络下发送-->
         <meta-data
             android:name="BaiduMobAd_ONLY_WIFI"
             android:value="true" />
-
         <!-- 是否获取基站位置信息-->
         <meta-data
             android:name="BaiduMobAd_CELL_LOCATION"
             android:value="true" />
-
         <!-- 是否获取GPS位置信息-->
         <meta-data
             android:name="BaiduMobAd_GPS_LOCATION"
             android:value="true" />
-
         <!-- 是否获取WIFI位置信息-->
         <meta-data
             android:name="BaiduMobAd_WIFI_LOCATION"
             android:value="true" />
+        <!--</editor-fold>-->
 
         <activity android:name=".layouts.MainActivity"
             android:launchMode="singleTask">
@@ -65,6 +61,9 @@
         </activity>
         <activity android:name=".layouts.MusicListPage"></activity>
         <activity android:name=".layouts.Adaptivelayout"></activity>
+        <activity android:name=".layouts.KeepliveActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/KeepliveActivityStyle"></activity>
     </application>
 
 </manifest>

@@ -32,6 +32,7 @@ import android.widget.ListAdapter;
 
 import java.util.ArrayList;
 
+import tk.twilightlemon.lemonapp.layouts.KeepliveActivity;
 import tk.twilightlemon.lemonapp.layouts.MainActivity;
 
 public class InfoHelper {
@@ -43,7 +44,8 @@ public class InfoHelper {
         public ListAdapter CSData;
         public AdapterView.OnItemClickListener ListOnClick;
     }
-    ///音乐播放信息
+
+    //<editor-fold desc="音乐播放&显示列表所用的数据">
     public class Music {
         public Music() {
         }
@@ -54,8 +56,6 @@ public class InfoHelper {
         public String ImageUrl = "";
         public String GC = "";
     }
-
-    ///歌单列表数据
     public class MusicGData {
         public MusicGData() {
         }
@@ -66,31 +66,27 @@ public class InfoHelper {
         public String id = "";
         public String sub = "";
     }
-
-    ///排行版列表数据
     public class MusicTop {
         public String Name = "";
         public String Photo = "";
         public String ID = "";
         public ArrayList<Music> Data = new ArrayList<>();
     }
-
-    ///分类歌单ID
     public class MusicFLGDIndexItemsList {
         public ArrayList<MusicFLGDIndexItems> Data = new ArrayList<MusicFLGDIndexItems>();
     }
-
     public class MusicFLGDIndexItems {
         public String name;
         public String id;
     }
-
     public class SingerAndRadioData {
         public String name;
         public String url;
         public String id;
     }
+    //</editor-fold>
 
+    //<editor-fold desc="广播所使用的Receiver">
     public class NotificationBCR extends BroadcastReceiver {
 
         public static final String ACTION_LAST = "ACTION_LAST";
@@ -105,4 +101,21 @@ public class InfoHelper {
             Settings.ACTIONCALLBACK.sendMessage(msg);
         }
     }
+    public class KeepliveBCR extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
+                Intent it = new Intent(context, KeepliveActivity.class);
+                it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(it);
+            } else if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
+                context.sendBroadcast(new Intent("finish"));
+                Intent main = new Intent(Intent.ACTION_MAIN);
+                main.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                main.addCategory(Intent.CATEGORY_HOME);
+                context.startActivity(main);
+            }
+        }
+    }
+    //</editor-fold>
 }

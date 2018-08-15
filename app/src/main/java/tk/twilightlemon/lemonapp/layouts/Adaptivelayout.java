@@ -36,7 +36,6 @@ public class Adaptivelayout extends AppCompatActivity {
     }
 
     public void SetWindow() {
-/////配置沉浸式窗口
         getWindow().setSoftInputMode
                 (WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN |
                         WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);

@@ -19,7 +19,6 @@ import tk.twilightlemon.lemonapp.Helpers.Image.BitmapUtils;
 import tk.twilightlemon.lemonapp.Helpers.InfoHelper;
 import tk.twilightlemon.lemonapp.R;
 
-/////gd_list的适配器
 public class GDListAdapter extends BaseAdapter {
     private ArrayList<InfoHelper.MusicGData> mData = null;
     private LayoutInflater inflater = null;

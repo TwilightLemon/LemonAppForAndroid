@@ -1,76 +1,5 @@
 package tk.twilightlemon.lemonapp.Fragments;
-/**
- * _ooOoo_
- * o8888888o
- * 88" . "88
- * (| -_- |)
- * O\  =  /O
- * ____/`---'\____
- * .'  \\|     |//  `.
- * /  \\|||  :  |||//  \
- * /  _||||| -:- |||||-  \
- * |   | \\\  -  /// |   |
- * | \_|  ''\---/''  |   |
- * \  .-\__  `-`  ___/-. /
- * ___`. .'  /--.--\  `. . __
- * ."" '<  `.___\_<|>_/___.'  >'"".
- * | | :  `- \`.;`\ _ /`;.`/ - ` : | |
- * \  \ `-.   \_ __\ /__ _/   .-` /  /
- * ======`-.____`-.___\_____/___.-`____.-'======
- * `=---='
- * ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- * 佛祖保佑        永无BUG
- * <p>
- * *************************************************************
- * *
- * .=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-.       *
- * |                     ______                     |      *
- * |                  .-"      "-.                  |      *
- * |                 /            \                 |      *
- * |     _          |              |          _     |      *
- * |    ( \         |,  .-.  .-.  ,|         / )    |      *
- * |     > "=._     | )(__/  \__)( |     _.=" <     |      *
- * |    (_/"=._"=._ |/     /\     \| _.="_.="\_)    |      *
- * |           "=._"(_     ^^     _)"_.="           |      *
- * |               "=\__|IIIIII|__/="               |      *
- * |              _.="| \IIIIII/ |"=._              |      *
- * |    _     _.="_.="\          /"=._"=._     _    |      *
- * |   ( \_.="_.="     `--------`     "=._"=._/ )   |      *
- * |    > _.="                            "=._ <    |      *
- * |   (_/                                    \_)   |      *
- * |                                                |      *
- * '-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='      *
- * *
- * NO BUG!                           *
- * *
- * *************************************************************
- */
-/**
- **************************************************************
- *                                                            *
- *   .=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-.       *
- *    |                     ______                     |      *
- *    |                  .-"      "-.                  |      *
- *    |                 /            \                 |      *
- *    |     _          |              |          _     |      *
- *    |    ( \         |,  .-.  .-.  ,|         / )    |      *
- *    |     > "=._     | )(__/  \__)( |     _.=" <     |      *
- *    |    (_/"=._"=._ |/     /\     \| _.="_.="\_)    |      *
- *    |           "=._"(_     ^^     _)"_.="           |      *
- *    |               "=\__|IIIIII|__/="               |      *
- *    |              _.="| \IIIIII/ |"=._              |      *
- *    |    _     _.="_.="\          /"=._"=._     _    |      *
- *    |   ( \_.="_.="     `--------`     "=._"=._/ )   |      *
- *    |    > _.="                            "=._ <    |      *
- *    |   (_/                                    \_)   |      *
- *    |                                                |      *
- *    '-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='      *
- *                                                            *
- *                          NO BUG!                           *
- *                                                            *
- **************************************************************
- */
-
+import android.annotation.SuppressLint;
 import android.app.DownloadManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -125,8 +54,9 @@ public class FirstFragment extends Fragment {
 
     InfoHelper.MusicGData ListData = new InfoHelper().new MusicGData();
 
+    @SuppressLint("HandlerLeak")
     public void LoadGDList(final ListView lv, final ListView slv) {
-        final HashMap<String, String> data = new HashMap<String, String>();/////start   加载歌单列表
+        final HashMap<String, String> data = new HashMap<String, String>();
         data.put("Connection", "keep-alive");
         data.put("CacheControl", "max-age=0");
         data.put("Upgrade", "1");
@@ -146,7 +76,6 @@ public class FirstFragment extends Fragment {
                         Settings.data.clear();
                         try {
                             JSONObject jo = new JSONObject(json);
-////加载歌单列表
                             ArrayList<InfoHelper.MusicGData> data = new ArrayList<InfoHelper.MusicGData>();
                             int i = 0;
                             while (i < jo.getJSONObject("data").getJSONObject("mydiss").getJSONArray("list").length()) {
@@ -180,8 +109,10 @@ public class FirstFragment extends Fragment {
 /////end/////
     }
 
+    @SuppressLint("HandlerLeak")
     public void LoadLikeList(String id, final ListView lv) {
-        final HashMap<String, String> data = new HashMap<String, String>();/////start   加载歌单列表
+        /////TODO:start   加载我喜欢列表
+        final HashMap<String, String> data = new HashMap<String, String>();
         data.put("Connection", "keep-alive");
         data.put("CacheControl", "max-age=0");
         data.put("Upgrade", "1");
@@ -258,6 +189,7 @@ public class FirstFragment extends Fragment {
                 }
             }
         }, "https://c.y.qq.com/qzone/fcg-bin/fcg_ucc_getcdinfo_byids_cp.fcg?type=1&json=1&utf8=1&onlysong=0&disstid=" + id + "&format=json&g_tk=1157737156&loginUin={qq}&hostUin=0&format=json&inCharset=utf8&outCharset=utf-8&notice=0&platform=yqq&needNewCode=0".replace("{qq}", Settings.qq), data);
+   ////END////
     }
 
     public void SetLikeList(ListView slv) {
@@ -296,22 +228,19 @@ public class FirstFragment extends Fragment {
     }
 
     public static void setListViewHeightBasedOnChildren(ListView listView) {
-//获取ListView对应的Adapter
         android.widget.ListAdapter listAdapter = listView.getAdapter();
-        if (listAdapter == null) {
-// pre-condition
-            return;
-        }
-        int totalHeight = 0;
-        if(listAdapter.getCount()!=0) {
-            View listItem = listAdapter.getView(0, null, listView);
-            for (int i = 0, len = listAdapter.getCount(); i < len; i++) {
-                listItem.measure(0, 0);
-                totalHeight += listItem.getMeasuredHeight();
+        if (listAdapter != null) {
+            int totalHeight = 0;
+            if(listAdapter.getCount()!=0) {
+                View listItem = listAdapter.getView(0, null, listView);
+                for (int i = 0, len = listAdapter.getCount(); i < len; i++) {
+                    listItem.measure(0, 0);
+                    totalHeight += listItem.getMeasuredHeight();
+                }
             }
+            ViewGroup.LayoutParams params = listView.getLayoutParams();
+            params.height = totalHeight + (listView.getDividerHeight() * (listAdapter.getCount() - 1));
+            listView.setLayoutParams(params);
         }
-        ViewGroup.LayoutParams params = listView.getLayoutParams();
-        params.height = totalHeight + (listView.getDividerHeight() * (listAdapter.getCount() - 1));
-        listView.setLayoutParams(params);
     }
 }

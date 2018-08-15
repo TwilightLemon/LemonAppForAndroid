@@ -1,5 +1,6 @@
 package tk.twilightlemon.lemonapp.Adapters;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -50,11 +51,13 @@ public class TopItemsAdapter extends BaseAdapter {
         return position;
     }
 
+    @SuppressLint("HandlerLeak")
     private View makeItemView(final InfoHelper.MusicTop data) {
         final View itemView = inflater.inflate(R.layout.items_top, null);
         TextView tit = itemView.findViewById(R.id.top_title);
         tit.setText(data.Name);
         if (data.Data.size() == 0) {
+            //<editor-fold desc="Get Top MusicList By Id">
             HttpHelper.GetWeb(new Handler() {
                 @Override
                 public void handleMessage(Message msg) {
@@ -88,6 +91,7 @@ public class TopItemsAdapter extends BaseAdapter {
                     }
                 }
             }, "https://c.y.qq.com/v8/fcg-bin/fcg_v8_toplist_cp.fcg?tpl=3&page=detail&topid=" + data.ID + "&type=top&song_begin=0&song_num=30&g_tk=1206122277&loginUin=" + Settings.qq + "&hostUin=0&format=json&inCharset=utf8&outCharset=utf-8&notice=0&platform=yqq&needNewCode=0", null);
+            //</editor-fold>
         }
         final ImageView img = itemView.findViewById(R.id.top_image);
         BitmapUtils bu=new BitmapUtils();

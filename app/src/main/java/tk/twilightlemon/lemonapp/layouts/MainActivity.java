@@ -1,32 +1,10 @@
 package tk.twilightlemon.lemonapp.layouts;
-/**
- *                             _ooOoo_
- *                            o8888888o
- *                            88" . "88
- *                            (| -_- |)
- *                            O\  =  /O
- *                         ____/`---'\____
- *                       .'  \\|     |//  `.
- *                      /  \\|||  :  |||//  \
- *                     /  _||||| -:- |||||-  \
- *                     |   | \\\  -  /// |   |
- *                     | \_|  ''\---/''  |   |
- *                     \  .-\__  `-`  ___/-. /
- *                   ___`. .'  /--.--\  `. . __
- *                ."" '<  `.___\_<|>_/___.'  >'"".
- *               | | :  `- \`.;`\ _ /`;.`/ - ` : | |
- *               \  \ `-.   \_ __\ /__ _/   .-` /  /
- *          ======`-.____`-.___\_____/___.-`____.-'======
- *                             `=---='
- *          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- *                     佛祖保佑        永无BUG
-*/
-
 import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
+import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -93,17 +71,20 @@ import tk.twilightlemon.lemonapp.Helpers.HttpHelper;
 import tk.twilightlemon.lemonapp.Helpers.InfoHelper;
 import tk.twilightlemon.lemonapp.Helpers.Lrc.LrcView;
 import tk.twilightlemon.lemonapp.Helpers.MusicLib;
+import tk.twilightlemon.lemonapp.MiuiUtils;
 import tk.twilightlemon.lemonapp.R;
 import tk.twilightlemon.lemonapp.Fragments.SecondFragment;
 import tk.twilightlemon.lemonapp.Helpers.Settings;
 
 public class MainActivity extends AppCompatActivity {
-    private Bundle bundle = null;
     private LrcView lrcBig = null;
+    private boolean isActive;
     private boolean isplaying = false;
     private int PlayListIndex = -1;
     private InfoHelper.Music Musicdt = null;
     private SeekBar MseekBar = null;
+
+    //<editor-fold desc="播放Timer">
     private Handler mHandler = new Handler();
     private Runnable r = new Runnable() {
         @Override
@@ -149,23 +130,14 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     };
+    //</editor-fold>
 
     /////加载区/////
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        bundle = savedInstanceState;
-        //TODO:百度app统计
         StatService.start(this);
         Lv();
-        SetWindow();
-        Updata();
-        SetTitle();
-        LoadSettings();
-        SetLoginPage();
-        MainActivity.Loading(findViewById(R.id.USERTX));
-        LoadMusicControls();
-        LoadNotification();
     }
 
     @Override
@@ -178,6 +150,22 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
         return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    protected void onResume() {
+        if (!isActive) {
+            isActive = true;
+            Updata();
+        }
+        super.onResume();
+    }
+
+    @Override
+    protected void onStop() {
+        if (!isAppOnForeground())
+            isActive = false;
+        super.onStop();
     }
 
     int xhindex = 0;
@@ -362,7 +350,6 @@ public class MainActivity extends AppCompatActivity {
             public void handleMessage(Message msg) {
                 try {
                     if (((int) msg.obj) != -1) {
-//TODO:此处处理由MusicListPage传来的播放事件
                         PlayListIndex = (int) msg.obj;
                         Musicdt = Settings.ListData.Data.get(PlayListIndex);
                         PlayMusic();
@@ -381,7 +368,7 @@ public class MainActivity extends AppCompatActivity {
                         Music_Last();
                         break;
                     case InfoHelper.NotificationBCR.ACTION_PRESS:
-                        Music_Press();
+                        Music_Press(isplaying); isplaying=!isplaying;
                         break;
                     case InfoHelper.NotificationBCR.ACTION_NEXT:
                         Music_Next();
@@ -396,16 +383,14 @@ public class MainActivity extends AppCompatActivity {
                                            public void onAudioFocusChange(int i) {
                                                switch (i) {
                                                    case AudioManager.AUDIOFOCUS_GAIN:
-                                                       if (isplaying) {
-                                                           Settings.mp.start();
-                                                           Settings.mp.setVolume(1.0f, 1.0f);
-                                                       }
+                                                       Music_Press(true);
+                                                       Settings.mp.setVolume(1.0f, 1.0f);
                                                        break;
                                                    case AudioManager.AUDIOFOCUS_LOSS:
-                                                       if (isplaying) Settings.mp.stop();
+                                                       Music_Press(false);
                                                        break;
                                                    case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
-                                                       if (isplaying) Settings.mp.pause();
+                                                       Music_Press(false);
                                                        break;
                                                    case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
                                                        if (isplaying) Settings.mp.setVolume(0.1f, 0.1f);
@@ -427,7 +412,7 @@ public class MainActivity extends AppCompatActivity {
         View.OnClickListener lister = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Music_Press();
+                Music_Press(isplaying);isplaying=!isplaying;
             }
         };
         PlayBottom_ControlBtn.setOnClickListener(lister);
@@ -499,13 +484,45 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void Lv() {
+        //TODO:GO TO HELL,MIUI!!!
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            SharedPreferences preferences = MainActivity.this.getSharedPreferences("Cookie", Context.MODE_PRIVATE);
+            final SharedPreferences.Editor editor = preferences.edit();
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE},
                         REQUEST_STORAGE_PERMISSION);
             }
+            if(MiuiUtils.isMIUI()) {
+                if (!preferences.contains("isLocked")) {
+                    final TextView tv = new TextView(MainActivity.this);
+                    tv.setText("#锁屏显示权限:由于MIUI系统限制，需要手动授权，此权限仅用于锁屏下正常播放");
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                    builder.setTitle("需要新权限嘞(っ °Д °;)っ").setView(tv)
+                            .setNegativeButton("取消", null);
+                    builder.setPositiveButton("手动授权", new DialogInterface.OnClickListener() {
+                        @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
+                        public void onClick(DialogInterface dialog, int which) {
+                            StatService.onEvent(MainActivity.this, "tw_miui", "辣鸡MIUI使用人数", 1);
+                            sdm("请给予小萌“锁屏显示”权限(●'◡'●)", MainActivity.this);
+                            editor.putBoolean("isLocked", true);
+                            editor.commit();
+                            MiuiUtils.jumpToPermissionsEditorActivity(MainActivity.this);
+                        }
+                    });
+                    builder.show();
+                }
+            }
         }
+        SetWindow();
+        Updata();
+        SetTitle();
+        LoadSettings();
+        SetLoginPage();
+        MainActivity.Loading(findViewById(R.id.USERTX));
+        LoadMusicControls();
+        LoadNotification();
+        KeepLive();
     }
 
     public void Updata() {
@@ -640,17 +657,15 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void Music_Press() {
+    public void Music_Press(boolean isplay) {
         Drawable ic = null;
-        if (isplaying) {
+        if (isplay) {
             ic = getResources().getDrawable(R.drawable.ic_playbtn);
             remoteViews.setImageViewResource(R.id.Notification_OpenBtn, R.drawable.ic_not_open);
-            isplaying = false;
             Settings.mp.pause();
         } else {
             ic = getResources().getDrawable(R.drawable.ic_unplaybtn);
             remoteViews.setImageViewResource(R.id.Notification_OpenBtn, R.drawable.ic_not_stop);
-            isplaying = true;
             Settings.mp.start();
         }
         PlayBottom_ControlBtn.setImageDrawable(ic);
@@ -668,8 +683,35 @@ public class MainActivity extends AppCompatActivity {
         lrcBig.initNextTime();
     }
 
+    public void KeepLive(){
+        InfoHelper.KeepliveBCR keeplive =new InfoHelper().new KeepliveBCR();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction("android.intent.action.SCREEN_OFF");
+        intentFilter.addAction("android.intent.action.SCREEN_ON");
+        intentFilter.addAction("android.intent.action.USER_PRESENT");
+        registerReceiver(keeplive, intentFilter);
+    }
+
     ///////加载区end//////
 //////功能区//////
+    public boolean isAppOnForeground() {
+        ActivityManager activityManager = (ActivityManager) getApplicationContext().getSystemService(Context.ACTIVITY_SERVICE);
+        String packageName = getApplicationContext().getPackageName();
+        List<ActivityManager.RunningAppProcessInfo> appProcesses = activityManager
+                .getRunningAppProcesses();
+        if (appProcesses == null)
+            return false;
+
+        for (ActivityManager.RunningAppProcessInfo appProcess : appProcesses) {
+            if (appProcess.processName.equals(packageName)
+                    && appProcess.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public static String FindByAb(String all, String a, String b) {
         return all.substring(all.indexOf(a) + a.length(), all.indexOf(b));
     }
