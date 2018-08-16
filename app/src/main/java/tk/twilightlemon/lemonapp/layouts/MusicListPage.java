@@ -70,7 +70,6 @@ public class MusicListPage extends AppCompatActivity {
                     message.what = 0;
                     message.obj = position;
                     Settings.Callback_PlayMusic.sendMessage(message);
-                    finish();
                 }
             }
         });

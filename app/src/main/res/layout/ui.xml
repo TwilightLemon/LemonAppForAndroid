@@ -1,6 +1,124 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <!--PS: 本文件仅用于设计-->
-</LinearLayout>
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".layouts.MainActivity">
+    <include
+        android:id="@+id/LyricView"
+        layout="@layout/lyriclayout"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="106dp"
+        android:theme="@style/AppTheme.AppBarOverlay">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="106dp"
+                android:scaleType="centerCrop"
+                android:src="@mipmap/bg"
+                android:contentDescription="TODO" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="20dp">
+
+                <ImageView
+                    android:id="@+id/USERTX"
+                    android:layout_width="35dp"
+                    android:layout_height="56dp"
+                    android:layout_marginLeft="15dp"
+                    android:src="@drawable/ic_usertx" />
+
+                <TextView
+                    android:id="@+id/USERNAME"
+                    android:layout_width="fill_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginLeft="60dp"
+                    android:gravity="center_vertical"
+                    android:text="立即登录"
+                    android:textSize="16dp" />
+            </RelativeLayout>
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/view_pager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:baselineAligned="false"
+        android:layout_marginTop="106dp"
+        android:layout_marginBottom="50dp"/>
+
+    <RelativeLayout
+        android:id="@+id/PlayBottom"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:background="#fdfdfd"
+        android:layout_alignParentLeft="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#dcdcdc"/>
+        <ImageView
+            android:id="@+id/PlayBottom_img"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="5dp"
+            android:background="#00000000" />
+
+        <TextView
+            android:id="@+id/PlayBottom_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="70dp"
+            android:layout_marginTop="5dp"
+            android:ellipsize="marquee"
+            android:singleLine="true"
+            android:text="Title"
+            android:textColor="#0b0b0b"
+            android:textSize="15dip"
+            android:textStyle="bold"
+            android:typeface="sans" />
+
+        <TextView
+            android:id="@+id/PlayBottom_mss"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/PlayBottom_title"
+            android:layout_marginLeft="70dp"
+            android:ellipsize="marquee"
+            android:singleLine="true"
+            android:text="Mss"
+            android:textColor="#5b5b5b"
+            android:textSize="10dip" />
+
+        <ImageButton
+            android:id="@+id/PlayBottom_ControlBtn"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="30dp"
+            android:layout_marginRight="20dp"
+            android:background="#fdfdfd"
+            android:scaleType="fitCenter" />
+
+    </RelativeLayout>
+</RelativeLayout>

@@ -1,17 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".layouts.MainActivity">
-    <include
-        android:id="@+id/LyricView"
-        layout="@layout/lyriclayout"
-        android:visibility="gone" />
 
-    <android.support.design.widget.AppBarLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="106dp"
         android:theme="@style/AppTheme.AppBarOverlay">
@@ -74,20 +70,29 @@
 
         </RelativeLayout>
 
-    </android.support.design.widget.AppBarLayout>
+    </LinearLayout>
 
     <android.support.v4.view.ViewPager
         android:id="@+id/view_pager"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:baselineAligned="false"></android.support.v4.view.ViewPager>
+        android:layout_height="match_parent"
+        android:layout_marginTop="106dp"
+        android:layout_marginBottom="50dp"
+        android:baselineAligned="false" />
 
     <RelativeLayout
         android:id="@+id/PlayBottom"
         android:layout_width="match_parent"
-        android:background="#f1f1f1"
-        android:layout_height="50dp">
+        android:layout_height="50dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:background="#fdfdfd"
+        android:layout_alignParentLeft="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#dcdcdc"/>
 
         <ImageView
             android:id="@+id/PlayBottom_img"
@@ -131,9 +136,21 @@
             android:layout_centerVertical="true"
             android:layout_marginEnd="30dp"
             android:scaleType="fitCenter"
-            android:background="#f1f1f1"
+            android:background="#fdfdfd"
             android:layout_alignParentRight="true"
             android:layout_marginRight="20dp" />
 
     </RelativeLayout>
-</LinearLayout>
+
+    <include
+        android:id="@+id/MusicList"
+        layout="@layout/musiclist"
+        android:layout_marginBottom="50dp"
+        android:visibility="gone"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent" />
+    <include
+        android:id="@+id/LyricView"
+        layout="@layout/lyriclayout"
+        android:visibility="gone" />
+</RelativeLayout>

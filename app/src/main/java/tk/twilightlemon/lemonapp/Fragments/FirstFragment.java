@@ -35,6 +35,9 @@ import static android.content.Context.DOWNLOAD_SERVICE;
 
 //layout/first_fragment_layout.xml的交互逻辑
 public class FirstFragment extends Fragment {
+    private ArrayList<InfoHelper.MusicGData> GDdata=new ArrayList<>();
+    private ArrayList<InfoHelper.MusicGData> LikeGDdata=new ArrayList<>();
+
     public static Fragment newInstance() {
         FirstFragment fragment = new FirstFragment();
         return fragment;
@@ -45,13 +48,17 @@ public class FirstFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.first_fragment_layout, null);
         ListView lv = view.findViewById(R.id.gd_list);
+        ListView slvx = view.findViewById(R.id.likegd_list);
         ListView slv = view.findViewById(R.id.like_list);
         LoadGDList(lv, slv);
+        LoadILikeDissList(slvx);
         SetLikeList(slv);
+        SetLikegdList(slvx);
         SetgdList(lv);
         return view;
     }
 
+    //<editor-fold desc="加载数据">
     InfoHelper.MusicGData ListData = new InfoHelper().new MusicGData();
 
     @SuppressLint("HandlerLeak")
@@ -73,10 +80,9 @@ public class FirstFragment extends Fragment {
                 switch (msg.what) {
                     case 0:
                         String json = (String) msg.obj;
-                        Settings.data.clear();
+                        GDdata.clear();
                         try {
                             JSONObject jo = new JSONObject(json);
-                            ArrayList<InfoHelper.MusicGData> data = new ArrayList<InfoHelper.MusicGData>();
                             int i = 0;
                             while (i < jo.getJSONObject("data").getJSONObject("mydiss").getJSONArray("list").length()) {
                                 JSONArray ja = jo.getJSONObject("data").getJSONObject("mydiss").getJSONArray("list");
@@ -89,11 +95,10 @@ public class FirstFragment extends Fragment {
                                     df.pic = obj.getString("picurl");
                                 else
                                     df.pic = "https://y.gtimg.cn/mediastyle/global/img/cover_playlist.png?max_age=31536000";
-                                Settings.data.add(df);
-                                data.add(df);
+                                GDdata.add(df);
                                 i++;
                             }
-                            GDListAdapter ga = new GDListAdapter(getActivity(), data);
+                            GDListAdapter ga = new GDListAdapter(getActivity(), GDdata);
                             lv.setAdapter(ga);
                             setListViewHeightBasedOnChildren(lv);
                             LoadLikeList(jo.getJSONObject("data").getJSONArray("mymusic").getJSONObject(0).getString("id"), slv);
@@ -107,6 +112,35 @@ public class FirstFragment extends Fragment {
             }
         }, "https://c.y.qq.com/rsc/fcgi-bin/fcg_get_profile_homepage.fcg?loginUin={qq}&hostUin=0&format=json&inCharset=utf8&outCharset=utf-8&notice=0&platform=yqq&needNewCode=0&cid=205360838&ct=20&userid={qq}&reqfrom=1&reqtype=0".replace("{qq}", Settings.qq), data);
 /////end/////
+    }
+
+    public void LoadILikeDissList(final ListView lv){
+        HttpHelper.GetWeb(new Handler(){
+            @Override
+            public void handleMessage(Message msg){
+                try {
+                    JSONArray o=new JSONObject(msg.obj.toString()).getJSONObject("data").getJSONArray("cdlist");
+                    LikeGDdata.clear();
+                    int i = 0;
+                    while (i < o.length()) {
+                        JSONObject obj = o.getJSONObject(i);
+                        InfoHelper.MusicGData df = new InfoHelper().new MusicGData();
+                        df.id = obj.getString("dissid");
+                        df.sub ="创建者:"+obj.getString("nickname");
+                        df.name = obj.getString("dissname");
+                        if (obj.getString("logo").length()>10)
+                            df.pic = obj.getString("logo");
+                        else
+                            df.pic = "https://y.gtimg.cn/mediastyle/global/img/cover_playlist.png?max_age=31536000";
+                        LikeGDdata.add(df);
+                        i++;
+                    }
+                    GDListAdapter ga = new GDListAdapter(getActivity(), LikeGDdata);
+                    lv.setAdapter(ga);
+                    setListViewHeightBasedOnChildren(lv);
+                } catch (Exception e) {}
+            }
+        },"https://c.y.qq.com/fav/fcgi-bin/fcg_get_profile_order_asset.fcg?g_tk=1470138129&loginUin="+Settings.qq+"&hostUin=0&format=json&inCharset=utf8&outCharset=utf-8&notice=0&platform=yqq&needNewCode=0&ct=20&cid=205360956&userid="+Settings.qq+"&reqtype=3&sin=0&ein=25",null);
     }
 
     @SuppressLint("HandlerLeak")
@@ -191,7 +225,9 @@ public class FirstFragment extends Fragment {
         }, "https://c.y.qq.com/qzone/fcg-bin/fcg_ucc_getcdinfo_byids_cp.fcg?type=1&json=1&utf8=1&onlysong=0&disstid=" + id + "&format=json&g_tk=1157737156&loginUin={qq}&hostUin=0&format=json&inCharset=utf8&outCharset=utf-8&notice=0&platform=yqq&needNewCode=0".replace("{qq}", Settings.qq), data);
    ////END////
     }
+    //</editor-fold>
 
+    //<editor-fold desc="初始化控件">
     public void SetLikeList(ListView slv) {
         slv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -212,10 +248,21 @@ public class FirstFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position,
                                     long id) {
-                MusicLib.GetGDbyID(Settings.data.get(position), getActivity());
+                MusicLib.GetGDbyID(GDdata.get(position), getActivity());
             }
         });
     }
+
+    public void SetLikegdList(ListView lv) {
+        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position,
+                                    long id) {
+                MusicLib.GetGDbyID(LikeGDdata.get(position), getActivity());
+            }
+        });
+    }
+    //</editor-fold>
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {

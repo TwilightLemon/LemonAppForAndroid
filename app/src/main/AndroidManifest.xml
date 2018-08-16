@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="tk.twilightlemon.lemonapp">
+
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
@@ -59,9 +60,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".layouts.MusicListPage"></activity>
-        <activity android:name=".layouts.Adaptivelayout"></activity>
-        <activity android:name=".layouts.KeepliveActivity"
+        <activity android:name=".layouts.Adaptivelayout" />
+        <activity
+            android:name=".layouts.KeepliveActivity"
             android:screenOrientation="portrait"
             android:excludeFromRecents="true"
             android:exported="false"
@@ -69,7 +70,7 @@
             android:launchMode="singleInstance"
             android:process=":main"
             android:theme="@style/KeepliveActivityStyle"
-            android:configChanges="keyboardHidden|orientation|screenSize"></activity>
+            android:configChanges="keyboardHidden|orientation|screenSize" />
     </application>
 
 </manifest>

@@ -13,7 +13,6 @@ public class Settings {
     //</editor-fold>
 
     //<editor-fold desc="一些跳转数据">
-    public static ArrayList<InfoHelper.MusicGData> data=new ArrayList<>();
     public static InfoHelper.MusicGData ListData=new InfoHelper().new MusicGData();
     public static InfoHelper.AdaptiveData AdapData=new InfoHelper().new AdaptiveData();
     //</editor-fold>

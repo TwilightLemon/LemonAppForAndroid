@@ -159,7 +159,7 @@ public class MusicLib {
         return str.replace("&apos;", "'").replace("&nbsp;", " ");
     }
 
-    public static void Search(final Activity activity, final String text) {
+    public static void Search(final MainActivity activity, final String text) {
         try {
             String url = "http://59.37.96.220/soso/fcgi-bin/client_search_cp?format=json&t=0&inCharset=GB2312&outCharset=utf-8&qqmusic_ver=1302&catZhida=0&p=1&n=20&w=" + URLEncoder.encode(text, "utf-8") + "&flag_qc=0&remoteplace=sizer.newclient.song&new_json=1&lossless=0&aggr=1&cr=1&sem=0&force_zonghe=0";
             HttpHelper.GetWeb(new Handler() {
@@ -186,9 +186,8 @@ public class MusicLib {
                         }
                         if(Data.Data.size()!=0){
                         Settings.ListData = Data;
-                        Intent intent = new Intent(activity, MusicListPage.class);
-                        activity.startActivityForResult(intent, 1000);}else{
-                            MainActivity.SendMessageBox("什么都没有搜索到哦o(≧口≦)o",activity);
+                        activity.MusicListShow();}else{
+                            MainActivity.SendMessageBox("什么都没有找到哦o(≧口≦)o",activity);
                         }
                     } catch (Exception e) {
                     }
@@ -302,8 +301,7 @@ public class MusicLib {
                                 }
                                 i++;
                             }
-                            Intent intent = new Intent(act, MusicListPage.class);
-                            act.startActivityForResult(intent, 1000);
+                            ((MainActivity)act).MusicListShow();
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }

@@ -31,11 +31,10 @@ import tk.twilightlemon.lemonapp.Adapters.TopItemsAdapter;
 import tk.twilightlemon.lemonapp.Helpers.HttpHelper;
 import tk.twilightlemon.lemonapp.Helpers.InfoHelper;
 import tk.twilightlemon.lemonapp.Helpers.MusicLib;
-import tk.twilightlemon.lemonapp.R;
 import tk.twilightlemon.lemonapp.Helpers.Settings;
+import tk.twilightlemon.lemonapp.R;
 import tk.twilightlemon.lemonapp.layouts.Adaptivelayout;
 import tk.twilightlemon.lemonapp.layouts.MainActivity;
-import tk.twilightlemon.lemonapp.layouts.MusicListPage;
 
 //layout/second_fragment_layout.xml的交互逻辑
 public class SecondFragment extends Fragment {
@@ -73,7 +72,7 @@ public class SecondFragment extends Fragment {
                 builder.setPositiveButton("搜索", new DialogInterface.OnClickListener() {
                     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
                     public void onClick(DialogInterface dialog, int which) {
-                        MusicLib.Search(getActivity(), qq.getText().toString());
+                        MusicLib.Search((MainActivity)getActivity(), qq.getText().toString());
                     }
                 });
                 builder.show();
@@ -129,8 +128,7 @@ public class SecondFragment extends Fragment {
                     dt.Data = dat.Data;
                     dt.name = dat.Name;
                     Settings.ListData = dt;
-                    Intent intent = new Intent(getActivity(), MusicListPage.class);
-                    getActivity().startActivityForResult(intent, 1000);
+                    ((MainActivity)getActivity()).MusicListShow();
                 }
             });
         }
@@ -292,7 +290,7 @@ public class SecondFragment extends Fragment {
                         aData.ListOnClick = new AdapterView.OnItemClickListener() {
                             @Override
                             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                                MusicLib.Search(getActivity(), SingerData.get(i).name);
+                                MusicLib.Search((MainActivity) getActivity(), SingerData.get(i).name);
                             }
                         };
                         Settings.AdapData = aData;
@@ -369,7 +367,7 @@ public class SecondFragment extends Fragment {
                 MusicLib.GetSingerByTag("all_all_all", new Handler() {
                     @Override
                     public void handleMessage(Message msg) {
-                        MusicLib.Search(getActivity(), ((ArrayList<InfoHelper.SingerAndRadioData>) msg.obj).get(i).name);
+                        MusicLib.Search((MainActivity) getActivity(), ((ArrayList<InfoHelper.SingerAndRadioData>) msg.obj).get(i).name);
                     }
                 }, 4);
             }
