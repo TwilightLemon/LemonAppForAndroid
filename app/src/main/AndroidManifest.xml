@@ -63,7 +63,13 @@
         <activity android:name=".layouts.Adaptivelayout"></activity>
         <activity android:name=".layouts.KeepliveActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/KeepliveActivityStyle"></activity>
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:finishOnTaskLaunch="false"
+            android:launchMode="singleInstance"
+            android:process=":main"
+            android:theme="@style/KeepliveActivityStyle"
+            android:configChanges="keyboardHidden|orientation|screenSize"></activity>
     </application>
 
 </manifest>
