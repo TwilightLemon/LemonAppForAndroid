@@ -81,12 +81,17 @@ import tk.twilightlemon.lemonapp.Helpers.Settings;
 
 public class MainActivity extends AppCompatActivity {
     //<editor-fold desc="常量">
+    private InfoHelper.KeepliveBCR keeplive=null;
+
     private int REQUEST_STORAGE_PERMISSION = 1;
 
     private boolean isplaying = false;
     private int xhindex = 0;
     private int PlayListIndex = -1;
-    private InfoHelper.Music Musicdt = null;
+    private InfoHelper.Music Musicdt = new InfoHelper().new Music();
+
+    private SharedPreferences musicPlayerSP = null;
+    private SharedPreferences.Editor mSP = null;
     //</editor-fold>
 
     //<editor-fold desc="控件">
@@ -128,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
                                 GData.id = Settings.ListData.id;
                                 Settings.ListData = GData;
                                 Musicdt = Settings.ListData.Data.get(PlayListIndex);
-                                PlayMusic();
+                                PlayMusic(true,0);
                             }
                         });
                     } else {
@@ -136,16 +141,18 @@ public class MainActivity extends AppCompatActivity {
                             PlayListIndex = 0;
                         else ++PlayListIndex;
                         Musicdt = Settings.ListData.Data.get(PlayListIndex);
-                        PlayMusic();
+                        PlayMusic(true,0);
                     }
                 } else {
                     Musicdt = Settings.ListData.Data.get(PlayListIndex);
-                    PlayMusic();
+                    PlayMusic(true,0);
                 }
             } else {
                 try {
                     int in = Settings.mp.getCurrentPosition();
                     MseekBar.setProgress(in);
+                    mSP.putInt("NowDuration",in);
+                    mSP.commit();
                     if (findViewById(R.id.LyricView).getVisibility() == View.VISIBLE)
                         lrcBig.updateTime(in);
                     mHandler.postDelayed(this, 1000);
@@ -192,6 +199,14 @@ public class MainActivity extends AppCompatActivity {
             Settings.isActive = false;
         super.onStop();
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(keeplive);
+        unregisterReceiver(myBroadcastReceiver);
+        notificationManager.cancelAll();
+    }
     //</editor-fold>
 
     //<editor-fold desc="OnCreate方法集">
@@ -225,13 +240,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void LoadSettings() {
-//////读取设置
+        //////读取配置
         SharedPreferences sp = MainActivity.this.getSharedPreferences("Cookie", Context.MODE_PRIVATE);
         if (sp.contains("name")) {
             ((TextView) findViewById(R.id.USERNAME)).setText(sp.getString("name", ""));
             final String nu = sp.getString("qq", "");
             BitmapUtils bu = new BitmapUtils();
-            Handler hl = new Handler() {
+            @SuppressLint("HandlerLeak") Handler hl = new Handler() {
                 @Override
                 public void handleMessage(Message msg) {
                     RoundedBitmapDrawable RBD = RoundedBitmapDrawableFactory.create(getResources(), (Bitmap) msg.obj);
@@ -241,6 +256,18 @@ public class MainActivity extends AppCompatActivity {
             };
             bu.disPlay(hl, "http://q2.qlogo.cn/headimg_dl?bs=qq&dst_uin=" + nu + "&spec=100");
             Settings.qq = nu;
+        }
+
+        //读取上次播放
+        musicPlayerSP = MainActivity.this.getSharedPreferences("MusicPlayer", Context.MODE_PRIVATE);
+        mSP = musicPlayerSP.edit();
+        if(musicPlayerSP.contains("MusicName")){
+            Musicdt.MusicName=musicPlayerSP.getString("MusicName","");
+            Musicdt.Singer=musicPlayerSP.getString("Singer","");
+            Musicdt.MusicID=musicPlayerSP.getString("MusicID","");
+            Musicdt.ImageUrl=musicPlayerSP.getString("ImageUrl","");
+            Musicdt.GC=musicPlayerSP.getString("GC","");
+            PlayMusic(false,musicPlayerSP.getInt("NowDuration",0));
         }
     }
 
@@ -311,7 +338,7 @@ public class MainActivity extends AppCompatActivity {
                     if (((int) msg.obj) != -1) {
                         PlayListIndex = (int) msg.obj;
                         Musicdt = Settings.ListData.Data.get(PlayListIndex);
-                        PlayMusic();
+                        PlayMusic(true,0);
                     }
                 } catch (Exception e) {
                 }
@@ -380,7 +407,7 @@ public class MainActivity extends AppCompatActivity {
         //<editor-fold desc="初始内容&事件">
         ((ImageView) findViewById(R.id.PlayBottom_img)).setImageDrawable(getResources().getDrawable(R.mipmap.ic_launcher_round));
         Drawable playic = getResources().getDrawable(R.drawable.ic_playbtn);
-        PlayBottom_ControlBtn.setImageDrawable(playic);
+        PlayBottom_ControlBtn.setImageDrawable(getResources().getDrawable(R.drawable.ic_bom_play));
         MButton.setImageDrawable(playic);
         View.OnClickListener lister = new View.OnClickListener() {
             @Override
@@ -446,6 +473,12 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+        findViewById(R.id.musiclistBtn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                MusicListShow();
+            }
+        });
         //</editor-fold>
     }
 
@@ -483,10 +516,10 @@ public class MainActivity extends AppCompatActivity {
         SetWindow();
         Updata();
         SetTitle();
-        LoadSettings();
         SetLoginPage();
         MainActivity.Loading(findViewById(R.id.USERTX));
         LoadMusicControls();
+        LoadSettings();
         LoadNotification();
         KeepLive();
     }
@@ -584,7 +617,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void KeepLive() {
-        InfoHelper.KeepliveBCR keeplive = new InfoHelper().new KeepliveBCR();
+        keeplive = new InfoHelper().new KeepliveBCR();
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction("android.intent.action.SCREEN_OFF");
         intentFilter.addAction("android.intent.action.SCREEN_ON");
@@ -600,7 +633,7 @@ public class MainActivity extends AppCompatActivity {
                 PlayListIndex = Settings.ListData.Data.size() - 1;
             else --PlayListIndex;
             Musicdt = Settings.ListData.Data.get(PlayListIndex);
-            PlayMusic();
+            PlayMusic(true,0);
         }
     }
 
@@ -616,7 +649,7 @@ public class MainActivity extends AppCompatActivity {
                     GData.id = Settings.ListData.id;
                     Settings.ListData = GData;
                     Musicdt = Settings.ListData.Data.get(PlayListIndex);
-                    PlayMusic();
+                    PlayMusic(true,0);
                 }
             });
         } else {
@@ -624,22 +657,25 @@ public class MainActivity extends AppCompatActivity {
                 PlayListIndex = 0;
             else ++PlayListIndex;
             Musicdt = Settings.ListData.Data.get(PlayListIndex);
-            PlayMusic();
+            PlayMusic(true,0);
         }
     }
 
     public void Music_Press(boolean isplay) {
         Drawable ic = null;
+        Drawable ic_bom = null;
         if (isplay) {
             ic = getResources().getDrawable(R.drawable.ic_playbtn);
+            ic_bom = getResources().getDrawable(R.drawable.ic_bom_play);
             remoteViews.setImageViewResource(R.id.Notification_OpenBtn, R.drawable.ic_not_open);
             Settings.mp.pause();
         } else {
             ic = getResources().getDrawable(R.drawable.ic_unplaybtn);
+            ic_bom = getResources().getDrawable(R.drawable.ic_bom_unplay);
             remoteViews.setImageViewResource(R.id.Notification_OpenBtn, R.drawable.ic_not_stop);
             Settings.mp.start();
         }
-        PlayBottom_ControlBtn.setImageDrawable(ic);
+        PlayBottom_ControlBtn.setImageDrawable(ic_bom);
         MButton.setImageDrawable(ic);
         notificationManager.notify(2, notification);
     }
@@ -671,58 +707,57 @@ public class MainActivity extends AppCompatActivity {
     //</editor-fold>
 
     //<editor-fold desc="MusicList">
+    public void MusicListLoad(){
+        MusicList_title.setText(Settings.ListData.name);
+        MusicListAdapter ad = new MusicListAdapter(MainActivity.this, Settings.ListData, new View.OnClickListener() {
+            @SuppressLint("HandlerLeak")
+            @Override
+            public void onClick(View view) {
+                try {
+                    RelativeLayout PATENT = (RelativeLayout) view.getParent();
+                    int index = Integer.parseInt(((TextView) PATENT.findViewById(R.id.MusicList_index)).getText().toString());
+                    final InfoHelper.Music Data = Settings.ListData.Data.get(index);
+                    String MusicID = Data.MusicID;
+                    MusicLib.GetUrl(MusicID, new Handler() {
+                        @Override
+                        public void handleMessage(Message msg) {
+                            String name = (Data.MusicName + "-" + Data.Singer + ".mp3").replace("\\", "").replace("/", "");
+                            DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+                            DownloadManager.Request request = new
+                                    DownloadManager.Request(Uri.parse(msg.obj.toString()));
+                            request.setDestinationInExternalPublicDir("LemonApp/MusicDownload", name);
+                            request.setTitle(name);
+                            request.setDescription("小萌音乐正在下载中");
+                            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                            downloadManager.enqueue(request);
+                            MainActivity.sdm("正在下载:" + name, getApplicationContext());
+                        }
+                    });
+                } catch (Exception ignored) {}
+            }
+        });
+        MusicList_list.setAdapter(ad);
+        FirstFragment.setListViewHeightBasedOnChildren(MusicList_list);
+        MusicList_list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if (position != -1) {
+                    Message message = new Message();
+                    message.what = 0;
+                    message.obj = position;
+                    Settings.Callback_PlayMusic.sendMessage(message);
+                }
+            }
+        });
+        MusicListShow();
+    }
+
     public void MusicListShow(){
         MusicList.setVisibility(View.VISIBLE);
         lyricView.setVisibility(View.GONE);
         ObjectAnimator animator = ObjectAnimator.ofFloat(MusicList, "translationY", 1200f, 0f);
         animator.setDuration(200);
         animator.start();
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                MusicList_title.setText(Settings.ListData.name);
-                MusicListAdapter ad = new MusicListAdapter(MainActivity.this, Settings.ListData, new View.OnClickListener() {
-                    @SuppressLint("HandlerLeak")
-                    @Override
-                    public void onClick(View view) {
-                        try {
-                            RelativeLayout PATENT = (RelativeLayout) view.getParent();
-                            int index = Integer.parseInt(((TextView) PATENT.findViewById(R.id.MusicList_index)).getText().toString());
-                            final InfoHelper.Music Data = Settings.ListData.Data.get(index);
-                            String MusicID = Data.MusicID;
-                            MusicLib.GetUrl(MusicID, new Handler() {
-                                @Override
-                                public void handleMessage(Message msg) {
-                                    String name = (Data.MusicName + "-" + Data.Singer + ".mp3").replace("\\", "").replace("/", "");
-                                    DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
-                                    DownloadManager.Request request = new
-                                            DownloadManager.Request(Uri.parse(msg.obj.toString()));
-                                    request.setDestinationInExternalPublicDir("LemonApp/MusicDownload", name);
-                                    request.setTitle(name);
-                                    request.setDescription("小萌音乐正在下载中");
-                                    request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-                                    downloadManager.enqueue(request);
-                                    MainActivity.sdm("正在下载:" + name, getApplicationContext());
-                                }
-                            });
-                        } catch (Exception ignored) {}
-                    }
-                });
-                MusicList_list.setAdapter(ad);
-                FirstFragment.setListViewHeightBasedOnChildren(MusicList_list);
-                MusicList_list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        if (position != -1) {
-                            Message message = new Message();
-                            message.what = 0;
-                            message.obj = position;
-                            Settings.Callback_PlayMusic.sendMessage(message);
-                        }
-                    }
-                });
-            }
-        }, 300);
     }
 
     public void MusicListBack() {
@@ -767,20 +802,17 @@ public class MainActivity extends AppCompatActivity {
 
     //<editor-fold desc="一些方法">
     @SuppressLint("HandlerLeak")
-    public void PlayMusic() {
+    public void PlayMusic(final boolean isplay,final int ex) {
         StatService.onEvent(this, "tw_Play", "播放音乐", 1);
         MainActivity.Loading(findViewById(R.id.USERTX));
-        Settings.mp.stop();
         mHandler.removeCallbacks(r);
-        Settings.mp = new MediaPlayer();
+        if(isplay) {
+            Settings.mp.stop();
+            Settings.mp = new MediaPlayer();
+        }
         final ImageView PlayBottom_img = findViewById(R.id.PlayBottom_img);
         TextView PlayBottom_title = findViewById(R.id.PlayBottom_title);
         TextView PlayBottom_mss = findViewById(R.id.PlayBottom_mss);
-        ImageButton PlayBottom_ControlBtn = findViewById(R.id.PlayBottom_ControlBtn);
-        Drawable ic = getResources().getDrawable(R.drawable.ic_unplaybtn);
-        PlayBottom_ControlBtn.setImageDrawable(ic);
-        ImageButton MButton = findViewById(R.id.MButton);
-        MButton.setImageDrawable(ic);
         BitmapUtils bu = new BitmapUtils();
         Handler hl = new Handler() {
             @Override
@@ -808,7 +840,12 @@ public class MainActivity extends AppCompatActivity {
                     String url = msg.obj.toString();
                     Settings.mp.setDataSource(url);
                     Settings.mp.prepare();
-                    Settings.mp.start();
+                    if(isplay){
+                        Settings.mp.start();
+                        PlayBottom_ControlBtn.setImageDrawable(getResources().getDrawable(R.drawable.ic_bom_unplay));
+                        MButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_unplaybtn));
+                        remoteViews.setImageViewResource(R.id.Notification_OpenBtn, R.drawable.ic_not_stop);
+                        isplaying = true;}
                     MusicLib.GetMusicLyric(Musicdt.MusicID, lrcBig);
                     mHandler.postDelayed(r, 1000);
                     TextView Title = findViewById(R.id.MusicTitle);
@@ -817,10 +854,18 @@ public class MainActivity extends AppCompatActivity {
                     Mss.setText(Musicdt.Singer);
                     remoteViews.setTextViewText(R.id.Notification_SongName, Musicdt.MusicName);
                     remoteViews.setTextViewText(R.id.Notification_Singer, Musicdt.Singer);
-                    remoteViews.setImageViewResource(R.id.Notification_OpenBtn, R.drawable.ic_not_stop);
-                    isplaying = true;
                     notificationManager.notify(2, notification);
                     MseekBar.setMax(Settings.mp.getDuration());
+
+                    mSP.putString("MusicName",Musicdt.MusicName);
+                    mSP.putString("Singer",Musicdt.Singer);
+                    mSP.putString("MusicID",Musicdt.MusicID);
+                    mSP.putString("ImageUrl",Musicdt.ImageUrl);
+                    mSP.putString("GC",Musicdt.GC);
+                    mSP.commit();
+
+                    MseekBar.setProgress(ex);
+                    Settings.mp.seekTo(ex);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

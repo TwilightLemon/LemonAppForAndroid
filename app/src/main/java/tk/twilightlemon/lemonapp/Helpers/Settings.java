@@ -8,7 +8,6 @@ public class Settings {
     //<editor-fold desc="一些常量">
     public static String qq="";
     public static boolean isActive=true;
-    public static boolean isShowKeepLive=true;
     public static MediaPlayer mp = new MediaPlayer();
     //</editor-fold>
 

@@ -128,7 +128,7 @@ public class SecondFragment extends Fragment {
                     dt.Data = dat.Data;
                     dt.name = dat.Name;
                     Settings.ListData = dt;
-                    ((MainActivity)getActivity()).MusicListShow();
+                    ((MainActivity)getActivity()).MusicListLoad();
                 }
             });
         }

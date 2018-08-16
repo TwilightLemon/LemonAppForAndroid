@@ -126,7 +126,7 @@
                     android:layout_height="wrap_content" />
 
                 <ImageButton
-                    android:id="@+id/musiclike"
+                    android:id="@+id/musiclistBtn"
                     android:layout_width="25dp"
                     android:layout_height="25dp"
                     android:layout_alignBottom="@+id/MButton"
@@ -134,7 +134,7 @@
                     android:layout_marginLeft="40dp"
                     android:layout_toRightOf="@+id/musicnext"
                     android:background="#00000000"
-                    android:src="@drawable/ic_like" />
+                    android:src="@drawable/ic_musiclist" />
 
                 <ImageButton
                     android:id="@+id/musicxh"

@@ -1,20 +1,15 @@
 package tk.twilightlemon.lemonapp.Helpers;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
 import android.text.format.DateUtils;
 import android.util.Base64;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -27,7 +22,6 @@ import java.util.regex.Pattern;
 import tk.twilightlemon.lemonapp.Helpers.Lrc.LrcEntry;
 import tk.twilightlemon.lemonapp.Helpers.Lrc.LrcView;
 import tk.twilightlemon.lemonapp.layouts.MainActivity;
-import tk.twilightlemon.lemonapp.layouts.MusicListPage;
 
 public class MusicLib {
     public static void GetMusicLyric(String ID, final LrcView lrc) {
@@ -186,7 +180,7 @@ public class MusicLib {
                         }
                         if(Data.Data.size()!=0){
                         Settings.ListData = Data;
-                        activity.MusicListShow();}else{
+                        activity.MusicListLoad();}else{
                             MainActivity.SendMessageBox("什么都没有找到哦o(≧口≦)o",activity);
                         }
                     } catch (Exception e) {
@@ -301,7 +295,7 @@ public class MusicLib {
                                 }
                                 i++;
                             }
-                            ((MainActivity)act).MusicListShow();
+                            ((MainActivity)act).MusicListLoad();
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
