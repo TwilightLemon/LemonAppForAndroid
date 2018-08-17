@@ -3,12 +3,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#ffffff"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="76dp"
+        android:layout_height="56dp"
         android:theme="@style/AppTheme.AppBarOverlay">
 
         <RelativeLayout
@@ -32,18 +33,19 @@
                     android:layout_height="56dp"
                     android:layout_marginLeft="20dp"
                     android:gravity="center_vertical"
-                    android:text="立即登录"
+                    android:text="Title"
                     android:textSize="16dp" />
+
                 <ImageView
                     android:id="@+id/MusicDownload"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:onClick="MusicAllDownloadOnClick"
                     android:layout_alignParentEnd="true"
-                    android:layout_marginRight="20dp"
                     android:layout_alignParentRight="true"
                     android:layout_alignParentTop="true"
-                    android:layout_marginTop="15dp"
+                    android:layout_marginRight="20dp"
+                    android:layout_marginTop="8dp"
+                    android:onClick="MusicAllDownloadOnClick"
                     app:srcCompat="@drawable/downloadicon"
                     tools:ignore="VectorDrawableCompat" />
             </RelativeLayout>

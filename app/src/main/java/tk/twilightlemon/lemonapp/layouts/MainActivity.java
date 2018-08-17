@@ -75,9 +75,12 @@ import tk.twilightlemon.lemonapp.Helpers.InfoHelper;
 import tk.twilightlemon.lemonapp.Helpers.Lrc.LrcView;
 import tk.twilightlemon.lemonapp.Helpers.MusicLib;
 import tk.twilightlemon.lemonapp.Helpers.MiuiUtils;
+import tk.twilightlemon.lemonapp.Helpers.TextHelper;
 import tk.twilightlemon.lemonapp.R;
 import tk.twilightlemon.lemonapp.Fragments.SecondFragment;
 import tk.twilightlemon.lemonapp.Helpers.Settings;
+
+import static tk.twilightlemon.lemonapp.Helpers.TextHelper.FindByAb;
 
 public class MainActivity extends AppCompatActivity {
     //<editor-fold desc="常量">
@@ -91,7 +94,6 @@ public class MainActivity extends AppCompatActivity {
     private InfoHelper.Music Musicdt = new InfoHelper().new Music();
 
     private SharedPreferences musicPlayerSP = null;
-    private SharedPreferences.Editor mSP = null;
     //</editor-fold>
 
     //<editor-fold desc="控件">
@@ -151,8 +153,7 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     int in = Settings.mp.getCurrentPosition();
                     MseekBar.setProgress(in);
-                    mSP.putInt("NowDuration",in);
-                    mSP.commit();
+                    Settings.mSP.putInt("NowDuration",in);
                     if (findViewById(R.id.LyricView).getVisibility() == View.VISIBLE)
                         lrcBig.updateTime(in);
                     mHandler.postDelayed(this, 1000);
@@ -197,6 +198,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onStop() {
         if (!isAppOnForeground())
             Settings.isActive = false;
+        Settings.mSP.commit();
         super.onStop();
     }
 
@@ -260,7 +262,7 @@ public class MainActivity extends AppCompatActivity {
 
         //读取上次播放
         musicPlayerSP = MainActivity.this.getSharedPreferences("MusicPlayer", Context.MODE_PRIVATE);
-        mSP = musicPlayerSP.edit();
+        Settings.mSP = musicPlayerSP.edit();
         if(musicPlayerSP.contains("MusicName")){
             Musicdt.MusicName=musicPlayerSP.getString("MusicName","");
             Musicdt.Singer=musicPlayerSP.getString("Singer","");
@@ -268,6 +270,19 @@ public class MainActivity extends AppCompatActivity {
             Musicdt.ImageUrl=musicPlayerSP.getString("ImageUrl","");
             Musicdt.GC=musicPlayerSP.getString("GC","");
             PlayMusic(false,musicPlayerSP.getInt("NowDuration",0));
+            String ListID=musicPlayerSP.getString("ListData","");
+            if(ListID.contains("Search"))
+                MusicLib.Search(this,TextHelper.Base64Coder.Decode(FindByAb(ListID,"[","]")),false);
+            else if(ListID.contains("Diss")){
+                InfoHelper.MusicGData gData=new InfoHelper().new MusicGData();
+                gData.id=FindByAb(ListID,"[","]");
+                gData.name=FindByAb(ListID,"skName{","}");
+                MusicLib.GetGDbyID(gData,this,false);
+            }else if(musicPlayerSP.getBoolean("isRadio",false)){
+                Settings.ListData.name="Radio";
+                Settings.ListData.id=FindByAb(ListID,"[","]");
+            }
+            PlayListIndex=musicPlayerSP.getInt("Index",0);
         }
     }
 
@@ -405,6 +420,13 @@ public class MainActivity extends AppCompatActivity {
         //</editor-fold>
 
         //<editor-fold desc="初始内容&事件">
+        lrcBig.setOnPlayClickListener(new LrcView.OnPlayClickListener() {
+            @Override
+            public boolean onPlayClick(long time) {
+                Settings.mp.seekTo((int) time);
+                return true;
+            }
+        });
         ((ImageView) findViewById(R.id.PlayBottom_img)).setImageDrawable(getResources().getDrawable(R.mipmap.ic_launcher_round));
         Drawable playic = getResources().getDrawable(R.drawable.ic_playbtn);
         PlayBottom_ControlBtn.setImageDrawable(getResources().getDrawable(R.drawable.ic_bom_play));
@@ -685,15 +707,16 @@ public class MainActivity extends AppCompatActivity {
 
     //<editor-fold desc="LyricView">
     public void LyricShow() {
-        lyricView.setVisibility(View.VISIBLE);
-        ObjectAnimator animator = ObjectAnimator.ofFloat(lyricView, "translationY", 1200f, 0f);
-        animator.setDuration(200);
-        animator.start();
-        lrcBig.initEntryList();
-        lrcBig.initNextTime();
+        if(Musicdt.MusicName.length()!=0) {
+            lyricView.setVisibility(View.VISIBLE);
+            ObjectAnimator animator = ObjectAnimator.ofFloat(lyricView, "translationY", 1200f, 0f);
+            animator.setDuration(300);
+            animator.start();
+            lrcBig.initEntryList();
+        }
     }
 
-    public void LyricBack() {
+    public void LyricBack(){
         ObjectAnimator animator = ObjectAnimator.ofFloat(lyricView, "translationY", 1200f);
         animator.setDuration(300);
         animator.start();
@@ -707,7 +730,7 @@ public class MainActivity extends AppCompatActivity {
     //</editor-fold>
 
     //<editor-fold desc="MusicList">
-    public void MusicListLoad(){
+    public void MusicListLoad(boolean isShow){
         MusicList_title.setText(Settings.ListData.name);
         MusicListAdapter ad = new MusicListAdapter(MainActivity.this, Settings.ListData, new View.OnClickListener() {
             @SuppressLint("HandlerLeak")
@@ -749,15 +772,18 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+        if(isShow)
         MusicListShow();
     }
 
     public void MusicListShow(){
-        MusicList.setVisibility(View.VISIBLE);
-        lyricView.setVisibility(View.GONE);
-        ObjectAnimator animator = ObjectAnimator.ofFloat(MusicList, "translationY", 1200f, 0f);
-        animator.setDuration(200);
-        animator.start();
+        if(MusicList_list.getAdapter()!=null) {
+            MusicList.setVisibility(View.VISIBLE);
+            LyricBack();
+            ObjectAnimator animator = ObjectAnimator.ofFloat(MusicList, "translationY", 1200f, 0f);
+            animator.setDuration(300);
+            animator.start();
+        }
     }
 
     public void MusicListBack() {
@@ -805,6 +831,10 @@ public class MainActivity extends AppCompatActivity {
     public void PlayMusic(final boolean isplay,final int ex) {
         StatService.onEvent(this, "tw_Play", "播放音乐", 1);
         MainActivity.Loading(findViewById(R.id.USERTX));
+        if (Settings.ListData.name == "Radio")
+            Settings.mSP.putBoolean("isRadio",true);
+        else         Settings.mSP.putBoolean("isRadio",false);
+        Settings.mSP.putInt("Index",PlayListIndex);
         mHandler.removeCallbacks(r);
         if(isplay) {
             Settings.mp.stop();
@@ -857,12 +887,12 @@ public class MainActivity extends AppCompatActivity {
                     notificationManager.notify(2, notification);
                     MseekBar.setMax(Settings.mp.getDuration());
 
-                    mSP.putString("MusicName",Musicdt.MusicName);
-                    mSP.putString("Singer",Musicdt.Singer);
-                    mSP.putString("MusicID",Musicdt.MusicID);
-                    mSP.putString("ImageUrl",Musicdt.ImageUrl);
-                    mSP.putString("GC",Musicdt.GC);
-                    mSP.commit();
+                    Settings.mSP.putString("MusicName",Musicdt.MusicName);
+                    Settings.mSP.putString("Singer",Musicdt.Singer);
+                    Settings.mSP.putString("MusicID",Musicdt.MusicID);
+                    Settings.mSP.putString("ImageUrl",Musicdt.ImageUrl);
+                    Settings.mSP.putString("GC",Musicdt.GC);
+                    Settings.mSP.commit();
 
                     MseekBar.setProgress(ex);
                     Settings.mp.seekTo(ex);
@@ -889,11 +919,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return false;
-    }
-
-    @NonNull
-    public static String FindByAb(String all, String a, String b) {
-        return all.substring(all.indexOf(a) + a.length(), all.indexOf(b));
     }
 
     public static void sdm(String m, Context co) {

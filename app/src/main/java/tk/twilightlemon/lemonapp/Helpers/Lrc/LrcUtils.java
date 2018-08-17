@@ -1,14 +1,15 @@
 package tk.twilightlemon.lemonapp.Helpers.Lrc;
 
-import android.content.Context;
-class LrcUtils {
-    public static int dp2px(Context context, float dpValue) {
-        float scale = context.getResources().getDisplayMetrics().density;
-        return (int) (dpValue * scale + 0.5f);
-    }
+import android.text.format.DateUtils;
 
-    public static int sp2px(Context context, float spValue) {
-        float fontScale = context.getResources().getDisplayMetrics().scaledDensity;
-        return (int) (spValue * fontScale + 0.5f);
+import java.util.Locale;
+
+class LrcUtils {
+    public static String formatTime(long milli) {
+        int m = (int) (milli / DateUtils.MINUTE_IN_MILLIS);
+        int s = (int) ((milli / DateUtils.SECOND_IN_MILLIS) % 60);
+        String mm = String.format(Locale.getDefault(), "%02d", m);
+        String ss = String.format(Locale.getDefault(), "%02d", s);
+        return mm + ":" + ss;
     }
 }

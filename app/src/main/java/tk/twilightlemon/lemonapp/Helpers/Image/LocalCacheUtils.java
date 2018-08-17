@@ -8,7 +8,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 
-import tk.twilightlemon.lemonapp.Helpers.MD5Encoder;
+import tk.twilightlemon.lemonapp.Helpers.TextHelper;
 
 public class LocalCacheUtils {
 
@@ -21,7 +21,7 @@ public class LocalCacheUtils {
     public Bitmap getBitmapFromLocal(String url){
         String fileName = null;//把图片的url当做文件名,并进行MD5加密
         try {
-            fileName = MD5Encoder.encode(url);
+            fileName = TextHelper.MD5Encoder.encode(url);
             File file=new File(CACHE_PATH,fileName);
 
             Bitmap bitmap = BitmapFactory.decodeStream(new FileInputStream(file));
@@ -41,7 +41,7 @@ public class LocalCacheUtils {
      */
     public void setBitmapToLocal(String url,Bitmap bitmap){
         try {
-            String fileName = MD5Encoder.encode(url);//把图片的url当做文件名,并进行MD5加密
+            String fileName = TextHelper.MD5Encoder.encode(url);//把图片的url当做文件名,并进行MD5加密
             File file=new File(CACHE_PATH,fileName);
 
             //通过得到文件的父文件,判断父文件是否存在

@@ -1,10 +1,12 @@
 package tk.twilightlemon.lemonapp.Helpers;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.os.Handler;
 import android.os.Message;
 import android.text.format.DateUtils;
 import android.util.Base64;
+import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -19,15 +21,19 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import tk.twilightlemon.lemonapp.Adapters.TopItemsAdapter;
+import tk.twilightlemon.lemonapp.Fragments.FirstFragment;
 import tk.twilightlemon.lemonapp.Helpers.Lrc.LrcEntry;
 import tk.twilightlemon.lemonapp.Helpers.Lrc.LrcView;
 import tk.twilightlemon.lemonapp.layouts.MainActivity;
 
+import static tk.twilightlemon.lemonapp.Helpers.TextHelper.FindByAb;
+
 public class MusicLib {
+    @SuppressLint("HandlerLeak")
     public static void GetMusicLyric(String ID, final LrcView lrc) {
         lrc.reset();
         lrc.initEntryList();
-        lrc.initNextTime();
         HashMap<String, String> data = new HashMap<>();
         data.put("User-Agent", " Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.139 Safari/537.36");
         data.put("Accept", "*/*");
@@ -56,11 +62,9 @@ public class MusicLib {
                                               lrc.reset();
                                               lrc.onLrcLoaded(list);
                                               lrc.initEntryList();
-                                              lrc.initNextTime();
                                           } catch (Exception e) {
                                           }
                                       } else {
-// SendMessageBox(lyricdata +transdata);
                                           ArrayList<String> datatimes = new ArrayList<String>();
                                           ArrayList<String> datatexs = new ArrayList<String>();
                                           HashMap<String, String> gcdata = new HashMap<String, String>();
@@ -68,7 +72,6 @@ public class MusicLib {
                                           for (String x : dt) {
                                               parserLine(x, datatimes, datatexs, gcdata);
                                           }
-//sdm("d1");
                                           ArrayList<String> dataatimes = new ArrayList<String>();
                                           ArrayList<String> dataatexs = new ArrayList<String>();
                                           HashMap<String, String> fydata = new HashMap<String, String>();
@@ -76,7 +79,6 @@ public class MusicLib {
                                           for (String x : dta) {
                                               parserLine(x, dataatimes, dataatexs, fydata);
                                           }
-//  sdm("d2");
                                           ArrayList<String> KEY = new ArrayList<String>();
                                           HashMap<String, String> gcfydata = new HashMap<String, String>();
                                           List<LrcEntry> list = new ArrayList<>();
@@ -84,36 +86,33 @@ public class MusicLib {
                                               KEY.add(x);
                                               gcfydata.put(x, "");
                                           }
-//sdm("d3");
                                           for (String x : dataatimes) {
                                               if (!KEY.contains(x)) {
                                                   KEY.add(x);
                                                   gcfydata.put(x, "");
                                               }
                                           }
-//sdm("d4");
                                           for (int i = 0; i != gcfydata.size(); i++) {
                                               try {
                                                   gcfydata.put(KEY.get(i), gcdata.get(KEY.get(i)) + "^" + fydata.get(KEY.get(i)));
                                               } catch (Exception e) {
                                               }
                                           }
-//sdm("d5   "+dataatexs.size()+"   "+dataatimes.size()+"   "+datatexs.size()+"   "+datatimes.size()+"   "+KEY.size());
                                           for (int i = 0; i != KEY.size(); i++) {
                                               try {
                                                   long key = strToTime(KEY.get(i));
-                                                  String value = gcfydata.get(KEY.get(i));
-                                                  list.add(new LrcEntry(key, value.replace("^", "\n").replace("//", "").replace("null", "")));
-                                              } catch (Exception e) {
-                                              }
+                                                  String value = gcfydata.get(KEY.get(i)).replace("^", "\n").replace("//", "").replace("null", "");
+                                                  Log.d("ST",value+"    length"+value.length());
+                                                  if(value.length()>1) {
+                                                      list.add(new LrcEntry(key, value));
+                                                  }
+                                              } catch (Exception e) {}
                                           }
                                           lrc.reset();
                                           lrc.onLrcLoaded(list);
                                           lrc.initEntryList();
-                                          lrc.initNextTime();
                                       }
-                                  } catch (Exception e) {
-                                  }
+                                  } catch (Exception e) {}
                               }
                           }
                 , "https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg?callback=MusicJsonCallback_lrc&pcachetime=1532863605625&songmid=" + ID + "&g_tk=5381&jsonpCallback=MusicJsonCallback_lrc&loginUin=0&hostUin=0&format=jsonp&inCharset=utf8&outCharset=utf-8&notice=0&platform=yqq&needNewCode=0", data);
@@ -133,7 +132,7 @@ public class MusicLib {
 
     public static ArrayList<String> parserLine(String str, ArrayList<String> times, ArrayList<String> texs, HashMap<String, String> data) {
         if (!str.startsWith("[ti:") && !str.startsWith("[ar:") && !str.startsWith("[al:") && !str.startsWith("[by:") && !str.startsWith("[offset:")) {
-            String TimeData = MainActivity.FindByAb(str, "[", "]");
+            String TimeData = FindByAb(str, "[", "]");
             String unTimeData = TimeData.substring(0, TimeData.length() - 1) + "0";
             String io = "[" + TimeData + "]";
             String TexsData = str.replace(io, "");
@@ -153,8 +152,77 @@ public class MusicLib {
         return str.replace("&apos;", "'").replace("&nbsp;", " ");
     }
 
-    public static void Search(final MainActivity activity, final String text) {
+    @SuppressLint("HandlerLeak")
+    public static void GetTopList(final int forni, final Handler handler){
+        HttpHelper.GetWeb(new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                super.handleMessage(msg);
+                try {
+                    String jsondata = "{\"data\":" + msg.obj.toString().replace("jsonCallback(", "").replace("}]\n)", "") + "}]" + "}";
+                    JSONObject o = new JSONObject(jsondata);
+                    ArrayList<InfoHelper.MusicTop> data = new ArrayList<>();
+                    int igne = forni;
+                    for (int dat = 0; dat < o.getJSONArray("data").length(); ++dat) {
+                        for (int i = 0; i < o.getJSONArray("data").getJSONObject(dat).getJSONArray("List").length(); ++i) {
+                            JSONObject json = o.getJSONArray("data").getJSONObject(dat).getJSONArray("List").getJSONObject(i);
+                            InfoHelper.MusicTop dt = new InfoHelper().new MusicTop();
+                            dt.Name = json.getString("ListName");
+                            if (dt.Name.contains("MV"))//排除MV榜
+                                continue;
+                            dt.ID = json.getString("topID");
+                            dt.Photo = json.getString("pic_v12");
+                            data.add(dt);
+                            if (igne != -1 && i == igne)
+                                break;
+                        }
+                        if (igne != -1)
+                            break;
+                    }
+                    Message ms=new Message();
+                    ms.obj=data;
+                    handler.sendMessage(ms);
+                } catch (Exception e) {
+                }
+            }
+        }, "https://c.y.qq.com/v8/fcg-bin/fcg_v8_toplist_opt.fcg?page=index&format=html&tpl=macv4&v8debug=1", null);
+    }
+
+    @SuppressLint("HandlerLeak")
+    public static void GetTopDataById(String id, final Handler handler){
+        HttpHelper.GetWeb(new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                try {
+                    super.handleMessage(msg);
+                    JSONObject o = new JSONObject(msg.obj.toString());
+                    ArrayList<InfoHelper.Music> dat = new ArrayList<>();
+                    for (int i = 0; i < o.getJSONArray("songlist").length(); ++i) {
+                        JSONObject dt = o.getJSONArray("songlist").getJSONObject(i).getJSONObject("data");
+                        InfoHelper.Music m = new InfoHelper().new Music();
+                        m.MusicName = dt.getString("songname").replace("\\", "-").replace("?", "").replace("/", "").replace(":", "").replace("*", "").replace("\"", "").replace("<", "").replace(">", "").replace("|", "");
+                        String Singer = "";
+                        for (int osxc = 0; osxc != dt.getJSONArray("singer").length(); osxc++) {
+                            Singer += dt.getJSONArray("singer").getJSONObject(osxc).getString("name") + "&";
+                        }
+                        m.Singer = Singer.substring(0, Singer.lastIndexOf("&"));
+                        m.MusicID = dt.getString("songmid");
+                        m.ImageUrl = "http://y.gtimg.cn/music/photo_new/T002R300x300M000" + dt.getString("albummid") + ".jpg";
+                        m.GC = dt.getString("songmid");
+                        dat.add(m);
+                    }
+                    Message ms=new Message();
+                    ms.obj=dat;
+                    handler.sendMessage(ms);
+                } catch (Exception e) {}
+            }
+        }, "https://c.y.qq.com/v8/fcg-bin/fcg_v8_toplist_cp.fcg?tpl=3&page=detail&topid=" + id + "&type=top&song_begin=0&song_num=100&g_tk=1206122277&loginUin=" + Settings.qq + "&hostUin=0&format=json&inCharset=utf8&outCharset=utf-8&notice=0&platform=yqq&needNewCode=0", null);
+    }
+
+    @SuppressLint("HandlerLeak")
+    public static void Search(final MainActivity activity, final String text, final boolean isshow) {
         try {
+            Settings.mSP.putString("ListData","Search_["+TextHelper.Base64Coder.Encode(text)+"]");
             String url = "http://59.37.96.220/soso/fcgi-bin/client_search_cp?format=json&t=0&inCharset=GB2312&outCharset=utf-8&qqmusic_ver=1302&catZhida=0&p=1&n=20&w=" + URLEncoder.encode(text, "utf-8") + "&flag_qc=0&remoteplace=sizer.newclient.song&new_json=1&lossless=0&aggr=1&cr=1&sem=0&force_zonghe=0";
             HttpHelper.GetWeb(new Handler() {
                 @Override
@@ -180,15 +248,13 @@ public class MusicLib {
                         }
                         if(Data.Data.size()!=0){
                         Settings.ListData = Data;
-                        activity.MusicListLoad();}else{
+                        activity.MusicListLoad(isshow);
+                        }else
                             MainActivity.SendMessageBox("什么都没有找到哦o(≧口≦)o",activity);
-                        }
-                    } catch (Exception e) {
-                    }
+                    } catch (Exception e) { }
                 }
             }, url, null);
-        } catch (Exception e) {
-        }
+        } catch (Exception e) { }
     }
 
     public static void GetUrl(final String Musicid, final Handler handler) {
@@ -252,7 +318,9 @@ public class MusicLib {
         }, "https://c.y.qq.com/v8/fcg-bin/fcg_play_single_song.fcg?songmid=" + Musicid + "&platform=yqq&format=json", hdata);
     }
 
-    public static void GetGDbyID(InfoHelper.MusicGData gData, final Activity act) {
+    @SuppressLint("HandlerLeak")
+    public static void GetGDbyID(InfoHelper.MusicGData gData, final Activity act, final boolean isShow) {
+        Settings.mSP.putString("ListData","Diss_["+gData.id+"] skName{"+gData.name+"}");
         Settings.ListData = gData;
         if (!Settings.ListData.name.contains("歌单:"))
             Settings.ListData.name = "歌单:" + Settings.ListData.name;
@@ -291,11 +359,10 @@ public class MusicLib {
                                     md.MusicID = obj.getString("songmid");
                                     md.ImageUrl = "http://y.gtimg.cn/music/photo_new/T002R300x300M000" + obj.getString("albummid") + ".jpg";
                                     Settings.ListData.Data.add(md);
-                                } catch (Exception e) {
-                                }
+                                } catch (Exception e) { }
                                 i++;
                             }
-                            ((MainActivity)act).MusicListLoad();
+                            ((MainActivity)act).MusicListLoad(isShow);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -402,6 +469,7 @@ public class MusicLib {
     }
 
     public static void GetRadioMusicById(String id, final Handler handler) {
+        Settings.mSP.putString("ListData","Radio_["+id+"]");
         if (id.length() == 2) {
             HttpHelper.GetWeb(new Handler() {
                 @Override
@@ -421,8 +489,7 @@ public class MusicLib {
                         Message ms = new Message();
                         ms.obj = m;
                         handler.sendMessage(ms);
-                    } catch (Exception e) {
-                    }
+                    } catch (Exception e) { }
                 }
             }, "https://c.y.qq.com/rcmusic2/fcgi-bin/fcg_guess_youlike_pc.fcg?g_tk=1206122277&loginUin=" + Settings.qq + "&hostUin=0&format=json&inCharset=utf8&outCharset=utf-8&notice=0&platform=yqq&needNewCode=0&cid=703&uin=" + Settings.qq, null);
         } else {

@@ -70,11 +70,11 @@
                     android:layout_marginTop="350dp"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    app:lrcAnimationDuration="500"
-                    app:lrcCurrentTextColor="#04e2b3"
+                    app:lrcAnimationDuration="200"
+                    app:lrcCurrentTextColor="#FFF"
                     app:lrcDividerHeight="20dp"
                     app:lrcLabel="小萌音乐"
-                    app:lrcNormalTextColor="#F8F8F8"
+                    app:lrcNormalTextColor="#82ffffff"
                     app:lrcPadding="16dp"
                     app:lrcTextSize="16sp" />
 

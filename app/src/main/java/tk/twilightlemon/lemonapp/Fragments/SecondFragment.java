@@ -72,7 +72,7 @@ public class SecondFragment extends Fragment {
                 builder.setPositiveButton("搜索", new DialogInterface.OnClickListener() {
                     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
                     public void onClick(DialogInterface dialog, int which) {
-                        MusicLib.Search((MainActivity)getActivity(), qq.getText().toString());
+                        MusicLib.Search((MainActivity)getActivity(), qq.getText().toString(),true);
                     }
                 });
                 builder.show();
@@ -80,55 +80,27 @@ public class SecondFragment extends Fragment {
         });
     }
 
-    @SuppressLint("HandlerLeak")
-    ArrayList<String> Top_idList = new ArrayList<>();
-
+    ArrayList<InfoHelper.MusicTop> Top_List = new ArrayList<>();
     @SuppressLint("HandlerLeak")
     public void LoadTopList(final ListView lv, final int forni) {
-        HttpHelper.GetWeb(new Handler() {
+        MusicLib.GetTopList(forni,new Handler() {
             @Override
             public void handleMessage(Message msg) {
-                super.handleMessage(msg);
-                try {
-                    String jsondata = "{\"data\":" + msg.obj.toString().replace("jsonCallback(", "").replace("}]\n)", "") + "}]" + "}";
-                    JSONObject o = new JSONObject(jsondata);
-                    ArrayList<InfoHelper.MusicTop> data = new ArrayList<>();
-                    Top_idList.clear();
-                    int igne = forni;
-                    for (int dat = 0; dat < o.getJSONArray("data").length(); ++dat) {
-                        for (int i = 0; i < o.getJSONArray("data").getJSONObject(dat).getJSONArray("List").length(); ++i) {
-                            JSONObject json = o.getJSONArray("data").getJSONObject(dat).getJSONArray("List").getJSONObject(i);
-                            InfoHelper.MusicTop dt = new InfoHelper().new MusicTop();
-                            dt.Name = json.getString("ListName");
-                            if (dt.Name.contains("MV"))//排除MV榜
-                                continue;
-                            dt.ID = json.getString("topID");
-                            dt.Photo = json.getString("pic_v12");
-                            data.add(dt);
-                            Top_idList.add(dt.ID);
-                            if (igne != -1 && i == igne)
-                                break;
-                        }
-                        if (igne != -1)
-                            break;
-                    }
-                    TopItemsAdapter tia = new TopItemsAdapter(getActivity(), data);
-                    lv.setAdapter(tia);
-                    FirstFragment.setListViewHeightBasedOnChildren(lv);
-                } catch (Exception e) {
-                }
-            }
-        }, "https://c.y.qq.com/v8/fcg-bin/fcg_v8_toplist_opt.fcg?page=index&format=html&tpl=macv4&v8debug=1", null);
+                Top_List= (ArrayList<InfoHelper.MusicTop>) msg.obj;
+                TopItemsAdapter tia = new TopItemsAdapter(getActivity(),Top_List);
+                lv.setAdapter(tia);
+                FirstFragment.setListViewHeightBasedOnChildren(lv);
+            }});
         if (forni != -1) {
             lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                     InfoHelper.MusicGData dt = new InfoHelper().new MusicGData();
-                    InfoHelper.MusicTop dat = ((TopItemsAdapter) lv.getAdapter()).getMdata().get(Top_idList.get(i));
+                    InfoHelper.MusicTop dat = ((TopItemsAdapter) lv.getAdapter()).getMdata().get(Top_List.get(i).ID);
                     dt.Data = dat.Data;
                     dt.name = dat.Name;
                     Settings.ListData = dt;
-                    ((MainActivity)getActivity()).MusicListLoad();
+                    ((MainActivity)getActivity()).MusicListLoad(true);
                 }
             });
         }
@@ -137,6 +109,7 @@ public class SecondFragment extends Fragment {
     ArrayList<InfoHelper.MusicGData> FLGDdata = new ArrayList<>();
     ArrayList<InfoHelper.MusicGData> FLGDdat = new ArrayList<>();
 
+    @SuppressLint("HandlerLeak")
     public void LoadFLGDList(final ListView lv) {
         MusicLib.GetFLGDItems("10000000", new Handler() {
             @Override
@@ -151,7 +124,7 @@ public class SecondFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position,
                                     long id) {
-                MusicLib.GetGDbyID(FLGDdata.get(position), getActivity());
+                MusicLib.GetGDbyID(FLGDdata.get(position), getActivity(),true);
             }
         });
     }
@@ -223,7 +196,7 @@ public class SecondFragment extends Fragment {
                                     aData.ListOnClick = new AdapterView.OnItemClickListener() {
                                         @Override
                                         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                                            MusicLib.GetGDbyID(FLGDdat.get(i), getActivity());
+                                            MusicLib.GetGDbyID(FLGDdat.get(i), getActivity(),true);
                                         }
                                     };
                                     FLGDdat = (ArrayList<InfoHelper.MusicGData>) msg.obj;
@@ -241,6 +214,7 @@ public class SecondFragment extends Fragment {
             }
         });
         view.findViewById(R.id.Singer_moreBtn).setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("HandlerLeak")
             @Override
             public void onClick(View view) {
                 MusicLib.GetSingerByTag("all_all_all", new Handler() {
@@ -290,7 +264,7 @@ public class SecondFragment extends Fragment {
                         aData.ListOnClick = new AdapterView.OnItemClickListener() {
                             @Override
                             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                                MusicLib.Search((MainActivity) getActivity(), SingerData.get(i).name);
+                                MusicLib.Search((MainActivity) getActivity(), SingerData.get(i).name,true);
                             }
                         };
                         Settings.AdapData = aData;
@@ -301,6 +275,7 @@ public class SecondFragment extends Fragment {
             }
         });
         view.findViewById(R.id.Radio_moreBtn).setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("HandlerLeak")
             @Override
             public void onClick(View view) {
                 MusicLib.GetRadioListByTag(new Handler() {
@@ -367,7 +342,7 @@ public class SecondFragment extends Fragment {
                 MusicLib.GetSingerByTag("all_all_all", new Handler() {
                     @Override
                     public void handleMessage(Message msg) {
-                        MusicLib.Search((MainActivity) getActivity(), ((ArrayList<InfoHelper.SingerAndRadioData>) msg.obj).get(i).name);
+                        MusicLib.Search((MainActivity) getActivity(), ((ArrayList<InfoHelper.SingerAndRadioData>) msg.obj).get(i).name,true);
                     }
                 }, 4);
             }

@@ -145,7 +145,6 @@ public class FirstFragment extends Fragment {
 
     @SuppressLint("HandlerLeak")
     public void LoadLikeList(String id, final ListView lv) {
-        /////TODO:start   加载我喜欢列表
         final HashMap<String, String> data = new HashMap<String, String>();
         data.put("Connection", "keep-alive");
         data.put("CacheControl", "max-age=0");
@@ -248,7 +247,7 @@ public class FirstFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position,
                                     long id) {
-                MusicLib.GetGDbyID(GDdata.get(position), getActivity());
+                MusicLib.GetGDbyID(GDdata.get(position), getActivity(),true);
             }
         });
     }
@@ -258,7 +257,7 @@ public class FirstFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position,
                                     long id) {
-                MusicLib.GetGDbyID(LikeGDdata.get(position), getActivity());
+                MusicLib.GetGDbyID(LikeGDdata.get(position), getActivity(),true);
             }
         });
     }

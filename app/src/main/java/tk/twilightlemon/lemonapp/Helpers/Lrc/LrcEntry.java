@@ -21,7 +21,7 @@ public class LrcEntry implements Comparable<LrcEntry> {
     private long time;
     private String text;
     private StaticLayout staticLayout;
-    private TextPaint paint;
+    private float offset = Float.MIN_VALUE;
 
     public LrcEntry(long time, String text) {
         this.time = time;
@@ -29,7 +29,6 @@ public class LrcEntry implements Comparable<LrcEntry> {
     }
 
     void init(TextPaint paint, int width) {
-        this.paint = paint;
         staticLayout = new StaticLayout(text, paint, width, Layout.Alignment.ALIGN_CENTER, 1f, 0f, false);
     }
 
@@ -41,11 +40,19 @@ public class LrcEntry implements Comparable<LrcEntry> {
         return staticLayout;
     }
 
-    float getTextHeight() {
-        if (paint == null || staticLayout == null) {
+    int getHeight() {
+        if (staticLayout == null) {
             return 0;
         }
-        return staticLayout.getLineCount() * paint.getTextSize();
+        return staticLayout.getHeight();
+    }
+
+    public float getOffset() {
+        return offset;
+    }
+
+    public void setOffset(float offset) {
+        this.offset = offset;
     }
 
     @Override
@@ -110,7 +117,7 @@ public class LrcEntry implements Comparable<LrcEntry> {
         }
 
         String times = lineMatcher.group(1);
-        String text = lineMatcher.group(3).replace("^","\n").replace("//","");
+        String text = lineMatcher.group(3);
         List<LrcEntry> entryList = new ArrayList<>();
 
         Matcher timeMatcher = Pattern.compile("\\[(\\d\\d):(\\d\\d)\\.(\\d\\d)\\]").matcher(times);

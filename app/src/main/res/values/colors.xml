@@ -3,4 +3,10 @@
     <color name="colorPrimary">#1b81f1</color>
     <color name="colorPrimaryDark">#3fa9ff</color>
     <color name="colorAccent">#56b3ff</color>
+
+    <color name="lrc_normal_text_color">#aaffffff</color>
+    <color name="lrc_current_text_color">#aaffffff</color>
+    <color name="lrc_timeline_text_color">#aaffffff</color>
+    <color name="lrc_timeline_color">#aaffffff</color>
+    <color name="lrc_time_text_color">#aaffffff</color>
 </resources>

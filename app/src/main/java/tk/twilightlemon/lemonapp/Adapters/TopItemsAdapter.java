@@ -21,6 +21,7 @@ import java.util.HashMap;
 import tk.twilightlemon.lemonapp.Helpers.HttpHelper;
 import tk.twilightlemon.lemonapp.Helpers.Image.BitmapUtils;
 import tk.twilightlemon.lemonapp.Helpers.InfoHelper;
+import tk.twilightlemon.lemonapp.Helpers.MusicLib;
 import tk.twilightlemon.lemonapp.R;
 import tk.twilightlemon.lemonapp.Helpers.Settings;
 
@@ -58,39 +59,19 @@ public class TopItemsAdapter extends BaseAdapter {
         tit.setText(data.Name);
         if (data.Data.size() == 0) {
             //<editor-fold desc="Get Top MusicList By Id">
-            HttpHelper.GetWeb(new Handler() {
+            MusicLib.GetTopDataById(data.ID,new Handler(){
                 @Override
-                public void handleMessage(Message msg) {
-                    try {
-                        super.handleMessage(msg);
-                        JSONObject o = new JSONObject(msg.obj.toString());
-                        ArrayList<InfoHelper.Music> dat = new ArrayList<>();
-                        for (int i = 0; i < o.getJSONArray("songlist").length(); ++i) {
-                            JSONObject dt = o.getJSONArray("songlist").getJSONObject(i).getJSONObject("data");
-                            InfoHelper.Music m = new InfoHelper().new Music();
-                            m.MusicName = dt.getString("songname").replace("\\", "-").replace("?", "").replace("/", "").replace(":", "").replace("*", "").replace("\"", "").replace("<", "").replace(">", "").replace("|", "");
-                            String Singer = "";
-                            for (int osxc = 0; osxc != dt.getJSONArray("singer").length(); osxc++) {
-                                Singer += dt.getJSONArray("singer").getJSONObject(osxc).getString("name") + "&";
-                            }
-                            m.Singer = Singer.substring(0, Singer.lastIndexOf("&"));
-                            m.MusicID = dt.getString("songmid");
-                            m.ImageUrl = "http://y.gtimg.cn/music/photo_new/T002R300x300M000" + dt.getString("albummid") + ".jpg";
-                            m.GC = dt.getString("songmid");
-                            dat.add(m);
-                        }
-                        data.Data = dat;
-                        TextView text = itemView.findViewById(R.id.top_item1);
-                        text.setText(data.Data.get(0).MusicName + " - " + data.Data.get(0).Singer);
-                        TextView text2 = itemView.findViewById(R.id.top_item2);
-                        text2.setText(data.Data.get(1).MusicName + " - " + data.Data.get(1).Singer);
-                        TextView text3 = itemView.findViewById(R.id.top_item3);
-                        text3.setText(data.Data.get(2).MusicName + " - " + data.Data.get(2).Singer);
-                        Mdata.put(data.ID, data);
-                    } catch (Exception e) {
-                    }
+                public void handleMessage(Message msg){
+                    data.Data = (ArrayList<InfoHelper.Music>) msg.obj;
+                    TextView text = itemView.findViewById(R.id.top_item1);
+                    text.setText(data.Data.get(0).MusicName + " - " + data.Data.get(0).Singer);
+                    TextView text2 = itemView.findViewById(R.id.top_item2);
+                    text2.setText(data.Data.get(1).MusicName + " - " + data.Data.get(1).Singer);
+                    TextView text3 = itemView.findViewById(R.id.top_item3);
+                    text3.setText(data.Data.get(2).MusicName + " - " + data.Data.get(2).Singer);
+                    Mdata.put(data.ID, data);
                 }
-            }, "https://c.y.qq.com/v8/fcg-bin/fcg_v8_toplist_cp.fcg?tpl=3&page=detail&topid=" + data.ID + "&type=top&song_begin=0&song_num=30&g_tk=1206122277&loginUin=" + Settings.qq + "&hostUin=0&format=json&inCharset=utf8&outCharset=utf-8&notice=0&platform=yqq&needNewCode=0", null);
+            });
             //</editor-fold>
         }
         final ImageView img = itemView.findViewById(R.id.top_image);
