@@ -28,6 +28,7 @@ public class InfoHelper {
         }
 
         public String MusicName = "";
+        public String MusicName_Lyric="";
         public String Singer = "";
         public String MusicID = "";
         public String ImageUrl = "";

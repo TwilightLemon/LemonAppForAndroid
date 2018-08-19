@@ -867,6 +867,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void handleMessage(Message msg) {
                 try {
+                    if(msg.what!=200){
+                        sdm("这首歌还在来的路上哦，已经为你播放下一首(*/ω＼*)",MainActivity.this);
+                        Music_Next();
+                        return;
+                    }
                     String url = msg.obj.toString();
                     Settings.mp.setDataSource(url);
                     Settings.mp.prepare();
@@ -896,9 +901,7 @@ public class MainActivity extends AppCompatActivity {
 
                     MseekBar.setProgress(ex);
                     Settings.mp.seekTo(ex);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                } catch (Exception e) { }
             }
         });
     }

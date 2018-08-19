@@ -39,7 +39,9 @@ public class MusicListAdapter extends BaseAdapter {
         TextView tit = itemView.findViewById(R.id.MusicList_title);
         tit.setText(dt.MusicName);
         TextView text = itemView.findViewById(R.id.MusicList_mss);
-        text.setText(dt.Singer);
+        if(dt.MusicName_Lyric.length()!=0)
+          text.setText(dt.Singer+"•"+dt.MusicName_Lyric);
+        else text.setText(dt.Singer);
         TextView indextx = itemView.findViewById(R.id.MusicList_index);
         indextx.setText(index + "");
         itemView.findViewById(R.id.MusicDownload).setOnClickListener(onClick);

@@ -235,7 +235,8 @@ public class MusicLib {
                         for (int i = 0; i < jo.getJSONObject("data").getJSONObject("song").getJSONArray("list").length(); ++i) {
                             InfoHelper.Music dt = new InfoHelper().new Music();
                             JSONObject jos = jo.getJSONObject("data").getJSONObject("song").getJSONArray("list").getJSONObject(i);
-                            dt.MusicName = jos.getString("name");
+                            dt.MusicName = jos.getString("title");
+                            dt.MusicName_Lyric=jos.getString("lyric");
                             String isx = "";
                             for (int ix = 0; ix != jos.getJSONArray("singer").length(); ix++) {
                                 isx += jos.getJSONArray("singer").getJSONObject(ix).getString("name") + "&";
@@ -245,6 +246,22 @@ public class MusicLib {
                             dt.ImageUrl = "http://y.gtimg.cn/music/photo_new/T002R300x300M000" + jos.getJSONObject("album").getString("mid") + ".jpg";
                             dt.GC = jos.getJSONObject("action").getString("alert");
                             Data.Data.add(dt);
+                            if(jos.getJSONArray("grp").length()!=0){
+                                for(int t=0;t<jos.getJSONArray("grp").length();t++){
+                                    InfoHelper.Music dat = new InfoHelper().new Music();
+                                    JSONObject joss = jos.getJSONArray("grp").getJSONObject(t);
+                                    dat.MusicName = joss.getString("title");
+                                    String isxs = "";
+                                    for (int ix = 0; ix != joss.getJSONArray("singer").length(); ix++) {
+                                        isxs += joss.getJSONArray("singer").getJSONObject(ix).getString("name") + "&";
+                                    }
+                                    dat.Singer = isxs.substring(0, isxs.lastIndexOf("&"));
+                                    dat.MusicID = joss.getString("mid");
+                                    dat.ImageUrl = "http://y.gtimg.cn/music/photo_new/T002R300x300M000" + joss.getJSONObject("album").getString("mid") + ".jpg";
+                                    dat.GC = joss.getJSONObject("action").getString("alert");
+                                    Data.Data.add(dat);
+                                }
+                            }
                         }
                         if(Data.Data.size()!=0){
                         Settings.ListData = Data;
@@ -257,6 +274,7 @@ public class MusicLib {
         } catch (Exception e) { }
     }
 
+    @SuppressLint("HandlerLeak")
     public static void GetUrl(final String Musicid, final Handler handler) {
         final HashMap<String, String> hdata = new HashMap<String, String>();
         hdata.put("Connection", "keep-alive");
@@ -291,14 +309,29 @@ public class MusicLib {
                                     @Override
                                     public void run() {
                                             while (true) {
-                                                String uri = "https://dl.stream.qqmusic.qq.com/" + MData.get(scr[0])[0] + mid + "." + MData.get(scr[0])[1] + "?vkey=" + key + "&guid=" + guid + "&uid=0&fromtag=30";
-                                                HttpURLConnection conn=null;
                                                 try {
+                                                String uri = "";
+                                                try{
+                                                    uri="https://dl.stream.qqmusic.qq.com/" + MData.get(scr[0])[0] + mid + "." + MData.get(scr[0])[1] + "?vkey=" + key + "&guid=" + guid + "&uid=0&fromtag=30";
+                                                }catch (Exception e){
+                                                    uri="http://ws.stream.qqmusic.qq.com/C100"+mid+".m4a?fromtag=0&guid=126548448";
+                                                    HttpURLConnection conn=null;
+                                                    URL url = new URL(uri);
+                                                    conn = (HttpURLConnection) url.openConnection();
+                                                    conn.setRequestMethod("GET");
+                                                    Message ms = new Message();
+                                                    ms.what=conn.getResponseCode();
+                                                    ms.obj = uri;
+                                                    handler.sendMessage(ms);
+                                                    return;
+                                                }
+                                                HttpURLConnection conn=null;
                                                     URL url = new URL(uri);
                                                     conn = (HttpURLConnection) url.openConnection();
                                                     conn.setRequestMethod("GET");
                                                     if (conn.getResponseCode() == 200) {
                                                         Message ms = new Message();
+                                                        ms.what=200;
                                                         ms.obj = uri;
                                                         handler.sendMessage(ms);
                                                         break;
@@ -308,8 +341,7 @@ public class MusicLib {
                                             MData.clear();
                                     }
                                 }).start();
-                            } catch (Exception e) {
-                            }
+                            } catch (Exception e) {}
                         }
                     }, "https://c.y.qq.com/base/fcgi-bin/fcg_musicexpress.fcg?json=3&guid=" + guid + "&format=json", hdata);
                 } catch (Exception e) {
@@ -349,6 +381,7 @@ public class MusicLib {
                                 JSONObject obj = ja.getJSONObject(i);
                                 InfoHelper.Music md = new InfoHelper().new Music();
                                 md.MusicName = obj.getString("songname");
+                                md.MusicName_Lyric=obj.getString("albumdesc");
                                 String Singer = "";
                                 for (int osxc = 0; osxc != obj.getJSONArray("singer").length(); ++osxc) {
                                     Singer += obj.getJSONArray("singer").getJSONObject(osxc).getString("name") + "&";

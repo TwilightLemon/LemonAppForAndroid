@@ -24,6 +24,8 @@
         android:layout_height="wrap_content"
         android:text="Title"
         android:textColor="#0b0b0b"
+        android:ellipsize="end"
+        android:singleLine="true"
         android:typeface="sans"
         android:textSize="15dip"
         android:layout_marginLeft="10dp"
@@ -37,6 +39,8 @@
         android:textColor="#5b5b5b"
         android:layout_marginLeft="10dp"
         android:textSize="10dip"
+        android:ellipsize="end"
+        android:singleLine="true"
         android:layout_marginTop="1dip"
         android:text="Mss" />
 
