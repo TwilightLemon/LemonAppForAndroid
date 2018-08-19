@@ -204,10 +204,10 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
+        notificationManager.cancelAll();
         unregisterReceiver(keeplive);
         unregisterReceiver(myBroadcastReceiver);
-        notificationManager.cancelAll();
+        super.onDestroy();
     }
     //</editor-fold>
 
