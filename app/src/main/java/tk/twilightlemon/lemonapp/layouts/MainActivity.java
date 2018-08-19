@@ -41,6 +41,7 @@ import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
@@ -60,6 +61,7 @@ import com.baidu.mobstat.StatService;
 
 import org.json.JSONObject;
 
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -204,10 +206,10 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
+        notificationManager.cancelAll();
         unregisterReceiver(keeplive);
         unregisterReceiver(myBroadcastReceiver);
-        notificationManager.cancelAll();
+        super.onDestroy();
     }
     //</editor-fold>
 
@@ -587,14 +589,24 @@ public class MainActivity extends AppCompatActivity {
         }, "https://coding.net/u/twilightlemon/p/Updata/git/raw/master/AndroidUpdata.json", data);
     }
 
+    @SuppressLint("HandlerLeak")
     public void OnShareClick(View view) {
-        Intent share_intent = new Intent();
-        share_intent.setAction(Intent.ACTION_SEND);
-        share_intent.setType("text/plain");
-        share_intent.putExtra(Intent.EXTRA_SUBJECT, "小萌音乐分享");
-        share_intent.putExtra(Intent.EXTRA_TEXT, Musicdt.MusicName + " - " + Musicdt.Singer + "：https://i.y.qq.com/v8/playsong.html?songmid=" + Musicdt.MusicID);
-        share_intent = Intent.createChooser(share_intent, "小萌音乐分享");
-        startActivity(share_intent);
+        String uri="http://tools.aeink.com/tools/dwz/urldwz.php?longurl=http%3a%2f%2ftwilightlemon.coding.me%2fMusicPlayer%2f%3fid%3d"+Musicdt.MusicID+"%26name%3d"+URLEncoder.encode(Musicdt.MusicName)+"%26singer%3d"+URLEncoder.encode(Musicdt.Singer)+"%26imgid%3dhttp%3a%2f%2fy.gtimg.cn%2fmusic%2fphoto_new%2fT002R300x300M000"+TextHelper.FindByAb(Musicdt.ImageUrl,"300x300M000",".jpg")+".jpg&api=urlcn";
+        HttpHelper.GetWeb(new Handler(){
+            @Override
+            public void handleMessage(Message msg){
+                try {
+                    String short_url = new JSONObject(msg.obj.toString()).getString("ae_url");
+                    Intent share_intent = new Intent();
+                    share_intent.setAction(Intent.ACTION_SEND);
+                    share_intent.setType("text/plain");
+                    share_intent.putExtra(Intent.EXTRA_SUBJECT, "小萌音乐分享");
+                    share_intent.putExtra(Intent.EXTRA_TEXT, Musicdt.MusicName + " - " + Musicdt.Singer + "：" + short_url);
+                    share_intent = Intent.createChooser(share_intent, "小萌音乐分享");
+                    startActivity(share_intent);
+                }catch (Exception e){}
+            }
+        },uri,null);
     }
 
     public void LoadNotification() {
