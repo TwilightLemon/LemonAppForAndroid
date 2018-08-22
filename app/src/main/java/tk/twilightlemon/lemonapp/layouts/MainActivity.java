@@ -53,6 +53,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.RemoteViews;
+import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -96,6 +97,9 @@ public class MainActivity extends AppCompatActivity {
     private InfoHelper.Music Musicdt = new InfoHelper().new Music();
 
     private SharedPreferences musicPlayerSP = null;
+
+    private int _calCount=0;
+    private int _calSearchCount=1;
     //</editor-fold>
 
     //<editor-fold desc="控件">
@@ -114,6 +118,8 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView MusicList_title=null;
     private ListView MusicList_list=null;
+
+    private View LastView=null;
     //</editor-fold>
 
     //<editor-fold desc="播放Timer">
@@ -274,7 +280,7 @@ public class MainActivity extends AppCompatActivity {
             PlayMusic(false,musicPlayerSP.getInt("NowDuration",0));
             String ListID=musicPlayerSP.getString("ListData","");
             if(ListID.contains("Search"))
-                MusicLib.Search(this,TextHelper.Base64Coder.Decode(FindByAb(ListID,"[","]")),false);
+                MusicLib.Search(this,TextHelper.Base64Coder.Decode(FindByAb(ListID,"[","]")),false,0);
             else if(ListID.contains("Diss")){
                 InfoHelper.MusicGData gData=new InfoHelper().new MusicGData();
                 gData.id=FindByAb(ListID,"[","]");
@@ -346,7 +352,38 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void LoadMusicControls() {
+        //<editor-fold desc="控件实例化">
+        MusicList_list=findViewById(R.id.MusicList_list);
+        MusicList_title=findViewById(R.id.MusicList_title);
+        MusicList = findViewById(R.id.MusicList);
+        lyricView = findViewById(R.id.LyricView);
+        MseekBar = findViewById(R.id.MusicSeek);
+        lrcBig = findViewById(R.id.lrc);
+        PlayBottom_ControlBtn = findViewById(R.id.PlayBottom_ControlBtn);
+        MButton = findViewById(R.id.MButton);
+        //</editor-fold>
+
         //<editor-fold desc="回调&事件">
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            final ScrollView MusicList_sv=findViewById(R.id.MusicList_sv);
+            MusicList_sv.setOnScrollChangeListener(new View.OnScrollChangeListener() {
+                @Override
+                public void onScrollChange(View view, int i, int i1, int i2, int i3) {
+                    View vi = MusicList_sv.getChildAt(0);
+                    if (MusicList_sv.getHeight() + MusicList_sv.getScrollY() == vi.getHeight()) {
+                        _calCount++;
+                        if (_calCount == 1) {
+                            String ListID=Settings.ModeID;
+                            if(ListID.contains("Search")){
+                                Loading(MusicList_sv);
+                                _calSearchCount++;
+                                MusicLib.Search(MainActivity.this,TextHelper.Base64Coder.Decode(FindByAb(ListID,"[","]")),false,_calSearchCount);
+                            }
+                        }
+                    } else _calCount = 0;
+                }
+            });
+        }
         ///播放回调
         Settings.Callback_PlayMusic = new Handler() {
             @Override
@@ -408,17 +445,6 @@ public class MainActivity extends AppCompatActivity {
                                            }
                                        }, AudioManager.STREAM_MUSIC,
                 AudioManager.AUDIOFOCUS_GAIN);
-        //</editor-fold>
-
-        //<editor-fold desc="控件实例化">
-        MusicList_list=findViewById(R.id.MusicList_list);
-        MusicList_title=findViewById(R.id.MusicList_title);
-        MusicList = findViewById(R.id.MusicList);
-        lyricView = findViewById(R.id.LyricView);
-        MseekBar = findViewById(R.id.MusicSeek);
-        lrcBig = findViewById(R.id.lrc);
-        PlayBottom_ControlBtn = findViewById(R.id.PlayBottom_ControlBtn);
-        MButton = findViewById(R.id.MButton);
         //</editor-fold>
 
         //<editor-fold desc="初始内容&事件">
@@ -777,6 +803,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if (position != -1) {
+                    if(LastView!=null){
+                        ((TextView)LastView.findViewById(R.id.MusicList_title)).setTextColor(0xff0b0b0b);
+                        ((TextView)LastView.findViewById(R.id.MusicList_mss)).setTextColor(0xff5b5b5b);
+                    }
+                    ((TextView)view.findViewById(R.id.MusicList_title)).setTextColor(getResources().getColor(R.color.colorAccent));
+                    ((TextView)view.findViewById(R.id.MusicList_mss)).setTextColor(getResources().getColor(R.color.colorAccent));
+                    LastView=view;
                     Message message = new Message();
                     message.what = 0;
                     message.obj = position;

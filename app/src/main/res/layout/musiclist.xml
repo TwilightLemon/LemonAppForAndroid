@@ -55,8 +55,10 @@
     </LinearLayout>
 
     <ScrollView
+        android:id="@+id/MusicList_sv"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="#fff">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -65,9 +67,9 @@
 
             <ListView
                 android:id="@+id/MusicList_list"
+                android:listSelector="@android:color/transparent"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="#fff" />
+                android:layout_height="wrap_content" />
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

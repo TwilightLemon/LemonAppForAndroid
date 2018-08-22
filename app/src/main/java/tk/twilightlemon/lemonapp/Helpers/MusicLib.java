@@ -21,8 +21,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import tk.twilightlemon.lemonapp.Adapters.TopItemsAdapter;
-import tk.twilightlemon.lemonapp.Fragments.FirstFragment;
 import tk.twilightlemon.lemonapp.Helpers.Lrc.LrcEntry;
 import tk.twilightlemon.lemonapp.Helpers.Lrc.LrcView;
 import tk.twilightlemon.lemonapp.layouts.MainActivity;
@@ -189,12 +187,14 @@ public class MusicLib {
     }
 
     @SuppressLint("HandlerLeak")
-    public static void GetTopDataById(String id, final Handler handler){
+    public static void GetTopDataById(final String id, final Handler handler){
         HttpHelper.GetWeb(new Handler() {
             @Override
             public void handleMessage(Message msg) {
                 try {
                     super.handleMessage(msg);
+                    Settings.mSP.putString("ListData","Top_["+id+"]");
+                    Settings.ModeID="TOP";
                     JSONObject o = new JSONObject(msg.obj.toString());
                     ArrayList<InfoHelper.Music> dat = new ArrayList<>();
                     for (int i = 0; i < o.getJSONArray("songlist").length(); ++i) {
@@ -219,19 +219,25 @@ public class MusicLib {
         }, "https://c.y.qq.com/v8/fcg-bin/fcg_v8_toplist_cp.fcg?tpl=3&page=detail&topid=" + id + "&type=top&song_begin=0&song_num=100&g_tk=1206122277&loginUin=" + Settings.qq + "&hostUin=0&format=json&inCharset=utf8&outCharset=utf-8&notice=0&platform=yqq&needNewCode=0", null);
     }
 
+    public static InfoHelper.MusicGData SearchData = new InfoHelper().new MusicGData();
     @SuppressLint("HandlerLeak")
-    public static void Search(final MainActivity activity, final String text, final boolean isshow) {
+    public static void Search(final MainActivity activity, final String text, final boolean isshow,final int pagecount) {
         try {
             Settings.mSP.putString("ListData","Search_["+TextHelper.Base64Coder.Encode(text)+"]");
-            String url = "http://59.37.96.220/soso/fcgi-bin/client_search_cp?format=json&t=0&inCharset=GB2312&outCharset=utf-8&qqmusic_ver=1302&catZhida=0&p=1&n=20&w=" + URLEncoder.encode(text, "utf-8") + "&flag_qc=0&remoteplace=sizer.newclient.song&new_json=1&lossless=0&aggr=1&cr=1&sem=0&force_zonghe=0";
+            Settings.ModeID="Search_["+TextHelper.Base64Coder.Encode(text)+"]";
+            int page=pagecount;
+            if(page==0) {
+                SearchData.Data.clear();
+                page=1;
+            }
+            SearchData.name = "搜索:" + text;
+            String url = "http://59.37.96.220/soso/fcgi-bin/client_search_cp?format=json&t=0&inCharset=GB2312&outCharset=utf-8&qqmusic_ver=1302&catZhida=0&p="+page+"&n=20&w=" + URLEncoder.encode(text, "utf-8") + "&flag_qc=0&remoteplace=sizer.newclient.song&new_json=1&lossless=0&aggr=1&cr=1&sem=0&force_zonghe=0";
             HttpHelper.GetWeb(new Handler() {
                 @Override
                 public void handleMessage(Message msg) {
                     try {
                         String json = msg.obj.toString().replace("<em>", "").replace("</em>", "");
                         JSONObject jo = new JSONObject(json);
-                        InfoHelper.MusicGData Data = new InfoHelper().new MusicGData();
-                        Data.name = "搜索:" + text;
                         for (int i = 0; i < jo.getJSONObject("data").getJSONObject("song").getJSONArray("list").length(); ++i) {
                             InfoHelper.Music dt = new InfoHelper().new Music();
                             JSONObject jos = jo.getJSONObject("data").getJSONObject("song").getJSONArray("list").getJSONObject(i);
@@ -245,7 +251,7 @@ public class MusicLib {
                             dt.MusicID = jos.getString("mid");
                             dt.ImageUrl = "http://y.gtimg.cn/music/photo_new/T002R300x300M000" + jos.getJSONObject("album").getString("mid") + ".jpg";
                             dt.GC = jos.getJSONObject("action").getString("alert");
-                            Data.Data.add(dt);
+                            SearchData.Data.add(dt);
                             if(jos.getJSONArray("grp").length()!=0){
                                 for(int t=0;t<jos.getJSONArray("grp").length();t++){
                                     InfoHelper.Music dat = new InfoHelper().new Music();
@@ -259,12 +265,12 @@ public class MusicLib {
                                     dat.MusicID = joss.getString("mid");
                                     dat.ImageUrl = "http://y.gtimg.cn/music/photo_new/T002R300x300M000" + joss.getJSONObject("album").getString("mid") + ".jpg";
                                     dat.GC = joss.getJSONObject("action").getString("alert");
-                                    Data.Data.add(dat);
+                                    SearchData.Data.add(dat);
                                 }
                             }
                         }
-                        if(Data.Data.size()!=0){
-                        Settings.ListData = Data;
+                        if(SearchData.Data.size()!=0){
+                        Settings.ListData = SearchData;
                         activity.MusicListLoad(isshow);
                         }else
                             MainActivity.SendMessageBox("什么都没有找到哦o(≧口≦)o",activity);
@@ -353,6 +359,7 @@ public class MusicLib {
     @SuppressLint("HandlerLeak")
     public static void GetGDbyID(InfoHelper.MusicGData gData, final Activity act, final boolean isShow) {
         Settings.mSP.putString("ListData","Diss_["+gData.id+"] skName{"+gData.name+"}");
+        Settings.ModeID="Diss_["+gData.id+"] skName{"+gData.name+"}";
         Settings.ListData = gData;
         if (!Settings.ListData.name.contains("歌单:"))
             Settings.ListData.name = "歌单:" + Settings.ListData.name;
@@ -381,7 +388,7 @@ public class MusicLib {
                                 JSONObject obj = ja.getJSONObject(i);
                                 InfoHelper.Music md = new InfoHelper().new Music();
                                 md.MusicName = obj.getString("songname");
-                                md.MusicName_Lyric=obj.getString("albumdesc");
+                                try{md.MusicName_Lyric=obj.getString("albumdesc");}catch(Exception e){}
                                 String Singer = "";
                                 for (int osxc = 0; osxc != obj.getJSONArray("singer").length(); ++osxc) {
                                     Singer += obj.getJSONArray("singer").getJSONObject(osxc).getString("name") + "&";
@@ -503,6 +510,7 @@ public class MusicLib {
 
     public static void GetRadioMusicById(String id, final Handler handler) {
         Settings.mSP.putString("ListData","Radio_["+id+"]");
+        Settings.ModeID="Radio_["+id+"]";
         if (id.length() == 2) {
             HttpHelper.GetWeb(new Handler() {
                 @Override

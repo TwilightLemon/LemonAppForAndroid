@@ -72,7 +72,7 @@ public class SecondFragment extends Fragment {
                 builder.setPositiveButton("搜索", new DialogInterface.OnClickListener() {
                     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
                     public void onClick(DialogInterface dialog, int which) {
-                        MusicLib.Search((MainActivity)getActivity(), qq.getText().toString(),true);
+                        MusicLib.Search((MainActivity)getActivity(), qq.getText().toString(),true,0);
                     }
                 });
                 builder.show();
@@ -264,7 +264,7 @@ public class SecondFragment extends Fragment {
                         aData.ListOnClick = new AdapterView.OnItemClickListener() {
                             @Override
                             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                                MusicLib.Search((MainActivity) getActivity(), SingerData.get(i).name,true);
+                                MusicLib.Search((MainActivity) getActivity(), SingerData.get(i).name,true,0);
                             }
                         };
                         Settings.AdapData = aData;
@@ -342,7 +342,7 @@ public class SecondFragment extends Fragment {
                 MusicLib.GetSingerByTag("all_all_all", new Handler() {
                     @Override
                     public void handleMessage(Message msg) {
-                        MusicLib.Search((MainActivity) getActivity(), ((ArrayList<InfoHelper.SingerAndRadioData>) msg.obj).get(i).name,true);
+                        MusicLib.Search((MainActivity) getActivity(), ((ArrayList<InfoHelper.SingerAndRadioData>) msg.obj).get(i).name,true,0);
                     }
                 }, 4);
             }

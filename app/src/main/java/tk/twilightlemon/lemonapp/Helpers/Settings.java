@@ -26,6 +26,8 @@ public class Settings {
     public static MediaPlayer mp = new MediaPlayer();
 
     public static SharedPreferences.Editor mSP = null;
+
+    public static String ModeID="";
     //</editor-fold>
 
     //<editor-fold desc="一些跳转数据">
