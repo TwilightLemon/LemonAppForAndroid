@@ -3,6 +3,7 @@ package tk.twilightlemon.lemonapp.layouts;
 import android.Manifest;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.app.DownloadManager;
 import android.app.Notification;
@@ -20,6 +21,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -448,6 +450,9 @@ public class MainActivity extends AppCompatActivity {
         //</editor-fold>
 
         //<editor-fold desc="初始内容&事件">
+        lyricView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {}});
         lrcBig.setOnPlayClickListener(new LrcView.OnPlayClickListener() {
             @Override
             public boolean onPlayClick(long time) {
@@ -689,9 +694,9 @@ public class MainActivity extends AppCompatActivity {
     //<editor-fold desc="播放控制">
     public void Music_Last() {
         if (Settings.ListData.name != "Radio") {
-            if (PlayListIndex == 0)
+            if (PlayListIndex <= 0)
                 PlayListIndex = Settings.ListData.Data.size() - 1;
-            else --PlayListIndex;
+            else PlayListIndex--;
             Musicdt = Settings.ListData.Data.get(PlayListIndex);
             PlayMusic(true,0);
         }
@@ -715,7 +720,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             if (PlayListIndex == Settings.ListData.Data.size() - 1)
                 PlayListIndex = 0;
-            else ++PlayListIndex;
+            else PlayListIndex++;
             Musicdt = Settings.ListData.Data.get(PlayListIndex);
             PlayMusic(true,0);
         }
@@ -803,13 +808,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if (position != -1) {
-                    if(LastView!=null){
-                        ((TextView)LastView.findViewById(R.id.MusicList_title)).setTextColor(0xff0b0b0b);
-                        ((TextView)LastView.findViewById(R.id.MusicList_mss)).setTextColor(0xff5b5b5b);
-                    }
-                    ((TextView)view.findViewById(R.id.MusicList_title)).setTextColor(getResources().getColor(R.color.colorAccent));
-                    ((TextView)view.findViewById(R.id.MusicList_mss)).setTextColor(getResources().getColor(R.color.colorAccent));
-                    LastView=view;
                     Message message = new Message();
                     message.what = 0;
                     message.obj = position;
@@ -843,6 +841,7 @@ public class MainActivity extends AppCompatActivity {
         }, 300);
     }
 
+    @SuppressLint("HandlerLeak")
     public void MusicAllDownloadOnClick(View view) {
         try {
             for (int index = 0; index != Settings.ListData.Data.size() - 1; ++index) {
@@ -872,6 +871,7 @@ public class MainActivity extends AppCompatActivity {
     //</editor-fold>
 
     //<editor-fold desc="一些方法">
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     @SuppressLint("HandlerLeak")
     public void PlayMusic(final boolean isplay,final int ex) {
         StatService.onEvent(this, "tw_Play", "播放音乐", 1);
@@ -884,6 +884,16 @@ public class MainActivity extends AppCompatActivity {
         if(isplay) {
             Settings.mp.stop();
             Settings.mp = new MediaPlayer();
+            View view=MusicList_list.getChildAt(PlayListIndex);
+            if(LastView!=null){
+                ((TextView)LastView.findViewById(R.id.MusicList_title)).setTextColor(0xff0b0b0b);
+                ((TextView)LastView.findViewById(R.id.MusicList_mss)).setTextColor(0xff5b5b5b);
+                LastView.findViewById(R.id.MusicList_Color).setBackground(new ColorDrawable(0x00000000));
+            }
+            ((TextView)view.findViewById(R.id.MusicList_title)).setTextColor(getResources().getColor(R.color.colorAccent));
+            ((TextView)view.findViewById(R.id.MusicList_mss)).setTextColor(getResources().getColor(R.color.colorAccent));
+            view.findViewById(R.id.MusicList_Color).setBackground(new ColorDrawable(getResources().getColor(R.color.colorAccent)));
+            LastView=view;
         }
         final ImageView PlayBottom_img = findViewById(R.id.PlayBottom_img);
         TextView PlayBottom_title = findViewById(R.id.PlayBottom_title);

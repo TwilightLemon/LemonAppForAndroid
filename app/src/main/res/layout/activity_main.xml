@@ -107,6 +107,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Title"
+            android:layout_marginRight="60dp"
             android:textColor="#0b0b0b"
             android:typeface="sans"
             android:ellipsize="marquee"
@@ -114,7 +115,6 @@
             android:layout_marginTop="5dp"
             android:textSize="15dip"
             android:layout_marginLeft="70dp"
-            android:layout_marginRight="40dp"
             android:textStyle="bold"/>
 
         <TextView
@@ -126,7 +126,7 @@
             android:layout_below="@id/PlayBottom_title"
             android:textColor="#5b5b5b"
             android:layout_marginLeft="70dp"
-            android:layout_marginRight="40dp"
+            android:layout_marginRight="60dp"
             android:textSize="10dip"
             android:text="Mss" />
 

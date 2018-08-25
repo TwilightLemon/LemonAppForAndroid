@@ -5,8 +5,16 @@
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="horizontal"
-    android:padding="5dip">
+    android:paddingRight="5dip"
+    android:paddingTop="5dip"
+    android:paddingBottom="5dip">
 
+    <RelativeLayout
+        android:id="@+id/MusicList_Color"
+        android:layout_width="5dp"
+        android:layout_height="35dp"
+        android:layout_marginTop="2dp"
+        android:background="#00000000" />
     <TextView
         android:id="@+id/MusicList_index"
         android:layout_width="wrap_content"
@@ -22,28 +30,31 @@
         android:id="@+id/MusicList_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Title"
+        android:text="Title00000000000000000000000000000000000000000000000000"
         android:textColor="#0b0b0b"
         android:ellipsize="end"
         android:singleLine="true"
+        android:layout_marginEnd="30dp"
         android:typeface="sans"
         android:textSize="15dip"
-        android:layout_marginLeft="10dp"
-        android:textStyle="bold"/>
-
+        android:layout_marginStart="20dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="20dp" />
     <TextView
         android:id="@+id/MusicList_mss"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/MusicList_title"
         android:textColor="#5b5b5b"
-        android:layout_marginLeft="10dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginStart="20dp"
         android:textSize="10dip"
+        android:layout_marginEnd="30dp"
         android:ellipsize="end"
         android:singleLine="true"
         android:layout_marginTop="1dip"
-        android:text="Mss" />
-
+        android:text="Mss"
+        android:layout_marginRight="30dp" />
     <ImageView
         android:id="@+id/MusicDownload"
         android:layout_width="wrap_content"

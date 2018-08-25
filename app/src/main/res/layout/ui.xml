@@ -87,10 +87,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="70dp"
+            android:layout_marginRight="60dp"
             android:layout_marginTop="5dp"
             android:ellipsize="marquee"
             android:singleLine="true"
-            android:text="Title"
+            android:text="Title000000000000000000000000000000000000000000000000000000000000"
             android:textColor="#0b0b0b"
             android:textSize="15dip"
             android:textStyle="bold"
@@ -98,6 +99,7 @@
 
         <TextView
             android:id="@+id/PlayBottom_mss"
+            android:layout_marginRight="60dp"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/PlayBottom_title"
