@@ -35,6 +35,7 @@ import tk.twilightlemon.lemonapp.Helpers.Settings;
 import tk.twilightlemon.lemonapp.R;
 import tk.twilightlemon.lemonapp.layouts.Adaptivelayout;
 import tk.twilightlemon.lemonapp.layouts.MainActivity;
+import tk.twilightlemon.lemonapp.layouts.SearchActivity;
 
 //layout/second_fragment_layout.xml的交互逻辑
 public class SecondFragment extends Fragment {
@@ -64,18 +65,8 @@ public class SecondFragment extends Fragment {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                final EditText qq = new EditText(getContext());
-                qq.setHint("搜索");
-                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                builder.setTitle("搜索").setView(qq)
-                        .setNegativeButton("取消", null);
-                builder.setPositiveButton("搜索", new DialogInterface.OnClickListener() {
-                    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
-                    public void onClick(DialogInterface dialog, int which) {
-                        MusicLib.Search((MainActivity)getActivity(), qq.getText().toString(),true,0);
-                    }
-                });
-                builder.show();
+                startActivity(new Intent(getContext(), SearchActivity.class));
+                SearchActivity.ma= (MainActivity) getActivity();
             }
         });
     }

@@ -281,6 +281,37 @@ public class MusicLib {
     }
 
     @SuppressLint("HandlerLeak")
+    public static void Search_SmartBox(String key, final Handler handler){
+        HttpHelper.GetWeb(new Handler(){
+            @Override
+            public void handleMessage(Message msg){
+                try {
+                    JSONObject data = new JSONObject(msg.obj.toString()).getJSONObject("data");
+                    ArrayList<String> list = new ArrayList<>();
+                    JSONArray song = data.getJSONObject("song").getJSONArray("itemlist");
+                    for (int i = 0; i < song.length(); i++) {
+                        JSONObject o = song.getJSONObject(i);
+                        list.add("歌曲:" + o.getString("name") + " - " + o.getString("singer"));
+                    }
+                    JSONArray album = data.getJSONObject("album").getJSONArray("itemlist");
+                    for (int i = 0; i < album.length(); i++) {
+                        JSONObject o = album.getJSONObject(i);
+                        list.add("专辑:" + o.getString("singer") + " - 《" + o.getString("name") + "》");
+                    }
+                    JSONArray singer = data.getJSONObject("singer").getJSONArray("itemlist");
+                    for (int i = 0; i < singer.length(); i++) {
+                        JSONObject o = singer.getJSONObject(i);
+                        list.add("歌手:" + o.getString("singer"));
+                    }
+                    Message ms = new Message();
+                    ms.obj = list;
+                    handler.sendMessage(ms);
+                }catch (Exception e){}
+            }
+        },"https://c.y.qq.com/splcloud/fcgi-bin/smartbox_new.fcg?key="+URLEncoder.encode(key)+"&utf8=1&is_xml=0&loginUin="+Settings.qq+"&qqmusic_ver=1592&searchid=3DA3E73D151F48308932D9680A3A5A1722872&pcachetime=1535710304",null);
+    }
+
+    @SuppressLint("HandlerLeak")
     public static void GetUrl(final String Musicid, final Handler handler) {
         final HashMap<String, String> hdata = new HashMap<String, String>();
         hdata.put("Connection", "keep-alive");
