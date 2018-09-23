@@ -579,22 +579,14 @@ public class MainActivity extends AppCompatActivity {
         KeepLive();
     }
 
+    @SuppressLint("HandlerLeak")
     public void Updata() {
-        HashMap<String, String> data = new HashMap<>();
-        data.put("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
-        data.put("Accept-Language", "zh-CN,zh;q=0.9");
-        data.put("Cache-Control", "max-age=0");
-        data.put("Connection", "keep-alive");
-        data.put("Host", "coding.net");
-        data.put("Referer", "https://coding.net/u/twilightlemon/p/Updata/git/blob/master/AndroidUpdata.json");
-        data.put("Upgrade-Insecure-Requests", "1");
-        data.put("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36");
         HttpHelper.GetWeb(new Handler() {
             @Override
             public void handleMessage(Message msg) {
                 try {
                     JSONObject o = new JSONObject(msg.obj.toString());
-                    if (Integer.parseInt(o.getString("version").replace(".", "")) > MainActivity.this.getPackageManager().
+                    if (Integer.parseInt(o.getString("version")) > MainActivity.this.getPackageManager().
                             getPackageInfo(MainActivity.this.getPackageName(), 0).versionCode) {
                         final TextView tv = new TextView(MainActivity.this);
                         tv.setText("新版本:" + o.getString("version") + "\n" + o.getString("description").replace("@32", "\n"));
@@ -614,10 +606,9 @@ public class MainActivity extends AppCompatActivity {
                         });
                         builder.show();
                     }
-                } catch (Exception e) {
-                }
+                } catch (Exception e) {}
             }
-        }, "https://coding.net/u/twilightlemon/p/Updata/git/raw/master/AndroidUpdata.json", data);
+        }, "https://gitee.com/TwilightLemon/UpdataForAndroid/raw/master/AndroidUpdata.json", null);
     }
 
     @SuppressLint("HandlerLeak")
