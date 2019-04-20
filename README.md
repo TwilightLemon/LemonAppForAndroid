@@ -19,4 +19,3 @@ MIUI系统需要授予“锁屏显示”权限，否则不能在锁屏状态下�
 
 #### 下载
 [Coding](https://coding.net/u/twilightlemon/p/Updata/git/raw/master/app-release.apk)
-[Gitee](https://gitee.com/TwilightLemon/Updata/raw/master/app-release.apk)
