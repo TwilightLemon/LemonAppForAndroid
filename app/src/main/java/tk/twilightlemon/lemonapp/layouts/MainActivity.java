@@ -322,6 +322,16 @@ public class MainActivity extends AppCompatActivity {
                                 }
                             };
                             bu.disPlay(hl, "http://q2.qlogo.cn/headimg_dl?bs=qq&dst_uin=" + nu + "&spec=100");
+                            final HashMap<String, String> data = new HashMap<String, String>();
+                            data.put("Connection", "keep-alive");
+                            data.put("CacheControl", "max-age=0");
+                            data.put("Upgrade", "1");
+                            data.put("UserAgent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.110 Safari/537.36");
+                            data.put("Accept", "*/*");
+                            data.put("Referer", "https://y.qq.com/portal/player.html");
+                            data.put("Host", "c.y.qq.com");
+                            data.put("AcceptLanguage", "zh-CN,zh;q=0.8");
+                            data.put("Cookie", "pgv_pvid=628769750; ptcz=323fab8e686b0804909689c16997ef7ebeb05ad86f35a5f0efbfddb53cfde431; pgv_pvi=578551808; sensorsdata2015jssdkcross=%7B%22distinct_id%22%3A%221680831408845b-04db59e502e9528-552317d-2073600-1680831408a736%22%2C%22%24device_id%22%3A%221680831408845b-04db59e502e9528-552317d-2073600-1680831408a736%22%2C%22props%22%3A%7B%22%24latest_traffic_source_type%22%3A%22%E7%9B%B4%E6%8E%A5%E6%B5%81%E9%87%8F%22%2C%22%24latest_referrer%22%3A%22%22%2C%22%24latest_referrer_host%22%3A%22%22%2C%22%24latest_search_keyword%22%3A%22%E6%9C%AA%E5%8F%96%E5%88%B0%E5%80%BC_%E7%9B%B4%E6%8E%A5%E6%89%93%E5%BC%80%22%7D%7D; RK=3LKEPA2s0s; pgv_si=s9201464320; _qpsvr_localtk=0.1869525627964156; uin=o2728578956; skey=@8ymlyzolM; ptisp=cm; luin=o2728578956; lskey=0001000066b9b6a80b3d79d7be9a890bd616cbd1579857cb6c4ebd62a9225286577b131068eec9b96c09e15f; ts_refer=xui.ptlogin2.qq.com/cgi-bin/xlogin; ts_uid=247815470; p_uin=o2728578956; pt4_token=fQqicJ80WCpNDE8jWGkT-RLRy2kTxBbTgfMdmDFH6sE_; p_skey=rOP4nfyjAvXqgMyGGkeYF-nUrw3pVGhcV3Ql14LbkL8_; p_luin=o2728578956; p_lskey=000400000a795e474000b2d7ae15b3f74b87c9db6af1053492f9480344e2fb40f8a31e33b06d8e48386ab6c6; yqq_stat=0");
                             HttpHelper.GetWeb(new Handler() {
                                 @Override
                                 public void handleMessage(Message msg) {
@@ -343,7 +353,7 @@ public class MainActivity extends AppCompatActivity {
                                             break;
                                     }
                                 }
-                            }, "https://c.y.qq.com/rsc/fcgi-bin/fcg_get_profile_homepage.fcg?loginUin=" + nu + "&hostUin=0&format=json&inCharset=utf8&outCharset=utf-8&notice=0&platform=yqq&needNewCode=0&cid=205360838&ct=20&userid=" + nu + "&reqfrom=1&reqtype=0", null);
+                            }, "https://c.y.qq.com/rsc/fcgi-bin/fcg_get_profile_homepage.fcg?loginUin=" + nu + "&hostUin=0&format=json&inCharset=utf8&outCharset=utf-8&notice=0&platform=yqq&needNewCode=0&cid=205360838&ct=20&userid=" + nu + "&reqfrom=1&reqtype=0", data);
                         } catch (Exception e) {
                         }
                     }
