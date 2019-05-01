@@ -3,7 +3,9 @@ LemonApp 是一款开源的基于QQ音乐的在线音乐播放器，采用Materi
 支持同步QQ音乐歌单及喜欢，更有排行版、分类歌单、歌手、电台等功能 发现好音乐！
 
  [![LICENSE](https://img.shields.io/badge/license-GPL%20v3.0-blue.svg?style=flat-square)](https://github.com/TwilightLemon/LemonAppForAndroid/blob/master/LICENSE)
- [![Download](https://img.shields.io/badge/Download-Lemon%20App-%23FF4D5B.svg?style=flat-squar)](https://coding.net/u/twilightlemon/p/Updata/git/raw/master/app-release.apk)
+[![LICENSE](https://img.shields.io/badge/license-Anti%20996-blue.svg)](https://github.com/996icu/996.ICU/blob/master/LICENSE)
+[![996.icu](https://img.shields.io/badge/link-996.icu-red.svg)](https://996.icu)
+[![Download](https://img.shields.io/badge/Download-Lemon%20App-%23FF4D5B.svg?style=flat-squar)](https://coding.net/u/twilightlemon/p/Updata/git/raw/master/app-release.apk)
  
 ### UI界面
 ![主界面](https://raw.githubusercontent.com/TwilightLemon/Data/master/MainPage.jpg)
