@@ -73,7 +73,7 @@ public class FirstFragment extends Fragment {
             data.put("Referer", "https://y.qq.com/portal/player.html");
             data.put("Host", "c.y.qq.com");
             data.put("AcceptLanguage", "zh-CN,zh;q=0.8");
-            data.put("Cookie", "pgv_pvid=628769750; ptcz=323fab8e686b0804909689c16997ef7ebeb05ad86f35a5f0efbfddb53cfde431; pgv_pvi=578551808; sensorsdata2015jssdkcross=%7B%22distinct_id%22%3A%221680831408845b-04db59e502e9528-552317d-2073600-1680831408a736%22%2C%22%24device_id%22%3A%221680831408845b-04db59e502e9528-552317d-2073600-1680831408a736%22%2C%22props%22%3A%7B%22%24latest_traffic_source_type%22%3A%22%E7%9B%B4%E6%8E%A5%E6%B5%81%E9%87%8F%22%2C%22%24latest_referrer%22%3A%22%22%2C%22%24latest_referrer_host%22%3A%22%22%2C%22%24latest_search_keyword%22%3A%22%E6%9C%AA%E5%8F%96%E5%88%B0%E5%80%BC_%E7%9B%B4%E6%8E%A5%E6%89%93%E5%BC%80%22%7D%7D; RK=3LKEPA2s0s; pgv_si=s9201464320; _qpsvr_localtk=0.1869525627964156; uin=o2728578956; skey=@8ymlyzolM; ptisp=cm; luin=o2728578956; lskey=0001000066b9b6a80b3d79d7be9a890bd616cbd1579857cb6c4ebd62a9225286577b131068eec9b96c09e15f; ts_refer=xui.ptlogin2.qq.com/cgi-bin/xlogin; ts_uid=247815470; p_uin=o2728578956; pt4_token=fQqicJ80WCpNDE8jWGkT-RLRy2kTxBbTgfMdmDFH6sE_; p_skey=rOP4nfyjAvXqgMyGGkeYF-nUrw3pVGhcV3Ql14LbkL8_; p_luin=o2728578956; p_lskey=000400000a795e474000b2d7ae15b3f74b87c9db6af1053492f9480344e2fb40f8a31e33b06d8e48386ab6c6; yqq_stat=0");
+            data.put("Cookie", "pgv_pvid=3531479395; euin_cookie=0DF01BA83F82F2B99D1327B4228ECEB457E5342B14DAEA7D; ptcz=b6a78a1389245b1d160bd02b1bd65a22d62fe28d6c0914e7264b6c74f1216b1f; pgv_pvi=4809115648; uin_cookie=2728578956; sensorsdata2015jssdkcross=%7B%22distinct_id%22%3A%22168c5952d117ea-0a44be39a4fa52-4f7b614a-1049088-168c5952d1218a%22%2C%22%24device_id%22%3A%22168c5952d117ea-0a44be39a4fa52-4f7b614a-1049088-168c5952d1218a%22%2C%22props%22%3A%7B%22%24latest_traffic_source_type%22%3A%22%E7%9B%B4%E6%8E%A5%E6%B5%81%E9%87%8F%22%2C%22%24latest_referrer%22%3A%22%22%2C%22%24latest_referrer_host%22%3A%22%22%2C%22%24latest_search_keyword%22%3A%22%E6%9C%AA%E5%8F%96%E5%88%B0%E5%80%BC_%E7%9B%B4%E6%8E%A5%E6%89%93%E5%BC%80%22%7D%7D; luin=o2728578956; RK=sKKMfg2M0M; ptui_loginuin=3474980436; lskey=00010000658d1565681b1c42a8c94005522e0cb48a7c37c6c0b8c7f8768a8a10e4194b27cc35be4e8a589920; pgv_si=s3607160832; _qpsvr_localtk=0.9909435018453949; ptisp=cm; uin=o2728578956; skey=@a79zUquVu; ts_last=y.qq.com/n/yqq/song/000edOaL1WZOWq.html; p_lskey=00040000434fd61fc4436000520646d6937237b9067e6f900daf6188175c0983042d1cfc48aa65e1d7d2af55; ts_refer=xui.ptlogin2.qq.com/cgi-bin/xlogin; ts_uid=3700488506; userAction=1; p_luin=o2728578956; p_uin=o2728578956; pt4_token=94OgYmRkOoVFeTTQE9OUHu8gr*ezHH60409TZzw-9Ng_; p_skey=eEasMNBX758iOrddAetDYI4Y6JTthz0imY37ergdOJE_; yqq_stat=0");
             HttpHelper.GetWeb(new Handler() {
                 @Override
                 public void handleMessage(Message msg) {
@@ -102,7 +102,12 @@ public class FirstFragment extends Fragment {
                                 GDListAdapter ga = new GDListAdapter(getActivity(), GDdata);
                                 lv.setAdapter(ga);
                                 setListViewHeightBasedOnChildren(lv);
-                                LoadLikeList(jo.getJSONObject("data").getJSONArray("mymusic").getJSONObject(0).getString("id"), slv);
+                                JSONArray cc=jo.getJSONObject("data").getJSONArray("mymusic");
+                                for(int ig=0;ig<cc.length();ig++){
+                                    if(cc.getJSONObject(ig).getString("title").equals("我喜欢")){
+                                        LoadLikeList(cc.getJSONObject(ig).getString("id"), slv);
+                                        break;}
+                                }
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
@@ -155,7 +160,8 @@ public class FirstFragment extends Fragment {
         data.put("Referer", "https://y.qq.com/portal/player.html");
         data.put("Host", "c.y.qq.com");
         data.put("AcceptLanguage", "zh-CN,zh;q=0.8");
-        data.put("Cookie", "pgv_pvid=628769750; ptcz=323fab8e686b0804909689c16997ef7ebeb05ad86f35a5f0efbfddb53cfde431; pgv_pvi=578551808; sensorsdata2015jssdkcross=%7B%22distinct_id%22%3A%221680831408845b-04db59e502e9528-552317d-2073600-1680831408a736%22%2C%22%24device_id%22%3A%221680831408845b-04db59e502e9528-552317d-2073600-1680831408a736%22%2C%22props%22%3A%7B%22%24latest_traffic_source_type%22%3A%22%E7%9B%B4%E6%8E%A5%E6%B5%81%E9%87%8F%22%2C%22%24latest_referrer%22%3A%22%22%2C%22%24latest_referrer_host%22%3A%22%22%2C%22%24latest_search_keyword%22%3A%22%E6%9C%AA%E5%8F%96%E5%88%B0%E5%80%BC_%E7%9B%B4%E6%8E%A5%E6%89%93%E5%BC%80%22%7D%7D; RK=3LKEPA2s0s; pgv_si=s9201464320; _qpsvr_localtk=0.1869525627964156; uin=o2728578956; skey=@8ymlyzolM; ptisp=cm; luin=o2728578956; lskey=0001000066b9b6a80b3d79d7be9a890bd616cbd1579857cb6c4ebd62a9225286577b131068eec9b96c09e15f; ts_refer=xui.ptlogin2.qq.com/cgi-bin/xlogin; ts_uid=247815470; p_uin=o2728578956; pt4_token=fQqicJ80WCpNDE8jWGkT-RLRy2kTxBbTgfMdmDFH6sE_; p_skey=rOP4nfyjAvXqgMyGGkeYF-nUrw3pVGhcV3Ql14LbkL8_; p_luin=o2728578956; p_lskey=000400000a795e474000b2d7ae15b3f74b87c9db6af1053492f9480344e2fb40f8a31e33b06d8e48386ab6c6; yqq_stat=0");
+        data.put("Cookie", "pgv_pvi=1693112320; RK=DKOGai2+wu; pgv_pvid=1804673584; ptcz=3a23e0a915ddf05c5addbede97812033b60be2a192f7c3ecb41aa0d60912ff26; pgv_si=s4366031872; _qpsvr_localtk=0.3782697029073365; ptisp=ctc; luin=o2728578956; lskey=00010000863c7a430b79e2cf0263ff24a1e97b0694ad14fcee720a1dc16ccba0717d728d32fcadda6c1109ff; pt2gguin=o2728578956; uin=o2728578956; skey=@PjlklcXgw; p_uin=o2728578956; p_skey=ROnI4JEkWgKYtgppi3CnVTETY3aHAIes-2eDPfGQcVg_; pt4_token=wC-2b7WFwI*8aKZBjbBb7f4Am4rskj11MmN7bvuacJQ_; p_luin=o2728578956; p_lskey=00040000e56d131f47948fb5a2bec49de6174d7938c2eb45cb224af316b053543412fd9393f83ee26a451e15; ts_refer=ui.ptlogin2.qq.com/cgi-bin/login; ts_last=y.qq.com/n/yqq/playlist/2591355982.html; ts_uid=1420532256; yqq_stat=0");
+
         HttpHelper.GetWeb(new Handler() {
             @Override
             public void handleMessage(Message msg) {

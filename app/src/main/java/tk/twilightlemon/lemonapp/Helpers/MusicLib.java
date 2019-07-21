@@ -314,77 +314,29 @@ public class MusicLib {
     @SuppressLint("HandlerLeak")
     public static void GetUrl(final String Musicid, final Handler handler) {
         final HashMap<String, String> hdata = new HashMap<String, String>();
-        hdata.put("Connection", "keep-alive");
-        hdata.put("CacheControl", "max-age=0");
-        hdata.put("Upgrade", "1");
-        hdata.put("UserAgent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.110 Safari/537.36");
-        hdata.put("Accept", "*/*");
-        hdata.put("Referer", "https://y.qq.com/portal/player.html");
-        hdata.put("Host", "c.y.qq.com");
-        hdata.put("AcceptLanguage", "zh-CN,zh;q=0.8");
-        hdata.put("Cookie", "pgv_pvi=1693112320; RK=DKOGai2+wu; pgv_pvid=1804673584; ptcz=3a23e0a915ddf05c5addbede97812033b60be2a192f7c3ecb41aa0d60912ff26; pgv_si=s4366031872; _qpsvr_localtk=0.3782697029073365; ptisp=ctc; luin=o2728578956; lskey=00010000863c7a430b79e2cf0263ff24a1e97b0694ad14fcee720a1dc16ccba0717d728d32fcadda6c1109ff; pt2gguin=o2728578956; uin=o2728578956; skey=@PjlklcXgw; p_uin=o2728578956; p_skey=ROnI4JEkWgKYtgppi3CnVTETY3aHAIes-2eDPfGQcVg_; pt4_token=wC-2b7WFwI*8aKZBjbBb7f4Am4rskj11MmN7bvuacJQ_; p_luin=o2728578956; p_lskey=00040000e56d131f47948fb5a2bec49de6174d7938c2eb45cb224af316b053543412fd9393f83ee26a451e15; ts_refer=ui.ptlogin2.qq.com/cgi-bin/login; ts_last=y.qq.com/n/yqq/playlist/2591355982.html; ts_uid=1420532256; yqq_stat=0");
+        hdata.put("cache-control", "max-age=0");
+        hdata.put("upgrade", "1");
+        hdata.put("user-agent", "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3854.3 Mobile Safari/537.36");
+        hdata.put("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3");
+        hdata.put("host", "i.y.qq.com");
+        hdata.put("accept-language", "zh-CN,zh;q=0.9");
+        hdata.put("sec-fetch-mode", "navigate");
+        hdata.put("sec-fetch-site", "none");
+        hdata.put("sec-fetch-user", "?1");
+        hdata.put("upgrade-insecure-requests", "1");
+        hdata.put("cookie", "pgv_pvi=3630597120; RK=kDKEPg2NxM; ptcz=2a68e8626b3724117c56d2f94b2716d35e4f6f51d79e0ff2d8b6e6cdbd5791e3; pgv_pvid=1338254218; ts_uid=712092420; luin=o2728578956; p_luin=o2728578956; lskey=00010000f0c3da6da390b7375ccf0ce8c5dc5e7f77ea9cf3edade68710ceaaf9238098b5b655cde3c9a94aa1; p_lskey=00040000e94b3dfb7fb24dbe6868d705514d4fe9a9a97f087286d85ad00c40c97ad8c778aab07f068f30bdda; ts_refer=ADTAGmyqq; ts_uid=712092420; yq_index=0; ts_refer=ADTAGh5_playsong; yqq_stat=0; pgv_info=ssid=s3863107460; ts_last=y.qq.com/n/yqq/song/105735736_num.html; pgv_si=s5451320320; userAction=1; ts_last=i.y.qq.com/v8/playsong.html");
         HttpHelper.GetWeb(new Handler() {
             @Override
             public void handleMessage(Message msg) {
-                try {
-                    final String mid = new JSONObject(msg.obj.toString()).getJSONArray("data").getJSONObject(0).getJSONObject("file").getString("media_mid");
-                    final String guid = "365305415";
-                    HttpHelper.GetWeb(new Handler() {
-                        @Override
-                        public void handleMessage(Message msg) {
-                            try {
-                                final int[] scr = {0};
-                                final ArrayList<String[]> MData = new ArrayList<>();
-                                MData.add(new String[]{"M800", "mp3"});
-                                MData.add(new String[]{"C600", "m4a"});
-                                MData.add(new String[]{"M500", "mp3"});
-                                MData.add(new String[]{"C400", "m4a"});
-                                MData.add(new String[]{"M200", "m4a"});
-                                MData.add(new String[]{"M100", "m4a"});
-                                final String key = new JSONObject(msg.obj.toString()).getString("key");
-                                new Thread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                            while (true) {
-                                                try {
-                                                String uri = "";
-                                                try{
-                                                    uri="https://dl.stream.qqmusic.qq.com/" + MData.get(scr[0])[0] + mid + "." + MData.get(scr[0])[1] + "?vkey=" + key + "&guid=" + guid + "&uid=0&fromtag=30";
-                                                }catch (Exception e){
-                                                    uri="http://ws.stream.qqmusic.qq.com/C100"+mid+".m4a?fromtag=0&guid=126548448";
-                                                    HttpURLConnection conn=null;
-                                                    URL url = new URL(uri);
-                                                    conn = (HttpURLConnection) url.openConnection();
-                                                    conn.setRequestMethod("GET");
-                                                    Message ms = new Message();
-                                                    ms.what=conn.getResponseCode();
-                                                    ms.obj = uri;
-                                                    handler.sendMessage(ms);
-                                                    return;
-                                                }
-                                                HttpURLConnection conn=null;
-                                                    URL url = new URL(uri);
-                                                    conn = (HttpURLConnection) url.openConnection();
-                                                    conn.setRequestMethod("GET");
-                                                    if (conn.getResponseCode() == 200) {
-                                                        Message ms = new Message();
-                                                        ms.what=200;
-                                                        ms.obj = uri;
-                                                        handler.sendMessage(ms);
-                                                        break;
-                                                    } else ++scr[0];
-                                                }catch (Exception e){}
-                                            }
-                                            MData.clear();
-                                    }
-                                }).start();
-                            } catch (Exception e) {}
-                        }
-                    }, "https://c.y.qq.com/base/fcgi-bin/fcg_musicexpress.fcg?json=3&guid=" + guid + "&format=json", hdata);
-                } catch (Exception e) {
-                }
+                String st=msg.obj.toString();
+                String vk=TextHelper.FindByAb(st,"http://aqqmusic.tc.qq.com/amobile.music.tc.qq.com/C4000013KcQ72u8FY7.m4a", "&fromtag=38");
+                String url="http://aqqmusic.tc.qq.com/amobile.music.tc.qq.com/C400"+Musicid+".m4a" + vk + "&fromtag=38";
+                Message ms=new Message();
+                ms.what=200;
+                ms.obj=url;
+                handler.sendMessage(ms);
             }
-        }, "https://c.y.qq.com/v8/fcg-bin/fcg_play_single_song.fcg?songmid=" + Musicid + "&platform=yqq&format=json", hdata);
+        }, "https://i.y.qq.com/v8/playsong.html?songmid=0013KcQ72u8FY7,0011jIhY1wP6wB", hdata);
     }
 
     @SuppressLint("HandlerLeak")
