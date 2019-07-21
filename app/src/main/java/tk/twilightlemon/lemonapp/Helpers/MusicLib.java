@@ -418,7 +418,7 @@ public class MusicLib {
                         InfoHelper.MusicGData md = new InfoHelper().new MusicGData();
                         JSONObject jo = o.getJSONObject("data").getJSONArray("list").getJSONObject(i);
                         md.name = jo.getString("dissname");
-                        md.pic = jo.getString("imgurl");
+                        md.pic = jo.getString("imgurl").replace("http://","https://");
                         md.id = jo.getString("dissid");
                         md.sub = jo.getJSONObject("creator").getString("name");
                         FLGDdata.add(md);

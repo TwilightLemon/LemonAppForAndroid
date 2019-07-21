@@ -93,7 +93,7 @@ public class FirstFragment extends Fragment {
                                     df.sub = obj.getString("subtitle");
                                     df.name = obj.getString("title");
                                     if (obj.getString("picurl").length() > 10)
-                                        df.pic = obj.getString("picurl");
+                                        df.pic = obj.getString("picurl").replace("http://","https://");
                                     else
                                         df.pic = "https://y.gtimg.cn/mediastyle/global/img/cover_playlist.png?max_age=31536000";
                                     GDdata.add(df);
@@ -135,7 +135,7 @@ public class FirstFragment extends Fragment {
                         df.sub ="创建者:"+obj.getString("nickname");
                         df.name = obj.getString("dissname");
                         if (obj.getString("logo").length()>10)
-                            df.pic = obj.getString("logo");
+                            df.pic = obj.getString("logo").replace("http://","https://");
                         else
                             df.pic = "https://y.gtimg.cn/mediastyle/global/img/cover_playlist.png?max_age=31536000";
                         LikeGDdata.add(df);
