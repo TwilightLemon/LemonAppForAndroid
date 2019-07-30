@@ -24,6 +24,7 @@ import tk.twilightlemon.lemonapp.Helpers.Settings;
 
 public class Adaptivelayout extends AppCompatActivity {
     private InfoHelper.AdaptiveData adaptData;
+    public static Handler Close;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +34,12 @@ public class Adaptivelayout extends AppCompatActivity {
         adaptData = Settings.AdapData;
         Settings.AdapData = null;
         LoadControls();
+        Close=new Handler(){
+            @Override
+            public void handleMessage(Message msg) {
+                finish();
+            }
+        };
     }
 
     public void SetWindow() {

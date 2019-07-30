@@ -187,6 +187,7 @@ public class SecondFragment extends Fragment {
                                     aData.ListOnClick = new AdapterView.OnItemClickListener() {
                                         @Override
                                         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                                            Adaptivelayout.Close.sendMessage(new Message());
                                             MusicLib.GetGDbyID(FLGDdat.get(i), getActivity(),true);
                                         }
                                     };
@@ -255,6 +256,7 @@ public class SecondFragment extends Fragment {
                         aData.ListOnClick = new AdapterView.OnItemClickListener() {
                             @Override
                             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                                Adaptivelayout.Close.sendMessage(new Message());
                                 MusicLib.Search((MainActivity) getActivity(), SingerData.get(i).name,true,0);
                             }
                         };
@@ -289,6 +291,7 @@ public class SecondFragment extends Fragment {
                         aData.ListOnClick = new AdapterView.OnItemClickListener() {
                             @Override
                             public void onItemClick(AdapterView<?> adapterView, View view, final int i, long l) {
+                                Adaptivelayout.Close.sendMessage(new Message());
                                 MusicLib.GetRadioMusicById(RadioMData.get(i).id, new Handler() {
                                     @Override
                                     public void handleMessage(Message msg) {

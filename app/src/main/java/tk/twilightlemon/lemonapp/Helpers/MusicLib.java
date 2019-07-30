@@ -252,22 +252,22 @@ public class MusicLib {
                             dt.ImageUrl = "http://y.gtimg.cn/music/photo_new/T002R300x300M000" + jos.getJSONObject("album").getString("mid") + ".jpg";
                             dt.GC = jos.getJSONObject("action").getString("alert");
                             SearchData.Data.add(dt);
-                            if(jos.getJSONArray("grp").length()!=0){
-                                for(int t=0;t<jos.getJSONArray("grp").length();t++){
-                                    InfoHelper.Music dat = new InfoHelper().new Music();
-                                    JSONObject joss = jos.getJSONArray("grp").getJSONObject(t);
-                                    dat.MusicName = joss.getString("title");
-                                    String isxs = "";
-                                    for (int ix = 0; ix != joss.getJSONArray("singer").length(); ix++) {
-                                        isxs += joss.getJSONArray("singer").getJSONObject(ix).getString("name") + "&";
-                                    }
-                                    dat.Singer = isxs.substring(0, isxs.lastIndexOf("&"));
-                                    dat.MusicID = joss.getString("mid");
-                                    dat.ImageUrl = "http://y.gtimg.cn/music/photo_new/T002R300x300M000" + joss.getJSONObject("album").getString("mid") + ".jpg";
-                                    dat.GC = joss.getJSONObject("action").getString("alert");
-                                    SearchData.Data.add(dat);
-                                }
-                            }
+     //                       if(jos.getJSONArray("grp").length()!=0){
+     //                           for(int t=0;t<jos.getJSONArray("grp").length();t++){
+     //    突突突突突                  InfoHelper.Music dat = new InfoHelper().new Music();
+     //                               JSONObject joss = jos.getJSONArray("grp").getJSONObject(t);
+     //                               dat.MusicName = joss.getString("title");
+     //                               String isxs = "";
+     //                               for (int ix = 0; ix != joss.getJSONArray("singer").length(); ix++) {
+     //                                   isxs += joss.getJSONArray("singer").getJSONObject(ix).getString("name") + "&";
+     //                               }
+      //                              dat.Singer = isxs.substring(0, isxs.lastIndexOf("&"));
+     //                               dat.MusicID = joss.getString("mid");
+     //                               dat.ImageUrl = "http://y.gtimg.cn/music/photo_new/T002R300x300M000" + joss.getJSONObject("album").getString("mid") + ".jpg";
+     //                               dat.GC = joss.getJSONObject("action").getString("alert");
+     //                               SearchData.Data.add(dat);
+     //                           }
+     //                       }
                         }
                         if(SearchData.Data.size()!=0){
                         Settings.ListData = SearchData;

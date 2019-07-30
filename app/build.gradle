@@ -7,8 +7,8 @@ android {
         applicationId "tk.twilightlemon.lemonapp"
         minSdkVersion 15
         targetSdkVersion 28
-        versionCode 1248
-        versionName "1.2.4.8"
+        versionCode 1255
+        versionName "1.2.5.5"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -20,7 +20,7 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.baidu.mobstat:mtj-sdk:latest.integration'
     implementation 'com.android.support:appcompat-v7:28.0.0-alpha3'
     implementation 'com.squareup.okhttp3:okhttp:3.6.0'

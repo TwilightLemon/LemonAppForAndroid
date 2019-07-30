@@ -28,6 +28,7 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
@@ -38,6 +39,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v4.view.ViewPager;
@@ -64,6 +66,11 @@ import com.baidu.mobstat.StatService;
 
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -72,6 +79,7 @@ import java.util.List;
 
 import tk.twilightlemon.lemonapp.Adapters.MusicListAdapter;
 import tk.twilightlemon.lemonapp.Adapters.MyFragmentAdapter;
+import tk.twilightlemon.lemonapp.Helpers.FileUtils;
 import tk.twilightlemon.lemonapp.Helpers.Image.BitmapUtils;
 import tk.twilightlemon.lemonapp.Helpers.Image.BlurBitmap;
 import tk.twilightlemon.lemonapp.Fragments.FirstFragment;
@@ -598,27 +606,92 @@ public class MainActivity extends AppCompatActivity {
                     JSONObject o = new JSONObject(msg.obj.toString());
                     if (Integer.parseInt(o.getString("version")) > MainActivity.this.getPackageManager().
                             getPackageInfo(MainActivity.this.getPackageName(), 0).versionCode) {
-                        final TextView tv = new TextView(MainActivity.this);
-                        tv.setText("新版本:" + o.getString("version") + "\n" + o.getString("description").replace("@32", "\n"));
-                        final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                        builder.setTitle("小萌有新版本啦").setView(tv)
-                                .setNegativeButton("关闭", null);
-                        builder.setPositiveButton("更新", new DialogInterface.OnClickListener() {
-                            @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
-                            public void onClick(DialogInterface dialog, int which) {
-                                StatService.onEvent(MainActivity.this, "tw_updata", "更新数", 1);
-                                Intent intent = new Intent();
-                                intent.setAction("android.intent.action.VIEW");
-                                Uri content_url = Uri.parse("https://coding.net/u/twilightlemon/p/Updata/git/raw/master/app-release.apk");
-                                intent.setData(content_url);
-                                startActivity(intent);
-                            }
-                        });
-                        builder.show();
+                        String message="新版本:" + o.getString("version") + "\n" + o.getString("description").replace("@32", "\n");
+                        AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
+                                .setTitle("发现新版本")
+                                .setIcon(R.mipmap.ic_launcher)
+                                .setMessage(message)
+                                .setPositiveButton("更新", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                        //Download Apk
+                                        downLoad("https://files.cnblogs.com/files/TwilightLemon/app-release.apk","app-release.apk",new Handler(){
+                                            @Override
+                                            public void handleMessage(Message msg) {
+                                                //Download Finished
+                                                FileUtils fileUtils = new FileUtils();
+                                                File f=fileUtils.createFile("app-release.apk");
+                                                installApk(f);
+                                            }
+                                        });
+                                    }
+                                })
+                                .setNegativeButton("取消", null)
+                                .create();
+                        dialog.show();
                     }
                 } catch (Exception e) {}
             }
         }, "https://gitee.com/TwilightLemon/UpdataForAndroid/raw/master/AndroidUpdata.json", null);
+    }
+
+
+    public static void downLoad(final String uri, final String FileName, final Handler finished) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    FileUtils fileUtils = new FileUtils();
+                    File f=fileUtils.createFile(FileName);
+                    if(f.exists())
+                        f.delete();
+                    URL url = new URL(uri);
+                    HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                    con.setReadTimeout(5000);
+                    con.setConnectTimeout(5000);
+                    con.setRequestProperty("Charset", "UTF-8");
+                    con.setRequestMethod("GET");
+                    if (con.getResponseCode() == 200) {
+                        InputStream is = con.getInputStream();//获取输入流
+                        FileOutputStream fileOutputStream = null;//文件输出流
+                        if (is != null) {
+                            fileOutputStream = new FileOutputStream(fileUtils.createFile(FileName));//指定文件保存路径，代码看下一步
+                            byte[] buf = new byte[1024];
+                            int ch;
+                            while ((ch = is.read(buf)) != -1) {
+                                fileOutputStream.write(buf, 0, ch);//将获取到的流写入文件中
+                            }
+                        }
+                        if (fileOutputStream != null) {
+                            fileOutputStream.flush();
+                            fileOutputStream.close();
+                            Message msg=new Message();
+                            msg.obj="Finished Downloading!!!";
+                            finished.sendMessage(msg);
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
+    public void installApk(File apkFile) {
+        Intent installApkIntent = new Intent();
+        installApkIntent.setAction(Intent.ACTION_VIEW);
+        installApkIntent.addCategory(Intent.CATEGORY_DEFAULT);
+        installApkIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
+            installApkIntent.setDataAndType(FileProvider.getUriForFile(getApplicationContext(), "tk.twilightlemon.lemonapp.fileprovider", apkFile), "application/vnd.android.package-archive");
+            installApkIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        } else {
+            installApkIntent.setDataAndType(Uri.fromFile(apkFile), "application/vnd.android.package-archive");
+        }
+        if (getPackageManager().queryIntentActivities(installApkIntent, 0).size() > 0) {
+            startActivity(installApkIntent);
+        }
     }
 
     @SuppressLint("HandlerLeak")
