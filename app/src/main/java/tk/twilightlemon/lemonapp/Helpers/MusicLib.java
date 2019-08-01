@@ -329,12 +329,25 @@ public class MusicLib {
             @Override
             public void handleMessage(Message msg) {
                 String st=msg.obj.toString();
-                String vk=TextHelper.FindByAb(st,"http://aqqmusic.tc.qq.com/amobile.music.tc.qq.com/C4000013KcQ72u8FY7.m4a", "&fromtag=38");
-                String url="http://aqqmusic.tc.qq.com/amobile.music.tc.qq.com/C400"+Musicid+".m4a" + vk + "&fromtag=38";
-                Message ms=new Message();
-                ms.what=200;
-                ms.obj=url;
-                handler.sendMessage(ms);
+                final String vk=TextHelper.FindByAb(st,"http://aqqmusic.tc.qq.com/amobile.music.tc.qq.com/C4000013KcQ72u8FY7.m4a", "&fromtag=38");
+                //var mid = JObject.Parse(await HttpHelper.GetWebDatacAsync($"https://c.y.qq.com/v8/fcg-bin/fcg_play_single_song.fcg?songmid={Musicid}&platform=yqq&format=json"))["data"][0]["file"]["media_mid"].ToString();
+                HttpHelper.GetWeb(new Handler(){
+                    @Override
+                    public void handleMessage(Message msg) {
+                        String json=msg.obj.toString();
+                        String mid= null;
+                        try {
+                            mid = new JSONObject(json).getJSONArray("data").getJSONObject(0).getJSONObject("file").getString("media_mid");
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        String url="http://aqqmusic.tc.qq.com/amobile.music.tc.qq.com/C400"+mid+".m4a" + vk + "&fromtag=38";
+                        Message ms=new Message();
+                        ms.what=200;
+                        ms.obj=url;
+                        handler.sendMessage(ms);
+                    }
+                },"https://c.y.qq.com/v8/fcg-bin/fcg_play_single_song.fcg?songmid="+Musicid+"&platform=yqq&format=json",hdata);
             }
         }, "https://i.y.qq.com/v8/playsong.html?songmid=0013KcQ72u8FY7,0011jIhY1wP6wB", hdata);
     }

@@ -274,7 +274,7 @@ public class MainActivity extends AppCompatActivity {
                     ((ImageView) findViewById(R.id.USERTX)).setImageDrawable(RBD);
                 }
             };
-            bu.disPlay(hl, "http://q2.qlogo.cn/headimg_dl?bs=qq&dst_uin=" + nu + "&spec=100");
+            bu.disPlay(hl, sp.getString("tx", ""));
             Settings.qq = nu;
         }
 
@@ -320,16 +320,6 @@ public class MainActivity extends AppCompatActivity {
                         try {
                             StatService.onEvent(MainActivity.this, "tw_Login", "活跃用户", 1);
                             final String nu = qq.getText().toString();
-                            BitmapUtils bu = new BitmapUtils();
-                            Handler hl = new Handler() {
-                                @Override
-                                public void handleMessage(Message msg) {
-                                    RoundedBitmapDrawable RBD = RoundedBitmapDrawableFactory.create(getResources(), (Bitmap) msg.obj);
-                                    RBD.setCircular(true);
-                                    ((ImageView) findViewById(R.id.USERTX)).setImageDrawable(RBD);
-                                }
-                            };
-                            bu.disPlay(hl, "http://q2.qlogo.cn/headimg_dl?bs=qq&dst_uin=" + nu + "&spec=100");
                             final HashMap<String, String> data = new HashMap<String, String>();
                             data.put("Connection", "keep-alive");
                             data.put("CacheControl", "max-age=0");
@@ -347,12 +337,24 @@ public class MainActivity extends AppCompatActivity {
                                     switch (msg.what) {
                                         case 0:
                                             String response = (String) msg.obj;
+                                            Handler hl = new Handler() {
+                                                @Override
+                                                public void handleMessage(Message msg) {
+                                                    RoundedBitmapDrawable RBD = RoundedBitmapDrawableFactory.create(getResources(), (Bitmap) msg.obj);
+                                                    RBD.setCircular(true);
+                                                    ((ImageView) findViewById(R.id.USERTX)).setImageDrawable(RBD);
+                                                }
+                                            };
+                                            BitmapUtils bu = new BitmapUtils();
+                                            String tx="https://"+ FindByAb(response, "\"headpic\":\"http://", "\",\"ifpic\"");
+                                            bu.disPlay(hl,tx);
                                             String name = FindByAb(response, "{\"nick\":\"", "\",\"headpic\"");
                                             ((TextView) findViewById(R.id.USERNAME)).setText(name);
                                             SharedPreferences preferences = MainActivity.this.getSharedPreferences("Cookie", Context.MODE_PRIVATE);
                                             SharedPreferences.Editor editor = preferences.edit();
                                             editor.putString("qq", qq.getText().toString());
                                             editor.putString("name", name);
+                                            editor.putString("tx", tx);
                                             editor.commit();
                                             Settings.qq = qq.getText().toString();
                                             SetTitle();
