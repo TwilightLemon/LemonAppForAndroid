@@ -22,6 +22,9 @@ import java.util.ArrayList;
 public class Settings {
     //<editor-fold desc="一些常量">
     public static String qq="";
+    public static String Cookie="";
+    public static String g_tk="";
+
     public static boolean isActive=true;
     public static MediaPlayer mp = new MediaPlayer();
 

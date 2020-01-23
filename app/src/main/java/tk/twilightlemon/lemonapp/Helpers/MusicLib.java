@@ -32,12 +32,7 @@ public class MusicLib {
     public static void GetMusicLyric(String ID, final LrcView lrc) {
         lrc.reset();
         lrc.initEntryList();
-        HashMap<String, String> data = new HashMap<>();
-        data.put("User-Agent", " Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.139 Safari/537.36");
-        data.put("Accept", "*/*");
-        data.put("Referer", "https://y.qq.com/portal/player.html");
-        data.put("Cookie", "yqq_stat=0; pgv_info=ssid=s5197017565; pgv_pvid=507491580; ts_uid=5941690444; pgv_pvi=1047845888; pgv_si=s4656565248; yq_index=0; player_exist=1; yq_playschange=0; yq_playdata=; qqmusic_fromtag=66; ts_last=y.qq.com/portal/player.html; yplayer_open=1");
-        data.put("Host", "c.y.qq.com");
+        HashMap<String, String> data = HttpHelper.GetHandler();
         HttpHelper.GetWeb(new Handler() {
                               @Override
                               public void handleMessage(Message msg) {
@@ -113,7 +108,7 @@ public class MusicLib {
                                   } catch (Exception e) {}
                               }
                           }
-                , "https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg?callback=MusicJsonCallback_lrc&pcachetime=1532863605625&songmid=" + ID + "&g_tk=5381&jsonpCallback=MusicJsonCallback_lrc&loginUin=0&hostUin=0&format=jsonp&inCharset=utf8&outCharset=utf-8&notice=0&platform=yqq&needNewCode=0", data);
+                , "https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg?callback=MusicJsonCallback_lrc&pcachetime=1532863605625&songmid=" + ID + "&g_tk="+Settings.g_tk+"&jsonpCallback=MusicJsonCallback_lrc&loginUin=0&hostUin=0&format=jsonp&inCharset=utf8&outCharset=utf-8&notice=0&platform=yqq&needNewCode=0", data);
     }
 
     public static long strToTime(String ts) {
@@ -318,38 +313,39 @@ public class MusicLib {
         hdata.put("upgrade", "1");
         hdata.put("user-agent", "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3854.3 Mobile Safari/537.36");
         hdata.put("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3");
+        hdata.put("referer","https://i.y.qq.com/n2/m/share/details/album.html?albummid=003bBofB3UzHxS&ADTAG=myqq&from=myqq&channel=10007100");
         hdata.put("host", "i.y.qq.com");
         hdata.put("accept-language", "zh-CN,zh;q=0.9");
         hdata.put("sec-fetch-mode", "navigate");
-        hdata.put("sec-fetch-site", "none");
+        hdata.put("sec-fetch-site", "same - origin");
         hdata.put("sec-fetch-user", "?1");
         hdata.put("upgrade-insecure-requests", "1");
-        hdata.put("cookie", "pgv_pvi=3630597120; RK=kDKEPg2NxM; ptcz=2a68e8626b3724117c56d2f94b2716d35e4f6f51d79e0ff2d8b6e6cdbd5791e3; pgv_pvid=1338254218; ts_uid=712092420; luin=o2728578956; p_luin=o2728578956; lskey=00010000f0c3da6da390b7375ccf0ce8c5dc5e7f77ea9cf3edade68710ceaaf9238098b5b655cde3c9a94aa1; p_lskey=00040000e94b3dfb7fb24dbe6868d705514d4fe9a9a97f087286d85ad00c40c97ad8c778aab07f068f30bdda; ts_refer=ADTAGmyqq; ts_uid=712092420; yq_index=0; ts_refer=ADTAGh5_playsong; yqq_stat=0; pgv_info=ssid=s3863107460; ts_last=y.qq.com/n/yqq/song/105735736_num.html; pgv_si=s5451320320; userAction=1; ts_last=i.y.qq.com/v8/playsong.html");
+        hdata.put("cookie", Settings.Cookie);
         HttpHelper.GetWeb(new Handler() {
             @Override
             public void handleMessage(Message msg) {
-                String st=msg.obj.toString();
-                final String vk=TextHelper.FindByAb(st,"http://aqqmusic.tc.qq.com/amobile.music.tc.qq.com/C4000013KcQ72u8FY7.m4a", "&fromtag=38");
-                //var mid = JObject.Parse(await HttpHelper.GetWebDatacAsync($"https://c.y.qq.com/v8/fcg-bin/fcg_play_single_song.fcg?songmid={Musicid}&platform=yqq&format=json"))["data"][0]["file"]["media_mid"].ToString();
-                HttpHelper.GetWeb(new Handler(){
-                    @Override
-                    public void handleMessage(Message msg) {
-                        String json=msg.obj.toString();
-                        String mid= null;
-                        try {
-                            mid = new JSONObject(json).getJSONArray("data").getJSONObject(0).getJSONObject("file").getString("media_mid");
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                        String url="http://aqqmusic.tc.qq.com/amobile.music.tc.qq.com/C400"+mid+".m4a" + vk + "&fromtag=38";
-                        Message ms=new Message();
-                        ms.what=200;
-                        ms.obj=url;
-                        handler.sendMessage(ms);
-                    }
-                },"https://c.y.qq.com/v8/fcg-bin/fcg_play_single_song.fcg?songmid="+Musicid+"&platform=yqq&format=json",hdata);
+                String st = msg.obj.toString();
+                Matcher m=Pattern.compile("http://aqqmusic.tc.qq.com/amobile.music.tc.qq.com/C400000By9MX0yKL2c.m4a.*?&fromtag=38").matcher(st);
+                m.find();
+                final String vk=TextHelper.FindByAb(m.group(),"http://aqqmusic.tc.qq.com/amobile.music.tc.qq.com/C400000By9MX0yKL2c.m4a","&fromtag=38");
+               HashMap<String,String> data=HttpHelper.GetHandler();
+               HttpHelper.GetWeb(new Handler(){
+                   @Override
+                   public void handleMessage(Message msg) {
+                       String json =(String)msg.obj;
+                       try {
+                           String mid=new JSONObject(json).getJSONArray("data").getJSONObject(0).getJSONObject("file").getString("media_mid");
+                           String url="http://aqqmusic.tc.qq.com/amobile.music.tc.qq.com/C400"+mid+".m4a" + vk + "&fromtag=98";
+                           Log.d("GETURL",url);
+                           Message ms=new Message();
+                           ms.obj=url;
+                           ms.what=200;
+                           handler.sendMessage(ms);
+                       } catch (JSONException e) {}
+                   }
+               },"https://c.y.qq.com/v8/fcg-bin/fcg_play_single_song.fcg?songmid="+Musicid+"&platform=yqq&format=json",data);
             }
-        }, "https://i.y.qq.com/v8/playsong.html?songmid=0013KcQ72u8FY7,0011jIhY1wP6wB", hdata);
+        }, "https://i.y.qq.com/v8/playsong.html?songmid=000edOaL1WZOWq", hdata);
     }
 
     @SuppressLint("HandlerLeak")

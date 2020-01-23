@@ -28,10 +28,8 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
@@ -45,13 +43,11 @@ import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -64,6 +60,7 @@ import android.widget.Toast;
 
 import com.baidu.mobstat.StatService;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -276,6 +273,8 @@ public class MainActivity extends AppCompatActivity {
             };
             bu.disPlay(hl, sp.getString("tx", ""));
             Settings.qq = nu;
+            Settings.Cookie=sp.getString("Cookie","");
+            Settings.g_tk=sp.getString("g_tk","");
         }
 
         //读取上次播放
@@ -309,17 +308,12 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.USERNAME).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                final EditText qq = new EditText(MainActivity.this);
-                qq.setHint("QQ账号");
-                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                builder.setTitle("登录到小萌").setView(qq)
-                        .setNegativeButton("关闭", null);
-                builder.setPositiveButton("完成", new DialogInterface.OnClickListener() {
-                    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
-                    public void onClick(DialogInterface dialog, int which) {
+                LoginActivity.LoginCallback=new Handler(){
+                    @Override
+                    public void handleMessage(Message msg) {
+                        final InfoHelper.LoginData Idata=(InfoHelper.LoginData)msg.obj;
                         try {
                             StatService.onEvent(MainActivity.this, "tw_Login", "活跃用户", 1);
-                            final String nu = qq.getText().toString();
                             final HashMap<String, String> data = new HashMap<String, String>();
                             data.put("Connection", "keep-alive");
                             data.put("CacheControl", "max-age=0");
@@ -329,7 +323,7 @@ public class MainActivity extends AppCompatActivity {
                             data.put("Referer", "https://y.qq.com/portal/player.html");
                             data.put("Host", "c.y.qq.com");
                             data.put("AcceptLanguage", "zh-CN,zh;q=0.8");
-                            data.put("Cookie", "pgv_pvid=3531479395; euin_cookie=0DF01BA83F82F2B99D1327B4228ECEB457E5342B14DAEA7D; ptcz=b6a78a1389245b1d160bd02b1bd65a22d62fe28d6c0914e7264b6c74f1216b1f; pgv_pvi=4809115648; uin_cookie=2728578956; sensorsdata2015jssdkcross=%7B%22distinct_id%22%3A%22168c5952d117ea-0a44be39a4fa52-4f7b614a-1049088-168c5952d1218a%22%2C%22%24device_id%22%3A%22168c5952d117ea-0a44be39a4fa52-4f7b614a-1049088-168c5952d1218a%22%2C%22props%22%3A%7B%22%24latest_traffic_source_type%22%3A%22%E7%9B%B4%E6%8E%A5%E6%B5%81%E9%87%8F%22%2C%22%24latest_referrer%22%3A%22%22%2C%22%24latest_referrer_host%22%3A%22%22%2C%22%24latest_search_keyword%22%3A%22%E6%9C%AA%E5%8F%96%E5%88%B0%E5%80%BC_%E7%9B%B4%E6%8E%A5%E6%89%93%E5%BC%80%22%7D%7D; luin=o2728578956; RK=sKKMfg2M0M; ptui_loginuin=3474980436; lskey=00010000658d1565681b1c42a8c94005522e0cb48a7c37c6c0b8c7f8768a8a10e4194b27cc35be4e8a589920; pgv_si=s3607160832; _qpsvr_localtk=0.9909435018453949; ptisp=cm; uin=o2728578956; skey=@a79zUquVu; ts_last=y.qq.com/n/yqq/song/000edOaL1WZOWq.html; p_lskey=00040000434fd61fc4436000520646d6937237b9067e6f900daf6188175c0983042d1cfc48aa65e1d7d2af55; ts_refer=xui.ptlogin2.qq.com/cgi-bin/xlogin; ts_uid=3700488506; userAction=1; p_luin=o2728578956; p_uin=o2728578956; pt4_token=94OgYmRkOoVFeTTQE9OUHu8gr*ezHH60409TZzw-9Ng_; p_skey=eEasMNBX758iOrddAetDYI4Y6JTthz0imY37ergdOJE_; yqq_stat=0");
+                            data.put("Cookie", Idata.Cookie);
                             HttpHelper.GetWeb(new Handler() {
                                 @Override
                                 public void handleMessage(Message msg) {
@@ -346,29 +340,43 @@ public class MainActivity extends AppCompatActivity {
                                                 }
                                             };
                                             BitmapUtils bu = new BitmapUtils();
-                                            String tx="https://"+ FindByAb(response, "\"headpic\":\"http://", "\",\"ifpic\"");
+                                            JSONObject obj=null;
+                                            String tx="";
+                                            String name="";
+                                            try {
+                                                obj=new JSONObject(response).getJSONObject("data").getJSONObject("creator");
+                                                tx=obj.getString("headpic").replace("http://", "https://");
+                                                name=obj.getString("nick");
+                                            } catch (JSONException e) {
+                                                e.printStackTrace();
+                                            }
+
+                                            MainActivity.sdm("🌈[登录成功!] 欢迎回来 "+name,MainActivity.this);
                                             bu.disPlay(hl,tx);
-                                            String name = FindByAb(response, "{\"nick\":\"", "\",\"headpic\"");
                                             ((TextView) findViewById(R.id.USERNAME)).setText(name);
                                             SharedPreferences preferences = MainActivity.this.getSharedPreferences("Cookie", Context.MODE_PRIVATE);
                                             SharedPreferences.Editor editor = preferences.edit();
-                                            editor.putString("qq", qq.getText().toString());
+                                            editor.putString("qq", Idata.qq);
+                                            editor.putString("Cookie",Idata.Cookie);
+                                            editor.putString("g_tk",Idata.g_tk);
                                             editor.putString("name", name);
                                             editor.putString("tx", tx);
                                             editor.commit();
-                                            Settings.qq = qq.getText().toString();
+                                            Settings.qq =Idata.qq;
+                                            Settings.g_tk=Idata.g_tk;
+                                            Settings.Cookie=Idata.Cookie;
                                             SetTitle();
                                             break;
                                         default:
                                             break;
                                     }
                                 }
-                            }, "https://c.y.qq.com/rsc/fcgi-bin/fcg_get_profile_homepage.fcg?loginUin=2728578956&hostUin=0&format=json&inCharset=utf8&outCharset=utf-8&notice=0&platform=yqq&needNewCode=0&cid=205360838&ct=20&userid="+nu+"&reqfrom=1&reqtype=0", data);
-                        } catch (Exception e) {
-                        }
+                            }, "https://c.y.qq.com/rsc/fcgi-bin/fcg_get_profile_homepage.fcg?loginUin="+Idata.qq+"&hostUin=0&format=json&inCharset=utf8&outCharset=utf-8&notice=0&platform=yqq&needNewCode=0&cid=205360838&ct=20&userid="+Idata.qq+"&reqfrom=1&reqtype=0", data);
+                        } catch (Exception e) {}
                     }
-                });
-                builder.show();
+                };
+                Intent intent=new Intent(MainActivity.this,LoginActivity.class);
+                startActivity(intent);
             }
         });
     }

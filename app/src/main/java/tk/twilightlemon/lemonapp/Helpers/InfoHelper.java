@@ -13,6 +13,11 @@ import tk.twilightlemon.lemonapp.layouts.KeepliveActivity;
 import tk.twilightlemon.lemonapp.layouts.MainActivity;
 
 public class InfoHelper {
+    public class LoginData{
+        public String g_tk="";
+        public String Cookie="";
+        public String qq="";
+    }
     public class AdaptiveData{
         public AdaptiveData(){}
         public String title="";

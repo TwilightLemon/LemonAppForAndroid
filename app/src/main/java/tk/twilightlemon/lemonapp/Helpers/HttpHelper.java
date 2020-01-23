@@ -42,6 +42,19 @@ public class HttpHelper {
             }
         }).start();
     }
+    public static HashMap<String,String> GetHandler(){
+        HashMap<String, String> data = new HashMap<String, String>();
+        data.put("Connection", "keep-alive");
+        data.put("CacheControl", "max-age=0");
+        data.put("Upgrade", "1");
+        data.put("UserAgent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.110 Safari/537.36");
+        data.put("Accept", "*/*");
+        data.put("Referer", "https://y.qq.com/portal/player.html");
+        data.put("Host", "c.y.qq.com");
+        data.put("AcceptLanguage", "zh-CN,zh;q=0.8");
+        data.put("Cookie", Settings.Cookie);
+        return data;
+    }
 
     public static String streamToString(InputStream is) {
         try {

@@ -7,13 +7,12 @@ android {
         applicationId "tk.twilightlemon.lemonapp"
         minSdkVersion 15
         targetSdkVersion 28
-        versionCode 1256
-        versionName "1.2.5.6"
+        versionCode 1263
+        versionName "1.2.6.3"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
-            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
