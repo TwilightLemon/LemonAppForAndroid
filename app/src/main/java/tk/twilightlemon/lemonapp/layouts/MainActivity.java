@@ -10,6 +10,7 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -17,6 +18,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -28,21 +30,9 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.support.annotation.RequiresApi;
-import android.support.design.widget.Snackbar;
-import android.support.design.widget.TabLayout;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.content.FileProvider;
-import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
-import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
-import android.support.v4.view.ViewPager;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
@@ -58,7 +48,21 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.baidu.mobstat.StatService;
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
+import androidx.core.graphics.drawable.RoundedBitmapDrawable;
+import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
+import androidx.fragment.app.Fragment;
+import androidx.viewpager.widget.ViewPager;
+
+import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.tabs.TabLayout;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -90,6 +94,8 @@ import tk.twilightlemon.lemonapp.R;
 import tk.twilightlemon.lemonapp.Fragments.SecondFragment;
 import tk.twilightlemon.lemonapp.Helpers.Settings;
 
+import static android.os.Environment.DIRECTORY_DOWNLOADS;
+import static android.os.Environment.DIRECTORY_MUSIC;
 import static tk.twilightlemon.lemonapp.Helpers.TextHelper.FindByAb;
 
 public class MainActivity extends AppCompatActivity {
@@ -183,7 +189,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        StatService.start(this);
         Lv();
     }
 
@@ -271,7 +276,7 @@ public class MainActivity extends AppCompatActivity {
                     ((ImageView) findViewById(R.id.USERTX)).setImageDrawable(RBD);
                 }
             };
-            bu.disPlay(hl, sp.getString("tx", ""));
+            bu.disPlay(hl, sp.getString("tx", ""),this);
             Settings.qq = nu;
             Settings.Cookie=sp.getString("Cookie","");
             Settings.g_tk=sp.getString("g_tk","");
@@ -313,7 +318,6 @@ public class MainActivity extends AppCompatActivity {
                     public void handleMessage(Message msg) {
                         final InfoHelper.LoginData Idata=(InfoHelper.LoginData)msg.obj;
                         try {
-                            StatService.onEvent(MainActivity.this, "tw_Login", "活跃用户", 1);
                             final HashMap<String, String> data = new HashMap<String, String>();
                             data.put("Connection", "keep-alive");
                             data.put("CacheControl", "max-age=0");
@@ -352,7 +356,7 @@ public class MainActivity extends AppCompatActivity {
                                             }
 
                                             MainActivity.sdm("🌈[登录成功!] 欢迎回来 "+name,MainActivity.this);
-                                            bu.disPlay(hl,tx);
+                                            bu.disPlay(hl,tx,MainActivity.this);
                                             ((TextView) findViewById(R.id.USERNAME)).setText(name);
                                             SharedPreferences preferences = MainActivity.this.getSharedPreferences("Cookie", Context.MODE_PRIVATE);
                                             SharedPreferences.Editor editor = preferences.edit();
@@ -424,6 +428,17 @@ public class MainActivity extends AppCompatActivity {
                         Musicdt = Settings.ListData.Data.get(PlayListIndex);
                         PlayMusic(true,0);
                     }
+                } catch (Exception e) {
+                }
+            }
+        };
+        ///下载回调
+        Settings.Callback_DownloadMusic = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                try {
+                    InfoHelper.Music Data=(InfoHelper.Music)msg.obj;
+                    DownloadMusic(Data);
                 } catch (Exception e) {
                 }
             }
@@ -565,15 +580,38 @@ public class MainActivity extends AppCompatActivity {
         //</editor-fold>
     }
 
+    public void DownloadMusic(final InfoHelper.Music Data){
+        String MusicID = Data.MusicID;
+        MusicLib.GetUrl(MusicID, new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                final String name = (Data.MusicName + "-" + Data.Singer + ".mp3").replace("\\", "").replace("/", "");
+                String url=msg.obj.toString();
+                final DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+                DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q)
+                    request.setDestinationInExternalPublicDir("LemonApp/MusicDownload", name);
+                else request.setDestinationInExternalFilesDir(MainActivity.this, Environment.DIRECTORY_DOWNLOADS,name);
+                request.setTitle(name);
+                request.setDescription("来自LemonApp的下载");
+                request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                long downloadId = downloadManager.enqueue(request);
+                MainActivity.sdm("正在下载:" + name, getApplicationContext());
+                //TODO:如果不能使用的话，在下载完成之后将文件通过MediaStore转储到公共目录
+            }
+        });
+    }
     public void Lv() {
         //TODO:GO TO HELL,MIUI!!!
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             SharedPreferences preferences = MainActivity.this.getSharedPreferences("Cookie", Context.MODE_PRIVATE);
             final SharedPreferences.Editor editor = preferences.edit();
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE},
-                        REQUEST_STORAGE_PERMISSION);
+            if(Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(this,
+                            new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE},
+                            REQUEST_STORAGE_PERMISSION);
+                }
             }
             if (MiuiUtils.isMIUI()) {
                 if (!preferences.contains("isLocked")) {
@@ -585,7 +623,6 @@ public class MainActivity extends AppCompatActivity {
                     builder.setPositiveButton("手动授权", new DialogInterface.OnClickListener() {
                         @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
                         public void onClick(DialogInterface dialog, int which) {
-                            StatService.onEvent(MainActivity.this, "tw_miui", "辣鸡MIUI使用人数", 1);
                             sdm("请给予小萌“锁屏显示”权限(●'◡'●)", MainActivity.this);
                             editor.putBoolean("isLocked", true);
                             editor.commit();
@@ -630,7 +667,7 @@ public class MainActivity extends AppCompatActivity {
                                             @Override
                                             public void handleMessage(Message msg) {
                                                 //Download Finished
-                                                FileUtils fileUtils = new FileUtils();
+                                                FileUtils fileUtils = new FileUtils(MainActivity.this);
                                                 File f=fileUtils.createFile("app-release.apk");
                                                 installApk(f);
                                             }
@@ -647,12 +684,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public static void downLoad(final String uri, final String FileName, final Handler finished) {
+    public  void downLoad(final String uri, final String FileName, final Handler finished) {
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    FileUtils fileUtils = new FileUtils();
+                    FileUtils fileUtils = new FileUtils(MainActivity.this);
                     File f=fileUtils.createFile(FileName);
                     if(f.exists())
                         f.delete();
@@ -867,22 +904,7 @@ public class MainActivity extends AppCompatActivity {
                     RelativeLayout PATENT = (RelativeLayout) view.getParent();
                     int index = Integer.parseInt(((TextView) PATENT.findViewById(R.id.MusicList_index)).getText().toString());
                     final InfoHelper.Music Data = Settings.ListData.Data.get(index);
-                    String MusicID = Data.MusicID;
-                    MusicLib.GetUrl(MusicID, new Handler() {
-                        @Override
-                        public void handleMessage(Message msg) {
-                            String name = (Data.MusicName + "-" + Data.Singer + ".mp3").replace("\\", "").replace("/", "");
-                            DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
-                            DownloadManager.Request request = new
-                                    DownloadManager.Request(Uri.parse(msg.obj.toString()));
-                            request.setDestinationInExternalPublicDir("LemonApp/MusicDownload", name);
-                            request.setTitle(name);
-                            request.setDescription("小萌音乐正在下载中");
-                            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-                            downloadManager.enqueue(request);
-                            MainActivity.sdm("正在下载:" + name, getApplicationContext());
-                        }
-                    });
+                    DownloadMusic(Data);
                 } catch (Exception ignored) {}
             }
         });
@@ -930,22 +952,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             for (int index = 0; index != Settings.ListData.Data.size() - 1; ++index) {
                 final InfoHelper.Music Data = Settings.ListData.Data.get(index);
-                String MusicID = Data.MusicID;
-                MusicLib.GetUrl(MusicID, new Handler() {
-                    @Override
-                    public void handleMessage(Message msg) {
-                        String name = (Data.MusicName + "-" + Data.Singer + ".mp3").replace("\\", "").replace("/", "");
-                        DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
-                        DownloadManager.Request request = new
-                                DownloadManager.Request(Uri.parse(msg.obj.toString()));
-                        request.setDestinationInExternalPublicDir("LemonApp/MusicDownload", name);
-                        request.setTitle(name);
-                        request.setDescription("小萌音乐正在下载中");
-                        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-                        downloadManager.enqueue(request);
-                        MainActivity.sdm("正在下载:" + name, getApplicationContext());
-                    }
-                });
+                DownloadMusic(Data);
             }
         } catch (Exception e) {
         }
@@ -958,7 +965,6 @@ public class MainActivity extends AppCompatActivity {
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     @SuppressLint("HandlerLeak")
     public void PlayMusic(final boolean isplay,final int ex) {
-        StatService.onEvent(this, "tw_Play", "播放音乐", 1);
         MainActivity.Loading(findViewById(R.id.USERTX));
         if (Settings.ListData.name == "Radio")
             Settings.mSP.putBoolean("isRadio",true);
@@ -966,18 +972,20 @@ public class MainActivity extends AppCompatActivity {
         Settings.mSP.putInt("Index",PlayListIndex);
         mHandler.removeCallbacks(r);
         if(isplay) {
-            Settings.mp.stop();
-            Settings.mp = new MediaPlayer();
-            View view=MusicList_list.getChildAt(PlayListIndex);
-            if(LastView!=null){
-                ((TextView)LastView.findViewById(R.id.MusicList_title)).setTextColor(0xff0b0b0b);
-                ((TextView)LastView.findViewById(R.id.MusicList_mss)).setTextColor(0xff5b5b5b);
-                LastView.findViewById(R.id.MusicList_Color).setBackground(new ColorDrawable(0x00000000));
-            }
-            ((TextView)view.findViewById(R.id.MusicList_title)).setTextColor(getResources().getColor(R.color.colorAccent));
-            ((TextView)view.findViewById(R.id.MusicList_mss)).setTextColor(getResources().getColor(R.color.colorAccent));
-            view.findViewById(R.id.MusicList_Color).setBackground(new ColorDrawable(getResources().getColor(R.color.colorAccent)));
-            LastView=view;
+            try {
+                Settings.mp.stop();
+                Settings.mp = new MediaPlayer();
+                View view = MusicList_list.getChildAt(PlayListIndex);
+                if (LastView != null) {
+                    ((TextView) LastView.findViewById(R.id.MusicList_title)).setTextColor(0xff0b0b0b);
+                    ((TextView) LastView.findViewById(R.id.MusicList_mss)).setTextColor(0xff5b5b5b);
+                    LastView.findViewById(R.id.MusicList_Color).setBackground(new ColorDrawable(0x00000000));
+                }
+                ((TextView) view.findViewById(R.id.MusicList_title)).setTextColor(getResources().getColor(R.color.colorAccent));
+                ((TextView) view.findViewById(R.id.MusicList_mss)).setTextColor(getResources().getColor(R.color.colorAccent));
+                view.findViewById(R.id.MusicList_Color).setBackground(new ColorDrawable(getResources().getColor(R.color.colorAccent)));
+                LastView = view;
+            }catch (Exception e){}
         }
         final ImageView PlayBottom_img = findViewById(R.id.PlayBottom_img);
         TextView PlayBottom_title = findViewById(R.id.PlayBottom_title);
@@ -999,7 +1007,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         };
-        bu.disPlay(hl, Musicdt.ImageUrl);
+        bu.disPlay(hl, Musicdt.ImageUrl,this);
         PlayBottom_title.setText(Musicdt.MusicName);
         PlayBottom_mss.setText(Musicdt.Singer);
         MusicLib.GetUrl(Musicdt.MusicID, new Handler() {

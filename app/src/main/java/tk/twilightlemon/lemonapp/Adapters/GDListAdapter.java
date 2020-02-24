@@ -22,10 +22,11 @@ import tk.twilightlemon.lemonapp.R;
 public class GDListAdapter extends BaseAdapter {
     private ArrayList<InfoHelper.MusicGData> mData = null;
     private LayoutInflater inflater = null;
-
-    public GDListAdapter(Activity a, ArrayList<InfoHelper.MusicGData> data) {
+    private Context context;
+    public GDListAdapter(Activity a, ArrayList<InfoHelper.MusicGData> data,Context context) {
         inflater = (LayoutInflater) a.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mData = data;
+        this.context=context;
     }
 
     public int getCount() {
@@ -54,7 +55,7 @@ public class GDListAdapter extends BaseAdapter {
                 img.setImageBitmap((Bitmap) msg.obj);
             }
         };
-        bu.disPlay(hl,data.pic);
+        bu.disPlay(hl,data.pic,context);
         return itemView;
     }
 

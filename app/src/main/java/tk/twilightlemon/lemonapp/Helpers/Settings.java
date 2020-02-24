@@ -17,6 +17,7 @@ package tk.twilightlemon.lemonapp.Helpers;
 import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.os.Handler;
+import android.os.Message;
 
 import java.util.ArrayList;
 public class Settings {
@@ -40,6 +41,7 @@ public class Settings {
 
     //<editor-fold desc="一些回调事件">
     public static Handler Callback_PlayMusic=null;
+    public static Handler Callback_DownloadMusic=null;
     public static Handler Callback_Close=null;
     public static Handler ACTIONCALLBACK=null;
     //</editor-fold>

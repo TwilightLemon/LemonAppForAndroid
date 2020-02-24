@@ -1,5 +1,6 @@
 package tk.twilightlemon.lemonapp.Helpers.Image;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Message;
@@ -15,7 +16,7 @@ public class BitmapUtils {
         mNetCacheUtils=new NetCacheUtils(mLocalCacheUtils,mMemoryCacheUtils);
     }
 
-    public void disPlay(Handler handler, String url) {
+    public void disPlay(Handler handler, String url, Context context) {
         Bitmap bitmap;
         //内存缓存
         bitmap=mMemoryCacheUtils.getBitmapFromMemory(url);
@@ -27,7 +28,7 @@ public class BitmapUtils {
         }
 
         //本地缓存
-        bitmap = mLocalCacheUtils.getBitmapFromLocal(url);
+        bitmap = mLocalCacheUtils.getBitmapFromLocal(context,url);
         if(bitmap !=null){
             Message msg=new Message();
             msg.obj=bitmap;

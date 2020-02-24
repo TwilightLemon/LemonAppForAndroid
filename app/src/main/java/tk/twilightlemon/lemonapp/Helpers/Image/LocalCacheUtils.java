@@ -1,5 +1,6 @@
 package tk.twilightlemon.lemonapp.Helpers.Image;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Environment;
@@ -12,13 +13,14 @@ import tk.twilightlemon.lemonapp.Helpers.TextHelper;
 
 public class LocalCacheUtils {
 
-    private static final String CACHE_PATH= Environment.getExternalStorageDirectory().getAbsolutePath()+"/LemonApp/Cache";
+    private static String CACHE_PATH="";
 
     /**
      * 从本地读取图片
      * @param url
      */
-    public Bitmap getBitmapFromLocal(String url){
+    public Bitmap getBitmapFromLocal(Context context, String url){
+        CACHE_PATH=context.getExternalCacheDir().getPath()+"/ImageCache/";
         String fileName = null;//把图片的url当做文件名,并进行MD5加密
         try {
             fileName = TextHelper.MD5Encoder.encode(url);

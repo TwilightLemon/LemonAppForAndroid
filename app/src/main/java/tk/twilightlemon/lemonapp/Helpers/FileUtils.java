@@ -1,13 +1,14 @@
 package tk.twilightlemon.lemonapp.Helpers;
 
-import android.os.Environment;
+import android.content.Context;
 
 import java.io.File;
 
 public class FileUtils {
-    private String path = Environment.getExternalStorageDirectory().toString() + "/LemonAppCache";
+    private String path = "";
 
-    public FileUtils() {
+    public FileUtils(Context context) {
+        path=context.getExternalCacheDir().getPath()+"/DownloadCache/";
         File file = new File(path);
         /**
          *如果文件夹不存在就创建

@@ -2,9 +2,8 @@ package tk.twilightlemon.lemonapp.layouts;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.support.v7.app.AppCompatActivity;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import tk.twilightlemon.lemonapp.Helpers.MusicLib;
 import tk.twilightlemon.lemonapp.Helpers.SearchView.ICallBack;

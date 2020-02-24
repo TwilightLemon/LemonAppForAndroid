@@ -5,8 +5,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +13,9 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -92,7 +93,7 @@ public class FirstFragment extends Fragment {
                                     GDdata.add(df);
                                     i++;
                                 }
-                                GDListAdapter ga = new GDListAdapter(getActivity(), GDdata);
+                                GDListAdapter ga = new GDListAdapter(getActivity(), GDdata,getContext());
                                 lv.setAdapter(ga);
                                 setListViewHeightBasedOnChildren(lv);
                                 JSONArray cc=jo.getJSONObject("data").getJSONArray("mymusic");
@@ -134,7 +135,7 @@ public class FirstFragment extends Fragment {
                         LikeGDdata.add(df);
                         i++;
                     }
-                    GDListAdapter ga = new GDListAdapter(getActivity(), LikeGDdata);
+                    GDListAdapter ga = new GDListAdapter(getActivity(), LikeGDdata,getContext());
                     lv.setAdapter(ga);
                     setListViewHeightBasedOnChildren(lv);
                 } catch (Exception e) {}
@@ -181,22 +182,9 @@ public class FirstFragment extends Fragment {
                                         RelativeLayout PATENT = (RelativeLayout) view.getParent();
                                         int index = Integer.parseInt(((TextView) PATENT.findViewById(R.id.MusicList_index)).getText().toString());
                                         final InfoHelper.Music Data = ListData.Data.get(index);
-                                        String MusicID = Data.MusicID;
-                                        MusicLib.GetUrl(MusicID, new Handler() {
-                                            @Override
-                                            public void handleMessage(Message msg) {
-                                                String name = (Data.MusicName + "-" + Data.Singer + ".mp3").replace("\\", "").replace("/", "");
-                                                DownloadManager downloadManager = (DownloadManager) getActivity().getSystemService(DOWNLOAD_SERVICE);
-                                                DownloadManager.Request request = new
-                                                        DownloadManager.Request(Uri.parse(msg.obj.toString()));
-                                                request.setDestinationInExternalPublicDir("LemonApp/MusicDownload", name);
-                                                request.setTitle(name);
-                                                request.setDescription("小萌音乐正在下载中");
-                                                request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-                                                downloadManager.enqueue(request);
-                                                MainActivity.sdm("正在下载:" + name, getActivity());
-                                            }
-                                        });
+                                        Message msg=new Message();
+                                        msg.obj=Data;
+                                        Settings.Callback_DownloadMusic.sendMessage(msg);
                                     } catch (Exception e) {}
                                 }
                             });

@@ -7,17 +7,17 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.Fragment;
-import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
+
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -78,7 +78,7 @@ public class SecondFragment extends Fragment {
             @Override
             public void handleMessage(Message msg) {
                 Top_List= (ArrayList<InfoHelper.MusicTop>) msg.obj;
-                TopItemsAdapter tia = new TopItemsAdapter(getActivity(),Top_List);
+                TopItemsAdapter tia = new TopItemsAdapter(getActivity(),Top_List,getContext());
                 lv.setAdapter(tia);
                 FirstFragment.setListViewHeightBasedOnChildren(lv);
             }});
@@ -106,7 +106,7 @@ public class SecondFragment extends Fragment {
             @Override
             public void handleMessage(Message msg) {
                 FLGDdata = (ArrayList<InfoHelper.MusicGData>) msg.obj;
-                GDListAdapter ga = new GDListAdapter(getActivity(), FLGDdata);
+                GDListAdapter ga = new GDListAdapter(getActivity(), FLGDdata,getContext());
                 lv.setAdapter(ga);
                 FirstFragment.setListViewHeightBasedOnChildren(lv);
             }
@@ -177,7 +177,7 @@ public class SecondFragment extends Fragment {
                                                 @Override
                                                 public void handleMessage(Message msg) {
                                                     FLGDdat = (ArrayList<InfoHelper.MusicGData>) msg.obj;
-                                                    GDListAdapter ga = new GDListAdapter(getActivity(), FLGDdat);
+                                                    GDListAdapter ga = new GDListAdapter(getActivity(), FLGDdat,getContext());
                                                     lv.setAdapter(ga);
                                                     FirstFragment.setListViewHeightBasedOnChildren(lv);
                                                 }
@@ -192,7 +192,7 @@ public class SecondFragment extends Fragment {
                                         }
                                     };
                                     FLGDdat = (ArrayList<InfoHelper.MusicGData>) msg.obj;
-                                    GDListAdapter ga = new GDListAdapter(getActivity(), FLGDdat);
+                                    GDListAdapter ga = new GDListAdapter(getActivity(), FLGDdat,getContext());
                                     aData.CSData = ga;
                                     Settings.AdapData = aData;
                                     Intent intent = new Intent(getActivity(), Adaptivelayout.class);
@@ -213,7 +213,7 @@ public class SecondFragment extends Fragment {
                     @Override
                     public void handleMessage(Message msg) {
                         SingerData = (ArrayList<InfoHelper.SingerAndRadioData>) msg.obj;
-                        SingerAndRadioListAdapter sla = new SingerAndRadioListAdapter(getActivity(), SingerData);
+                        SingerAndRadioListAdapter sla = new SingerAndRadioListAdapter(getActivity(), SingerData,getContext());
                         InfoHelper.AdaptiveData aData = new InfoHelper().new AdaptiveData();
                         aData.CSData = sla;
                         aData.title = "歌手";
@@ -231,7 +231,7 @@ public class SecondFragment extends Fragment {
                                     public void handleMessage(Message msg) {
                                         SingerData.clear();
                                         SingerData = (ArrayList<InfoHelper.SingerAndRadioData>) msg.obj;
-                                        lv.setAdapter(new SingerAndRadioListAdapter(getActivity(), SingerData));
+                                        lv.setAdapter(new SingerAndRadioListAdapter(getActivity(), SingerData,getContext()));
                                         FirstFragment.setListViewHeightBasedOnChildren(lv);
                                     }
                                 }, 50);
@@ -247,7 +247,7 @@ public class SecondFragment extends Fragment {
                                     public void handleMessage(Message msg) {
                                         SingerData.clear();
                                         SingerData = (ArrayList<InfoHelper.SingerAndRadioData>) msg.obj;
-                                        lv.setAdapter(new SingerAndRadioListAdapter(getActivity(), SingerData));
+                                        lv.setAdapter(new SingerAndRadioListAdapter(getActivity(), SingerData,getContext()));
                                         FirstFragment.setListViewHeightBasedOnChildren(lv);
                                     }
                                 }, 50);
@@ -279,13 +279,13 @@ public class SecondFragment extends Fragment {
                         aData.ChooseData.add(new String[]{"热门", "下午", "情感", "主题", "场景", "曲风", "语言", "人群", "乐器", "地区"});
                         aData.title = "电台";
                         RadioMData = data.get(0);
-                        aData.CSData = new SingerAndRadioListAdapter(getActivity(), RadioMData);
+                        aData.CSData = new SingerAndRadioListAdapter(getActivity(), RadioMData,getContext());
                         aData.ChooseCallBack.add(new Handler() {
                             @Override
                             public void handleMessage(Message msg) {
                                 ListView lv = (ListView) msg.obj;
                                 RadioMData = data.get(msg.what);
-                                lv.setAdapter(new SingerAndRadioListAdapter(getActivity(), RadioMData));
+                                lv.setAdapter(new SingerAndRadioListAdapter(getActivity(), RadioMData,getContext()));
                             }
                         });
                         aData.ListOnClick = new AdapterView.OnItemClickListener() {
@@ -326,7 +326,7 @@ public class SecondFragment extends Fragment {
         MusicLib.GetSingerByTag("all_all_all", new Handler() {
             @Override
             public void handleMessage(Message msg) {
-                lv.setAdapter(new SingerAndRadioListAdapter(getActivity(), (ArrayList<InfoHelper.SingerAndRadioData>) msg.obj));
+                lv.setAdapter(new SingerAndRadioListAdapter(getActivity(), (ArrayList<InfoHelper.SingerAndRadioData>) msg.obj,getContext()));
                 FirstFragment.setListViewHeightBasedOnChildren(lv);
             }
         }, 4);
@@ -350,7 +350,7 @@ public class SecondFragment extends Fragment {
             @Override
             public void handleMessage(Message msg) {
                 ArrayList<ArrayList<InfoHelper.SingerAndRadioData>> data = (ArrayList<ArrayList<InfoHelper.SingerAndRadioData>>) msg.obj;
-                lv.setAdapter(new SingerAndRadioListAdapter(getActivity(), data.get(0)));
+                lv.setAdapter(new SingerAndRadioListAdapter(getActivity(), data.get(0),getContext()));
                 FirstFragment.setListViewHeightBasedOnChildren(lv);
             }
         }, 4);

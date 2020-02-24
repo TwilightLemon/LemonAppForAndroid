@@ -1,10 +1,16 @@
 package tk.twilightlemon.lemonapp.Helpers;
 
+import android.content.ContentValues;
+import android.content.Context;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.MediaStore;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
@@ -71,5 +77,51 @@ public class HttpHelper {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    public static void Download(final String urll, final Handler pro, final Handler finished, final String fileName, final Context context){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    URL url = new URL(urll);
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setConnectTimeout(30 * 1000);
+                    InputStream is = conn.getInputStream();
+                    Uri uri = null;
+                    ContentValues contentValues = new ContentValues();
+                    contentValues.put(MediaStore.Audio.Media.MIME_TYPE, "audio/mp3");
+                    contentValues.put(MediaStore.Audio.Media.DISPLAY_NAME, fileName);
+                    contentValues.put(MediaStore.Audio.Media.DATE_TAKEN, System.currentTimeMillis());
+                    //只是往 MediaStore 里面插入一条新的记录，MediaStore 会返回给我们一个空的 Content Uri
+                    //接下来问题就转化为往这个 Content Uri 里面写入
+                    uri = context.getContentResolver().insert(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, contentValues);
+                    BufferedInputStream inputStream = new BufferedInputStream(is);
+                    OutputStream os = null;
+                    if (uri != null) {
+                        os = context.getContentResolver().openOutputStream(uri);
+                    }
+                    if (os != null) {
+                        byte[] buffer = new byte[1024];
+                        int len;
+                        int total = 0;
+                        int contentLeng = conn.getContentLength();
+                        while ((len = inputStream.read(buffer)) != -1) {
+                            os.write(buffer, 0, len);
+                            total += len;
+                            int pp=total * 100 / contentLeng;
+                            Message msg=new Message();
+                            msg.arg1=pp;
+                            pro.sendMessage(msg);
+                        }
+                        finished.sendMessage(new Message());
+                    }
+                    os.flush();
+                    inputStream.close();
+                    is.close();
+                    os.close();
+                }catch (Exception e){}
+            }
+        }).start();
     }
 }

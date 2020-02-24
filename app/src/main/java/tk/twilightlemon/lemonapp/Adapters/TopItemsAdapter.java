@@ -30,10 +30,11 @@ public class TopItemsAdapter extends BaseAdapter {
     private LayoutInflater inflater = null;
     private ArrayList<InfoHelper.MusicTop> MData = null;
     private HashMap<String, InfoHelper.MusicTop> Mdata = new HashMap<>();
-
-    public TopItemsAdapter(Activity a, ArrayList<InfoHelper.MusicTop> data) {
+    private Context context;
+    public TopItemsAdapter(Activity a, ArrayList<InfoHelper.MusicTop> data,Context context) {
         inflater = (LayoutInflater) a.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         MData = data;
+        this.context=context;
     }
 
     public HashMap<String, InfoHelper.MusicTop> getMdata() {
@@ -82,7 +83,7 @@ public class TopItemsAdapter extends BaseAdapter {
                 img.setImageBitmap((Bitmap) msg.obj);
             }
         };
-        bu.disPlay(hl,data.Photo);
+        bu.disPlay(hl,data.Photo,context);
         return itemView;
     }
 

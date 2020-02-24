@@ -13,7 +13,7 @@ LemonApp 是一款开源的基于QQ音乐的在线音乐播放器，采用Materi
 ![播放界面](https://raw.githubusercontent.com/TwilightLemon/Data/master/PlayPage.jpg)
 
 ### 运行环境
-Android 4.4 ~ Android 9.0：完美运行
+Android 4.4 ~ Android 10.0：完美运行
 MIUI系统需要授予“锁屏显示”权限，否则不能在锁屏状态下播放音乐(1.1.2)
 
 #### 版权
@@ -21,4 +21,4 @@ MIUI系统需要授予“锁屏显示”权限，否则不能在锁屏状态下�
 使用请遵守GPL以及Anti 996协议
 
 #### 免责声明
-本应用中的歌曲和部分API来自QQ音乐(y.qq.com),音乐及歌词翻译版权归QQ音乐所有。本应用仅用于学习交流，禁止用于商业用途
+本应用中的歌曲和部分API来自QQ音乐(y.qq.com),音乐及歌词翻译版权归QQ音乐所有。本以用仅用于学习交流，禁止用于商业用途

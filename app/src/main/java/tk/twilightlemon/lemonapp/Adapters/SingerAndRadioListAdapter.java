@@ -22,10 +22,11 @@ import tk.twilightlemon.lemonapp.R;
 public class SingerAndRadioListAdapter extends BaseAdapter {
     private ArrayList<InfoHelper.SingerAndRadioData> mData = null;
     private LayoutInflater inflater = null;
-
-    public SingerAndRadioListAdapter(Activity a, ArrayList<InfoHelper.SingerAndRadioData> data) {
+    private Context context;
+    public SingerAndRadioListAdapter(Activity a, ArrayList<InfoHelper.SingerAndRadioData> data,Context context) {
         inflater = (LayoutInflater) a.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mData = data;
+        this.context=context;
     }
 
     public int getCount() {
@@ -52,7 +53,7 @@ public class SingerAndRadioListAdapter extends BaseAdapter {
                 img.setImageBitmap((Bitmap) msg.obj);
             }
         };
-        bu.disPlay(hl,data.url);
+        bu.disPlay(hl,data.url,context);
         return itemView;
     }
 

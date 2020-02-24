@@ -1,7 +1,8 @@
 package tk.twilightlemon.lemonapp.Helpers;
 
-import android.support.annotation.NonNull;
 import android.util.Base64;
+
+import androidx.annotation.NonNull;
 
 import java.security.MessageDigest;
 
