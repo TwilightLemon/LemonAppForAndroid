@@ -325,9 +325,9 @@ public class MusicLib {
             @Override
             public void handleMessage(Message msg) {
                 String st = msg.obj.toString();
-                Matcher m=Pattern.compile("http://aqqmusic.tc.qq.com/amobile.music.tc.qq.com/C400000By9MX0yKL2c.m4a.*?&fromtag=38").matcher(st);
+                Matcher m=Pattern.compile("http://apd-vlive.apdcdn.tc.qq.com/amobile.music.tc.qq.com/C400000By9MX0yKL2c.m4a.*?&fromtag=38").matcher(st);
                 m.find();
-                final String vk=TextHelper.FindByAb(m.group(),"http://aqqmusic.tc.qq.com/amobile.music.tc.qq.com/C400000By9MX0yKL2c.m4a","&fromtag=38");
+                final String vk=TextHelper.FindByAb(m.group(),"http://apd-vlive.apdcdn.tc.qq.com/amobile.music.tc.qq.com/C400000By9MX0yKL2c.m4a","&fromtag=38");
                HashMap<String,String> data=HttpHelper.GetHandler();
                HttpHelper.GetWeb(new Handler(){
                    @Override
