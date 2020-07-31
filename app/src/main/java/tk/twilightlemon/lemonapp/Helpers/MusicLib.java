@@ -8,6 +8,8 @@ import android.text.format.DateUtils;
 import android.util.Base64;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -325,6 +327,21 @@ public class MusicLib {
             @Override
             public void handleMessage(Message msg) {
                 String st = msg.obj.toString();
+                if(!st.contains("http://apd-vlive.apdcdn.tc.qq.com/amobile.music.tc.qq.com/C400000By9MX0yKL2c.m4a")){
+                    //vkey获取失败
+                    try {
+                        Thread.sleep(500);
+                    }catch (Exception e){}
+
+                    //重连
+                    GetUrl(Musicid,new Handler(){
+                        @Override
+                        public void handleMessage(@NonNull Message msg) {
+                            handler.sendMessage(msg);
+                        }
+                    });
+                    return;
+                }
                 Matcher m=Pattern.compile("http://apd-vlive.apdcdn.tc.qq.com/amobile.music.tc.qq.com/C400000By9MX0yKL2c.m4a.*?&fromtag=38").matcher(st);
                 m.find();
                 final String vk=TextHelper.FindByAb(m.group(),"http://apd-vlive.apdcdn.tc.qq.com/amobile.music.tc.qq.com/C400000By9MX0yKL2c.m4a","&fromtag=38");
