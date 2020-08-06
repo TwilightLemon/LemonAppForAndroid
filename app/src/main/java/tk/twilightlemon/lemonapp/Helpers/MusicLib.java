@@ -337,7 +337,10 @@ public class MusicLib {
                     GetUrl(Musicid,new Handler(){
                         @Override
                         public void handleMessage(@NonNull Message msg) {
-                            handler.sendMessage(msg);
+                            Message m=new Message();
+                            m.what=msg.what;
+                            m.obj=msg.obj;
+                            handler.sendMessage(m);
                         }
                     });
                     return;

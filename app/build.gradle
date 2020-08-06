@@ -7,8 +7,8 @@ android {
         applicationId "tk.twilightlemon.lemonapp"
         minSdkVersion 15
         targetSdkVersion 29
-        versionCode 1296
-        versionName "1.2.9.6"
+        versionCode 1297
+        versionName "1.2.9.7"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
