@@ -355,7 +355,7 @@ public class MusicLib {
                        String json =(String)msg.obj;
                        try {
                            String mid=new JSONObject(json).getJSONArray("data").getJSONObject(0).getJSONObject("file").getString("media_mid");
-                           String url="http://aqqmusic.tc.qq.com/amobile.music.tc.qq.com/C400"+mid+".m4a" + vk + "&fromtag=98";
+                           String url="http://musichy.tc.qq.com/amobile.music.tc.qq.com/C400"+mid+".m4a" + vk + "&fromtag=98";
                            Log.d("GETURL",url);
                            Message ms=new Message();
                            ms.obj=url;
