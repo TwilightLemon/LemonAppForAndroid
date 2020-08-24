@@ -5,51 +5,52 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="#F9F9F9"
     tools:context=".layouts.MainActivity">
 
     <LinearLayout
+        android:id="@+id/topBar"
         android:layout_width="match_parent"
         android:layout_height="106dp"
-        android:theme="@style/AppTheme.AppBarOverlay">
+        android:background="#FFF"
 
+        android:theme="@style/AppTheme.AppBarOverlay">
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
-
-            <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="106dp"
-                android:scaleType="centerCrop"
-                android:src="@mipmap/bg"
-                android:contentDescription="TODO" />
-
+            <!--Login-->
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginTop="20dp">
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="36dp">
 
                 <ImageView
                     android:id="@+id/USERTX"
                     android:layout_width="35dp"
-                    android:layout_height="56dp"
+                    android:layout_height="35dp"
                     android:layout_marginLeft="15dp"
+                    android:layout_centerVertical="true"
                     android:src="@drawable/ic_usertx" />
 
                 <TextView
                     android:id="@+id/USERNAME"
                     android:layout_width="fill_parent"
-                    android:layout_height="56dp"
+                    android:layout_height="20dp"
+                    android:layout_centerVertical="true"
                     android:layout_marginLeft="60dp"
+                    android:textColor="#404040"
                     android:gravity="center_vertical"
                     android:text="立即登录"
                     android:textSize="16dp" />
             </RelativeLayout>
-
             <com.google.android.material.tabs.TabLayout
                 android:id="@+id/tabLayout"
                 android:layout_width="match_parent"
-                android:layout_height="30dp"
-                android:layout_marginTop="76dp">
+                android:layout_height="36dp"
+                app:tabTextColor="#000"
+                app:tabSelectedTextColor="@color/colorAccent"
+                android:layout_marginTop="70dp">
 
                 <com.google.android.material.tabs.TabItem
                     android:layout_width="wrap_content"
@@ -67,21 +68,26 @@
                     android:layout_height="wrap_content"
                     android:text="电台" /TODO:等待下一个栏目开启.......-->
             </com.google.android.material.tabs.TabLayout>
-
         </RelativeLayout>
-
     </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="106dp"
+        android:background="#40404040"/>
 
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/view_pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="106dp"
+        android:layout_marginTop="107dp"
         android:layout_marginBottom="50dp"
         android:baselineAligned="false" />
 
     <RelativeLayout
         android:id="@+id/PlayBottom"
+
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_alignParentBottom="true"

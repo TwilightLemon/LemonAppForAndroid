@@ -31,7 +31,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="45dp"
                     android:scaleType="centerCrop"
-                    app:srcCompat="@mipmap/bg_gd"
+                    android:background="@color/colorTheme"
                     tools:ignore="VectorDrawableCompat" />
 
                 <ImageView
@@ -76,7 +76,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="45dp"
                     android:scaleType="centerCrop"
-                    app:srcCompat="@mipmap/bg_likediss"
+                    android:background="@color/colorTheme"
                     tools:ignore="VectorDrawableCompat" />
 
                 <ImageView
@@ -120,7 +120,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="45dp"
                     android:scaleType="centerCrop"
-                    app:srcCompat="@mipmap/timg"
+                    android:background="@color/colorTheme"
                     tools:ignore="VectorDrawableCompat" />
 
                 <ImageView

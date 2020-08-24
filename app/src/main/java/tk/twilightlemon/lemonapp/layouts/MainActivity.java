@@ -40,6 +40,7 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.RemoteViews;
@@ -116,6 +117,7 @@ public class MainActivity extends AppCompatActivity {
     //</editor-fold>
 
     //<editor-fold desc="控件">
+    private LinearLayout topBar=null;
     private LrcView lrcBig = null;
     private SeekBar MseekBar = null;
     private View lyricView = null;
@@ -246,6 +248,8 @@ public class MainActivity extends AppCompatActivity {
                     | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
             window.setStatusBarColor(Color.TRANSPARENT);
+            //状态栏 Dark
+            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
         }
     }
 
@@ -395,6 +399,7 @@ public class MainActivity extends AppCompatActivity {
         lrcBig = findViewById(R.id.lrc);
         PlayBottom_ControlBtn = findViewById(R.id.PlayBottom_ControlBtn);
         MButton = findViewById(R.id.MButton);
+        topBar=findViewById(R.id.topBar);
         //</editor-fold>
 
         //<editor-fold desc="回调&事件">
@@ -872,6 +877,7 @@ public class MainActivity extends AppCompatActivity {
     //<editor-fold desc="LyricView">
     public void LyricShow() {
         if(Musicdt.MusicName.length()!=0) {
+            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
             lyricView.setVisibility(View.VISIBLE);
             ObjectAnimator animator = ObjectAnimator.ofFloat(lyricView, "translationY", 1200f, 0f);
             animator.setDuration(300);
@@ -881,6 +887,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void LyricBack(){
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
         ObjectAnimator animator = ObjectAnimator.ofFloat(lyricView, "translationY", 1200f);
         animator.setDuration(300);
         animator.start();
