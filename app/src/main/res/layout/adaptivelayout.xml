@@ -5,41 +5,41 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    tools:context=".layouts.MusicListPage">
+    android:background="#f9f9f9"
+    tools:context=".layouts.Adaptivelayout">
 
-    <com.google.android.material.appbar.AppBarLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="76dp"
+        android:layout_height="80dp"
+        android:background="#FFF"
+        android:elevation="4dp"
         android:theme="@style/AppTheme.AppBarOverlay">
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="106dp"
-                android:scaleType="centerCrop"
-                android:src="@mipmap/bg" />
+            android:layout_height="56dp"
+            android:layout_marginTop="24dp">
 
             <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginTop="20dp">
+                android:layout_centerVertical="true"
+                android:layout_height="24dp">
 
                 <TextView
                     android:id="@+id/Adaptive_title"
                     android:layout_width="fill_parent"
                     android:layout_height="56dp"
+                    android:textColor="#404040"
                     android:layout_marginLeft="20dp"
                     android:gravity="center_vertical"
                     android:text="Title"
                     android:textSize="16dp" />
+
             </RelativeLayout>
 
         </RelativeLayout>
 
-    </com.google.android.material.appbar.AppBarLayout>
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/Chooses"

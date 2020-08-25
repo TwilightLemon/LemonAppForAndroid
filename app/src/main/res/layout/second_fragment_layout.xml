@@ -33,7 +33,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="45dp"
                     android:scaleType="centerCrop"
-                    app:srcCompat="@mipmap/bg_top"
+                    android:background="@color/colorTheme"
                     tools:ignore="VectorDrawableCompat" />
 
                 <ImageView
@@ -87,7 +87,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="45dp"
                     android:scaleType="centerCrop"
-                    app:srcCompat="@mipmap/bg_zj"
+                    android:background="@color/colorTheme"
                     tools:ignore="VectorDrawableCompat" />
 
                 <ImageView
@@ -141,7 +141,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="45dp"
                     android:scaleType="centerCrop"
-                    app:srcCompat="@mipmap/bg_singer"
+                    android:background="@color/colorTheme"
                     tools:ignore="VectorDrawableCompat" />
 
                 <ImageView
@@ -195,7 +195,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="45dp"
                     android:scaleType="centerCrop"
-                    app:srcCompat="@mipmap/bg_radio"
+                    android:background="@color/colorTheme"
                     tools:ignore="VectorDrawableCompat" />
 
                 <ImageView

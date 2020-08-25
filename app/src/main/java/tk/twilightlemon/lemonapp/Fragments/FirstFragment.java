@@ -51,20 +51,19 @@ public class FirstFragment extends Fragment {
         final View view = inflater.inflate(R.layout.first_fragment_layout, null);
         ListView lv = view.findViewById(R.id.gd_list);
         ListView slvx = view.findViewById(R.id.likegd_list);
-        ListView slv = view.findViewById(R.id.like_list);
-        LoadGDList(lv, slv);
+        LoadGDList(lv);
         LoadILikeDissList(slvx);
-        SetLikeList(slv);
         SetLikegdList(slvx);
         SetgdList(lv);
         return view;
     }
 
     //<editor-fold desc="加载数据">
-    InfoHelper.MusicGData ListData = new InfoHelper().new MusicGData();
 
+    //获取 我创建的歌单 列表
     @SuppressLint("HandlerLeak")
-    public void LoadGDList(final ListView lv, final ListView slv) {
+    public void LoadGDList(final ListView lv) {
+        //Step 1: 发送Get请求
             final HashMap<String, String> data = HttpHelper.GetHandler();
             HttpHelper.GetWeb(new Handler() {
                 @Override
@@ -75,10 +74,12 @@ public class FirstFragment extends Fragment {
                             String json = (String) msg.obj;
                             Log.d("LoadGDList",Settings.qq+ " --- "+Settings.g_tk+" --- "+Settings.Cookie);
                             Log.d("LoadGDList",json);
+
                             GDdata.clear();
                             try {
                                 JSONObject jo = new JSONObject(json);
                                 int i = 0;
+                                //歌单列表
                                 while (i < jo.getJSONObject("data").getJSONObject("mydiss").getJSONArray("list").length()) {
                                     JSONArray ja = jo.getJSONObject("data").getJSONObject("mydiss").getJSONArray("list");
                                     JSONObject obj = ja.getJSONObject(i);
@@ -93,15 +94,25 @@ public class FirstFragment extends Fragment {
                                     GDdata.add(df);
                                     i++;
                                 }
-                                GDListAdapter ga = new GDListAdapter(getActivity(), GDdata,getContext());
-                                lv.setAdapter(ga);
-                                setListViewHeightBasedOnChildren(lv);
+                                //"我喜欢"歌单
                                 JSONArray cc=jo.getJSONObject("data").getJSONArray("mymusic");
                                 for(int ig=0;ig<cc.length();ig++){
                                     if(cc.getJSONObject(ig).getString("title").equals("我喜欢")){
-                                        LoadLikeList(cc.getJSONObject(ig).getString("id"), slv);
-                                        break;}
+                                        String id=cc.getJSONObject(ig).getString("id");
+                                        InfoHelper.MusicGData df = new InfoHelper().new MusicGData();
+                                        df.id = id;
+                                        df.sub =cc.getJSONObject(ig).getString("subtitle");
+                                        df.name = "我喜欢";
+                                        df.pic = "https://y.gtimg.cn/mediastyle/y/img/cover_love_300.jpg";
+                                        GDdata.add(df);
+                                        break;
+                                    }
                                 }
+                                //添加到listbox适配器
+                                GDListAdapter ga = new GDListAdapter(getActivity(), GDdata,getContext());
+                                lv.setAdapter(ga);
+                                setListViewHeightBasedOnChildren(lv);
+
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
@@ -113,6 +124,7 @@ public class FirstFragment extends Fragment {
             }, "https://c.y.qq.com/rsc/fcgi-bin/fcg_get_profile_homepage.fcg?loginUin="+Settings.qq+"&hostUin=0&format=json&inCharset=utf8&outCharset=utf-8&notice=0&platform=yqq&needNewCode=0&cid=205360838&ct=20&userid="+Settings.qq+"&reqfrom=1&reqtype=0", data);
 /////end/////
     }
+    //获取 我收藏的歌单 列表
     public void LoadILikeDissList(final ListView lv){
         final HashMap<String, String> data = HttpHelper.GetHandler();
         HttpHelper.GetWeb(new Handler(){
@@ -142,82 +154,9 @@ public class FirstFragment extends Fragment {
             }
         },"https://c.y.qq.com/fav/fcgi-bin/fcg_get_profile_order_asset.fcg?g_tk="+Settings.g_tk+"&loginUin="+Settings.qq+"&hostUin=0&format=json&inCharset=utf8&outCharset=utf-8&notice=0&platform=yqq&needNewCode=0&ct=20&cid=205360956&userid="+Settings.qq+"&reqtype=3&sin=0&ein=25",data);
     }
-
-    @SuppressLint("HandlerLeak")
-    public void LoadLikeList(String id, final ListView lv) {
-        final HashMap<String, String> data = HttpHelper.GetHandler();
-        HttpHelper.GetWeb(new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                super.handleMessage(msg);
-                switch (msg.what) {
-                    case 0:
-                        String json = (String) msg.obj;
-                        try {
-                            JSONObject jo = new JSONObject(json);
-                            int i = 0;
-                            while (i < jo.getJSONArray("cdlist").getJSONObject(0).getJSONArray("songlist").length()) {
-                                JSONArray ja = jo.getJSONArray("cdlist").getJSONObject(0).getJSONArray("songlist");
-                                JSONObject obj = ja.getJSONObject(i);
-                                InfoHelper.Music md = new InfoHelper().new Music();
-                                md.MusicName = obj.getString("songname");
-                                String Singer = "";
-                                for (int osxc = 0; osxc != obj.getJSONArray("singer").length(); ++osxc) {
-                                    Singer += obj.getJSONArray("singer").getJSONObject(osxc).getString("name") + "&";
-                                }
-                                md.Singer = Singer.substring(0, Singer.lastIndexOf("&"));
-                                md.GC = obj.getString("songid");
-                                try {
-                                    md.MusicID = obj.getString("songmid");
-                                    md.ImageUrl = "http://y.gtimg.cn/music/photo_new/T002R300x300M000" + obj.getString("albummid") + ".jpg";
-                                    ListData.Data.add(md);
-                                } catch (Exception e) {
-                                }
-                                i++;
-                            }
-                            MusicListAdapter ad = new MusicListAdapter(getActivity(), ListData, new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    try {
-                                        RelativeLayout PATENT = (RelativeLayout) view.getParent();
-                                        int index = Integer.parseInt(((TextView) PATENT.findViewById(R.id.MusicList_index)).getText().toString());
-                                        final InfoHelper.Music Data = ListData.Data.get(index);
-                                        Message msg=new Message();
-                                        msg.obj=Data;
-                                        Settings.Callback_DownloadMusic.sendMessage(msg);
-                                    } catch (Exception e) {}
-                                }
-                            });
-                            lv.setAdapter(ad);
-                            setListViewHeightBasedOnChildren(lv);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }, "https://c.y.qq.com/qzone/fcg-bin/fcg_ucc_getcdinfo_byids_cp.fcg?type=1&json=1&utf8=1&onlysong=0&disstid=" + id + "&format=json&g_tk="+Settings.g_tk+"&loginUin="+Settings.qq+"&hostUin=0&format=json&inCharset=utf8&outCharset=utf-8&notice=0&platform=yqq&needNewCode=0", data);
-   ////END////
-    }
     //</editor-fold>
 
     //<editor-fold desc="初始化控件">
-    public void SetLikeList(ListView slv) {
-        slv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (position != -1) {
-                    Message message = new Message();
-                    message.what = 0;
-                    message.obj = position;
-                    Settings.ListData = ListData;
-                    Settings.Callback_PlayMusic.sendMessage(message);
-                }
-            }
-        });
-    }
 
     public void SetgdList(ListView lv) {
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
