@@ -70,7 +70,7 @@ public class LoginActivity extends AppCompatActivity {
                         g_tk = hash & 0x7fffffff;
                     }
                     Message msg=new Message();
-                    InfoHelper.LoginData ld= new InfoHelper().new LoginData();
+                    InfoHelper.LoginData ld= new InfoHelper.LoginData();
                     ld.Cookie=cookie;
                     ld.g_tk=g_tk+"";
                     ld.qq=qq;

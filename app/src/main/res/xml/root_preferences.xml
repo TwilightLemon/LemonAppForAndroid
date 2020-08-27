@@ -1,0 +1,34 @@
+<PreferenceScreen
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory app:title="Login Info">
+        <Preference
+            app:key="qq"
+            app:title="QQ"
+            app:summary="Has Login 2728578956"/>
+        <Preference
+            app:key="name"
+            app:title="Nick"
+            app:summary="Twilight./Lemon"/>
+        <Preference
+            app:key="usable"
+            app:title="Key"
+            app:summary="g_tk Cookies 有效"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="Settings">
+
+        <SwitchPreference
+            app:key="cacheDownload"
+            app:title="听歌时缓存"
+            app:defaultValue="true"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="About">
+        <Preference app:title="Code By"
+            app:summary="一只江仔 -Twilight./Lemon 0xA2A2CF8C" />
+        <Preference app:title="Powered By"
+            app:summary="Android Studio 4.0.1" />
+    </PreferenceCategory>
+</PreferenceScreen>

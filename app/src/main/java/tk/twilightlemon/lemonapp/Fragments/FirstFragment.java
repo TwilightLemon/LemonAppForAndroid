@@ -83,7 +83,9 @@ public class FirstFragment extends Fragment {
                                 while (i < jo.getJSONObject("data").getJSONObject("mydiss").getJSONArray("list").length()) {
                                     JSONArray ja = jo.getJSONObject("data").getJSONObject("mydiss").getJSONArray("list");
                                     JSONObject obj = ja.getJSONObject(i);
-                                    InfoHelper.MusicGData df = new InfoHelper().new MusicGData();
+                                    InfoHelper.MusicGData df = new InfoHelper.MusicGData();
+                                    df.IsOwn=true;
+                                    df.dirid=obj.getString("dirid");
                                     df.id = obj.getString("dissid");
                                     df.sub = obj.getString("subtitle");
                                     df.name = obj.getString("title");
@@ -99,8 +101,10 @@ public class FirstFragment extends Fragment {
                                 for(int ig=0;ig<cc.length();ig++){
                                     if(cc.getJSONObject(ig).getString("title").equals("我喜欢")){
                                         String id=cc.getJSONObject(ig).getString("id");
-                                        InfoHelper.MusicGData df = new InfoHelper().new MusicGData();
+                                        InfoHelper.MusicGData df = new InfoHelper.MusicGData();
                                         df.id = id;
+                                        df.IsOwn=true;
+                                        df.dirid=null;
                                         df.sub =cc.getJSONObject(ig).getString("subtitle");
                                         df.name = "我喜欢";
                                         df.pic = "https://y.gtimg.cn/mediastyle/y/img/cover_love_300.jpg";
@@ -111,7 +115,7 @@ public class FirstFragment extends Fragment {
                                 //添加到listbox适配器
                                 GDListAdapter ga = new GDListAdapter(getActivity(), GDdata,getContext());
                                 lv.setAdapter(ga);
-                                setListViewHeightBasedOnChildren(lv);
+                                setListViewHeightBasedOnChildren(lv,false);
 
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -136,7 +140,7 @@ public class FirstFragment extends Fragment {
                     int i = 0;
                     while (i < o.length()) {
                         JSONObject obj = o.getJSONObject(i);
-                        InfoHelper.MusicGData df = new InfoHelper().new MusicGData();
+                        InfoHelper.MusicGData df = new InfoHelper.MusicGData();
                         df.id = obj.getString("dissid");
                         df.sub ="创建者:"+obj.getString("nickname");
                         df.name = obj.getString("dissname");
@@ -149,7 +153,7 @@ public class FirstFragment extends Fragment {
                     }
                     GDListAdapter ga = new GDListAdapter(getActivity(), LikeGDdata,getContext());
                     lv.setAdapter(ga);
-                    setListViewHeightBasedOnChildren(lv);
+                    setListViewHeightBasedOnChildren(lv,false);
                 } catch (Exception e) {}
             }
         },"https://c.y.qq.com/fav/fcgi-bin/fcg_get_profile_order_asset.fcg?g_tk="+Settings.g_tk+"&loginUin="+Settings.qq+"&hostUin=0&format=json&inCharset=utf8&outCharset=utf-8&notice=0&platform=yqq&needNewCode=0&ct=20&cid=205360956&userid="+Settings.qq+"&reqtype=3&sin=0&ein=25",data);
@@ -189,7 +193,7 @@ public class FirstFragment extends Fragment {
         super.onDestroyView();
     }
 
-    public static void setListViewHeightBasedOnChildren(ListView listView) {
+    public static void setListViewHeightBasedOnChildren(ListView listView,boolean needAdd) {
         android.widget.ListAdapter listAdapter = listView.getAdapter();
         if (listAdapter != null) {
             int totalHeight = 0;
@@ -200,6 +204,7 @@ public class FirstFragment extends Fragment {
                     totalHeight += listItem.getMeasuredHeight();
                 }
             }
+            if(needAdd)totalHeight+=200;
             ViewGroup.LayoutParams params = listView.getLayoutParams();
             params.height = totalHeight + (listView.getDividerHeight() * (listAdapter.getCount() - 1));
             listView.setLayoutParams(params);

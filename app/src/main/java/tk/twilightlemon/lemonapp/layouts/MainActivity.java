@@ -10,7 +10,6 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -18,7 +17,6 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -62,6 +60,7 @@ import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.ViewPager;
 
+import com.danikula.videocache.HttpProxyCacheServer;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 
@@ -73,7 +72,6 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -82,6 +80,7 @@ import java.util.List;
 import tk.twilightlemon.lemonapp.Adapters.MusicListAdapter;
 import tk.twilightlemon.lemonapp.Adapters.MyFragmentAdapter;
 import tk.twilightlemon.lemonapp.Helpers.FileUtils;
+import tk.twilightlemon.lemonapp.Helpers.HttpProxyCacheUtil;
 import tk.twilightlemon.lemonapp.Helpers.Image.BitmapUtils;
 import tk.twilightlemon.lemonapp.Helpers.Image.BlurBitmap;
 import tk.twilightlemon.lemonapp.Fragments.FirstFragment;
@@ -95,8 +94,6 @@ import tk.twilightlemon.lemonapp.R;
 import tk.twilightlemon.lemonapp.Fragments.SecondFragment;
 import tk.twilightlemon.lemonapp.Helpers.Settings;
 
-import static android.os.Environment.DIRECTORY_DOWNLOADS;
-import static android.os.Environment.DIRECTORY_MUSIC;
 import static tk.twilightlemon.lemonapp.Helpers.TextHelper.FindByAb;
 
 public class MainActivity extends AppCompatActivity {
@@ -108,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean isplaying = false;
     private int xhindex = 0;
     private int PlayListIndex = -1;
-    private InfoHelper.Music Musicdt = new InfoHelper().new Music();
+    private InfoHelper.Music Musicdt = new InfoHelper.Music();
 
     private SharedPreferences musicPlayerSP = null;
 
@@ -142,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
     private Runnable r = new Runnable() {
         @Override
         public void run() {
-            if (isplaying && MseekBar.getProgress() + 2000 >= MseekBar.getMax()) {
+            if (isplaying && MseekBar.getProgress() == MseekBar.getMax()) {
                 isplaying = false;
                 mHandler.removeCallbacks(r);
                 MseekBar.setProgress(0);
@@ -152,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void handleMessage(Message msg) {
                                 PlayListIndex = 0;
-                                InfoHelper.MusicGData GData = new InfoHelper().new MusicGData();
+                                InfoHelper.MusicGData GData = new InfoHelper.MusicGData();
                                 GData.Data.add((InfoHelper.Music) msg.obj);
                                 GData.name = "Radio";
                                 GData.id = Settings.ListData.id;
@@ -161,7 +158,8 @@ public class MainActivity extends AppCompatActivity {
                                 PlayMusic(true,0);
                             }
                         });
-                    } else {
+                    }
+                    else {
                         if (PlayListIndex == Settings.ListData.Data.size() - 1)
                             PlayListIndex = 0;
                         else ++PlayListIndex;
@@ -221,6 +219,7 @@ public class MainActivity extends AppCompatActivity {
         if (!isAppOnForeground())
             Settings.isActive = false;
         Settings.mSP.commit();
+        Settings.sp.commit();
         super.onStop();
     }
 
@@ -284,7 +283,10 @@ public class MainActivity extends AppCompatActivity {
             Settings.qq = nu;
             Settings.Cookie=sp.getString("Cookie","");
             Settings.g_tk=sp.getString("g_tk","");
+            Settings.nick=sp.getString("name","");
+            Settings.ListenWithCache=sp.getBoolean("ListenWithCache",true);
         }
+        Settings.sp=sp.edit();
 
         //读取上次播放
         musicPlayerSP = MainActivity.this.getSharedPreferences("MusicPlayer", Context.MODE_PRIVATE);
@@ -300,7 +302,7 @@ public class MainActivity extends AppCompatActivity {
             if(ListID.contains("Search"))
                 MusicLib.Search(this,TextHelper.Base64Coder.Decode(FindByAb(ListID,"[","]")),false,0);
             else if(ListID.contains("Diss")){
-                InfoHelper.MusicGData gData=new InfoHelper().new MusicGData();
+                InfoHelper.MusicGData gData=new InfoHelper.MusicGData();
                 gData.id=FindByAb(ListID,"[","]");
                 gData.name=FindByAb(ListID,"skName{","}");
                 MusicLib.GetGDbyID(gData,this,false);
@@ -369,10 +371,12 @@ public class MainActivity extends AppCompatActivity {
                                             editor.putString("g_tk",Idata.g_tk);
                                             editor.putString("name", name);
                                             editor.putString("tx", tx);
+                                            editor.putBoolean("ListenWithCache",true);
                                             editor.commit();
                                             Settings.qq =Idata.qq;
                                             Settings.g_tk=Idata.g_tk;
                                             Settings.Cookie=Idata.Cookie;
+                                            Settings.nick=name;
                                             SetTitle();
                                             break;
                                         default:
@@ -388,6 +392,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+    HttpProxyCacheServer AudioCache;
 
     public void LoadMusicControls() {
         //<editor-fold desc="控件实例化">
@@ -403,6 +408,14 @@ public class MainActivity extends AppCompatActivity {
         //</editor-fold>
 
         //<editor-fold desc="回调&事件">
+        AudioCache = HttpProxyCacheUtil.getAudioProxy(this);
+        findViewById(R.id.USERTX).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(MainActivity.this, SettingsActivity.class);
+                startActivity(intent);
+            }
+        });
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             final ScrollView MusicList_sv=findViewById(R.id.MusicList_sv);
             MusicList_sv.setOnScrollChangeListener(new View.OnScrollChangeListener() {
@@ -498,6 +511,17 @@ public class MainActivity extends AppCompatActivity {
         //</editor-fold>
 
         //<editor-fold desc="初始内容&事件">
+        MusicList_list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if (position != -1) {
+                    Message message = new Message();
+                    message.what = 0;
+                    message.obj = position;
+                    Settings.Callback_PlayMusic.sendMessage(message);
+                }
+            }
+        });
         lyricView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {}});
@@ -638,6 +662,10 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
+        File cacheDic=new File(getExternalCacheDir().getPath()+"/LyricCache/");
+        if(!cacheDic.exists()){
+            cacheDic.mkdir();
+        }
         SetWindow();
         Updata();
         SetTitle();
@@ -647,6 +675,7 @@ public class MainActivity extends AppCompatActivity {
         LoadSettings();
         LoadNotification();
         KeepLive();
+        ResignGDListMeum();
     }
 
     @SuppressLint("HandlerLeak")
@@ -748,28 +777,20 @@ public class MainActivity extends AppCompatActivity {
 
     @SuppressLint("HandlerLeak")
     public void OnShareClick(View view) {
-        String uri="http://tools.aeink.com/tools/dwz/urldwz.php?longurl=http%3a%2f%2ftwilightlemon.coding.me%2fMusicPlayer%2f%3fid%3d"+Musicdt.MusicID+"%26name%3d"+URLEncoder.encode(Musicdt.MusicName)+"%26singer%3d"+URLEncoder.encode(Musicdt.Singer)+"%26imgid%3dhttp%3a%2f%2fy.gtimg.cn%2fmusic%2fphoto_new%2fT002R300x300M000"+TextHelper.FindByAb(Musicdt.ImageUrl,"300x300M000",".jpg")+".jpg&api=urlcn";
-        HttpHelper.GetWeb(new Handler(){
-            @Override
-            public void handleMessage(Message msg){
-                try {
-                    String short_url = new JSONObject(msg.obj.toString()).getString("ae_url");
-                    Intent share_intent = new Intent();
-                    share_intent.setAction(Intent.ACTION_SEND);
-                    share_intent.setType("text/plain");
-                    share_intent.putExtra(Intent.EXTRA_SUBJECT, "小萌音乐分享");
-                    share_intent.putExtra(Intent.EXTRA_TEXT, Musicdt.MusicName + " - " + Musicdt.Singer + "：" + short_url);
-                    share_intent = Intent.createChooser(share_intent, "小萌音乐分享");
-                    startActivity(share_intent);
-                }catch (Exception e){}
-            }
-        },uri,null);
+        String short_url = "http://dl.lemonapp.tk/GetMusic/?id="+Musicdt.MusicID;
+        Intent share_intent = new Intent();
+        share_intent.setAction(Intent.ACTION_SEND);
+        share_intent.setType("text/plain");
+        share_intent.putExtra(Intent.EXTRA_SUBJECT, "小萌音乐分享");
+        share_intent.putExtra(Intent.EXTRA_TEXT, Musicdt.MusicName + " - " + Musicdt.Singer + "：" + short_url);
+        share_intent = Intent.createChooser(share_intent, "小萌音乐分享");
+        startActivity(share_intent);
     }
 
     public void LoadNotification() {
         notificationManager = (NotificationManager)
                 getSystemService(Context.NOTIFICATION_SERVICE);
-        myBroadcastReceiver = new InfoHelper().new NotificationBCR();
+        myBroadcastReceiver = new InfoHelper.NotificationBCR();
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(InfoHelper.NotificationBCR.ACTION_LAST);
         intentFilter.addAction(InfoHelper.NotificationBCR.ACTION_PRESS);
@@ -808,7 +829,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void KeepLive() {
-        keeplive = new InfoHelper().new KeepliveBCR();
+        keeplive = new InfoHelper.KeepliveBCR();
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction("android.intent.action.SCREEN_OFF");
         intentFilter.addAction("android.intent.action.SCREEN_ON");
@@ -834,7 +855,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void handleMessage(Message msg) {
                     PlayListIndex = 0;
-                    InfoHelper.MusicGData GData = new InfoHelper().new MusicGData();
+                    InfoHelper.MusicGData GData = new InfoHelper.MusicGData();
                     GData.Data.add((InfoHelper.Music) msg.obj);
                     GData.name = "Radio";
                     GData.id = Settings.ListData.id;
@@ -901,35 +922,25 @@ public class MainActivity extends AppCompatActivity {
     //</editor-fold>
 
     //<editor-fold desc="MusicList">
+    private View.OnClickListener OnMusicLAClick= new View.OnClickListener() {
+        @SuppressLint("HandlerLeak")
+        @Override
+        public void onClick(View view) {
+            try {
+                RelativeLayout PATENT = (RelativeLayout) view.getParent();
+                int index = Integer.parseInt(((TextView) PATENT.findViewById(R.id.MusicList_index)).getText().toString());
+                final InfoHelper.Music Data = Settings.ListData.Data.get(index);
+                DownloadMusic(Data);
+            } catch (Exception ignored) {}
+        }
+    };
     public void MusicListLoad(boolean isShow){
         MusicList_title.setText(Settings.ListData.name);
-        MusicListAdapter ad = new MusicListAdapter(MainActivity.this, Settings.ListData, new View.OnClickListener() {
-            @SuppressLint("HandlerLeak")
-            @Override
-            public void onClick(View view) {
-                try {
-                    RelativeLayout PATENT = (RelativeLayout) view.getParent();
-                    int index = Integer.parseInt(((TextView) PATENT.findViewById(R.id.MusicList_index)).getText().toString());
-                    final InfoHelper.Music Data = Settings.ListData.Data.get(index);
-                    DownloadMusic(Data);
-                } catch (Exception ignored) {}
-            }
-        });
+        MusicListAdapter ad = new MusicListAdapter(MainActivity.this, Settings.ListData,OnMusicLAClick);
         MusicList_list.setAdapter(ad);
-        FirstFragment.setListViewHeightBasedOnChildren(MusicList_list);
-        MusicList_list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (position != -1) {
-                    Message message = new Message();
-                    message.what = 0;
-                    message.obj = position;
-                    Settings.Callback_PlayMusic.sendMessage(message);
-                }
-            }
-        });
+        FirstFragment.setListViewHeightBasedOnChildren(MusicList_list,true);
         if(isShow)
-        MusicListShow();
+            MusicListShow();
     }
 
     public void MusicListShow(){
@@ -969,6 +980,99 @@ public class MainActivity extends AppCompatActivity {
     //</editor-fold>
 
     //<editor-fold desc="一些方法">
+    @SuppressLint("HandlerLeak")
+    private void ResignGDListMeum(){
+        MusicList_list.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener(){
+            @Override
+            public boolean onItemLongClick(AdapterView<?> arg0, View arg1,final int arg2, long arg3) {
+                ArrayList<String>meumList=new ArrayList<String>();
+                meumList.add("添加");
+                if(Settings.ListData.IsOwn)
+                    meumList.add("删除");
+                new AlertDialog.Builder(MainActivity.this)
+                        .setTitle("歌单操作")
+                        .setItems(meumList.toArray(new CharSequence[meumList.size()]), new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                switch (which){
+                                    case 0:
+                                        //Add 添加
+                                        ChooseAGDdirid("添加到:",new Handler(){
+                                           @Override
+                                           public void handleMessage(@NonNull Message msg) {
+                                               MusicLib.AddMusicToGD(Settings.ListData.Data.get(arg2).MusicID,msg.obj.toString(),MainActivity.this);
+                                           }
+                                       });
+                                        break;
+                                    case 1:
+                                        //Delete 删除
+                                        if(Settings.ListData.dirid==null){
+                                            MusicLib.GetGDiridByName("我喜欢",new Handler(){
+                                                @Override
+                                                public void handleMessage(@NonNull Message msg) {
+                                                    String dirid=msg.obj.toString();
+                                                    MusicLib.DeleteMusicToFromGD(Settings.ListData.sogids.get(arg2), dirid, new Handler() {
+                                                        @Override
+                                                        public void handleMessage(@NonNull Message msg) {
+                                                            sdm(msg.obj.toString(), MainActivity.this);
+                                                            Settings.ListData.Data.remove(arg2);
+                                                            Settings.ListData.sogids.remove(arg2);
+                                                            //通知更新数据
+                                                            MusicListLoad(false);
+                                                        }
+                                                    });
+                                                }
+                                            });
+                                        }else {
+                                            String dirid = Settings.ListData.dirid;
+                                            MusicLib.DeleteMusicToFromGD(Settings.ListData.sogids.get(arg2), dirid, new Handler() {
+                                                @Override
+                                                public void handleMessage(@NonNull Message msg) {
+                                                    sdm(msg.obj.toString(), MainActivity.this);
+                                                    Settings.ListData.Data.remove(arg2);
+                                                    Settings.ListData.sogids.remove(arg2);
+                                                    //通知更新数据
+                                                    MusicListLoad(false);
+                                                }
+                                            });
+                                        }
+                                        break;
+                                }
+                            }
+                        })
+                .create()
+                .show();
+                return true;
+            }
+        });
+    }
+    @SuppressLint("HandlerLeak")
+    private void ChooseAGDdirid(final String title,final Handler handler){
+        MusicLib.GetGDListICreated(new Handler(){
+            @Override
+            public void handleMessage(@NonNull Message msg) {
+                ArrayList<String> NameList=new ArrayList<>();
+                final ArrayList<String> DiridList=new ArrayList<>();
+                for(InfoHelper.MusicGData gData :(ArrayList<InfoHelper.MusicGData>)msg.obj){
+                    NameList.add(gData.name);
+                    DiridList.add(gData.dirid);
+                }
+                new AlertDialog.Builder(MainActivity.this)
+                        .setTitle(title)
+                        .setItems(NameList.toArray(new CharSequence[NameList.size()]), new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                Message ms=new Message();
+                                ms.obj=DiridList.get(which);
+                                handler.sendMessage(ms);
+                            }
+                        })
+                        .create()
+                        .show();
+            }
+        });
+    }
+
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     @SuppressLint("HandlerLeak")
     public void PlayMusic(final boolean isplay,final int ex) {
@@ -1027,7 +1131,16 @@ public class MainActivity extends AppCompatActivity {
                         return;
                     }
                     String url = msg.obj.toString();
-                    Settings.mp.setDataSource(url);
+                    if(Settings.ListenWithCache)
+                         Settings.mp.setDataSource(AudioCache.getProxyUrl(url));
+                    else{
+                        String cachepath=getExternalCacheDir().getPath()+"/AudioCache/"+Musicdt.MusicID+".m4a";
+                        if(new File(cachepath).exists()){
+                            Settings.mp.setDataSource(cachepath);
+                        }else{
+                            Settings.mp.setDataSource(url);
+                        }
+                    }
                     Settings.mp.prepare();
                     if(isplay){
                         Settings.mp.start();

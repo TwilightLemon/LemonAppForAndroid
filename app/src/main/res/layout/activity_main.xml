@@ -12,6 +12,7 @@
         android:id="@+id/topBar"
         android:layout_width="match_parent"
         android:layout_height="106dp"
+        android:elevation="4dp"
         android:background="#FFF"
 
         android:theme="@style/AppTheme.AppBarOverlay">
@@ -71,23 +72,17 @@
         </RelativeLayout>
     </LinearLayout>
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="106dp"
-        android:background="#40404040"/>
-
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/view_pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="107dp"
+        android:layout_marginTop="106dp"
         android:layout_marginBottom="50dp"
         android:baselineAligned="false" />
 
     <RelativeLayout
         android:id="@+id/PlayBottom"
-
+        android:elevation="6dp"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_alignParentBottom="true"
@@ -153,7 +148,6 @@
     <include
         android:id="@+id/MusicList"
         layout="@layout/musiclist"
-        android:layout_marginBottom="50dp"
         android:visibility="gone"
         android:layout_height="match_parent"
         android:layout_width="match_parent" />

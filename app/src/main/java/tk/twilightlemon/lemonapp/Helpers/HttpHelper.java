@@ -11,6 +11,7 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
@@ -18,6 +19,38 @@ import java.util.Iterator;
 import java.util.Map;
 
 public class HttpHelper {
+    public static void PostWeb(final Handler handler,final String Url,final String postData,final HashMap<String,String> Headers){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    URL url = new URL(Url);
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setConnectTimeout(50000);//超时时间
+                    conn.setRequestMethod("POST");
+                    conn.setDoOutput(true);
+                    if (Headers != null) {
+                        Iterator iter = Headers.entrySet().iterator();
+                        while (iter.hasNext()) {
+                            Map.Entry entry = (Map.Entry) iter.next();
+                            conn.setRequestProperty(entry.getKey().toString(), entry.getValue().toString());
+                        }
+                    }
+                    conn.setRequestProperty("Content-Type", "application/json");
+                    OutputStreamWriter out = new OutputStreamWriter(conn.getOutputStream());
+                    out.write(postData);
+                    out.flush();
+                    out.close();
+
+                    InputStream inputStream = conn.getInputStream();
+                    String result=streamToString(inputStream);
+                    Message msg=new Message();
+                    msg.obj=result;
+                    handler.sendMessage(msg);
+                }catch (Exception e){}
+            }
+        }).start();
+    }
     public static void GetWeb(final Handler handler, final String url, final HashMap<String, String> Headers) {
         new Thread(new Runnable() {
             @Override
@@ -48,6 +81,7 @@ public class HttpHelper {
             }
         }).start();
     }
+
     public static HashMap<String,String> GetHandler(){
         HashMap<String, String> data = new HashMap<String, String>();
         data.put("Connection", "keep-alive");
@@ -79,49 +113,4 @@ public class HttpHelper {
         }
     }
 
-    public static void Download(final String urll, final Handler pro, final Handler finished, final String fileName, final Context context){
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    URL url = new URL(urll);
-                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                    conn.setConnectTimeout(30 * 1000);
-                    InputStream is = conn.getInputStream();
-                    Uri uri = null;
-                    ContentValues contentValues = new ContentValues();
-                    contentValues.put(MediaStore.Audio.Media.MIME_TYPE, "audio/mp3");
-                    contentValues.put(MediaStore.Audio.Media.DISPLAY_NAME, fileName);
-                    contentValues.put(MediaStore.Audio.Media.DATE_TAKEN, System.currentTimeMillis());
-                    //只是往 MediaStore 里面插入一条新的记录，MediaStore 会返回给我们一个空的 Content Uri
-                    //接下来问题就转化为往这个 Content Uri 里面写入
-                    uri = context.getContentResolver().insert(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, contentValues);
-                    BufferedInputStream inputStream = new BufferedInputStream(is);
-                    OutputStream os = null;
-                    if (uri != null) {
-                        os = context.getContentResolver().openOutputStream(uri);
-                    }
-                    if (os != null) {
-                        byte[] buffer = new byte[1024];
-                        int len;
-                        int total = 0;
-                        int contentLeng = conn.getContentLength();
-                        while ((len = inputStream.read(buffer)) != -1) {
-                            os.write(buffer, 0, len);
-                            total += len;
-                            int pp=total * 100 / contentLeng;
-                            Message msg=new Message();
-                            msg.arg1=pp;
-                            pro.sendMessage(msg);
-                        }
-                        finished.sendMessage(new Message());
-                    }
-                    os.flush();
-                    inputStream.close();
-                    is.close();
-                    os.close();
-                }catch (Exception e){}
-            }
-        }).start();
-    }
 }

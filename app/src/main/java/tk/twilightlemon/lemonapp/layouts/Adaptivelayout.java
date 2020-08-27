@@ -74,7 +74,7 @@ public class Adaptivelayout extends AppCompatActivity {
         final ListView lv = findViewById(R.id.Adaptive_list);
         lv.setOnItemClickListener(adaptData.ListOnClick);
         lv.setAdapter(adaptData.CSData);
-        FirstFragment.setListViewHeightBasedOnChildren(lv);
+        FirstFragment.setListViewHeightBasedOnChildren(lv,false);
         LinearLayout ll = findViewById(R.id.Chooses);
         for (int i = 0; i < adaptData.ChooseData.size(); i++) {
             final RadioButton choose = new RadioButton(this);

@@ -25,18 +25,23 @@ public class Settings {
     public static String qq="";
     public static String Cookie="";
     public static String g_tk="";
+    public static String nick="";
+    public static boolean ListenWithCache=true;
 
+    //用于储存账户数据
+    public static SharedPreferences.Editor sp;
     public static boolean isActive=true;
     public static MediaPlayer mp = new MediaPlayer();
 
+    //用于储存播放数据
     public static SharedPreferences.Editor mSP = null;
 
     public static String ModeID="";
     //</editor-fold>
 
     //<editor-fold desc="一些跳转数据">
-    public static InfoHelper.MusicGData ListData=new InfoHelper().new MusicGData();
-    public static InfoHelper.AdaptiveData AdapData=new InfoHelper().new AdaptiveData();
+    public static InfoHelper.MusicGData ListData=new InfoHelper.MusicGData();
+    public static InfoHelper.AdaptiveData AdapData=new InfoHelper.AdaptiveData();
     //</editor-fold>
 
     //<editor-fold desc="一些回调事件">

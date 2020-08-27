@@ -80,13 +80,13 @@ public class SecondFragment extends Fragment {
                 Top_List= (ArrayList<InfoHelper.MusicTop>) msg.obj;
                 TopItemsAdapter tia = new TopItemsAdapter(getActivity(),Top_List,getContext());
                 lv.setAdapter(tia);
-                FirstFragment.setListViewHeightBasedOnChildren(lv);
+                FirstFragment.setListViewHeightBasedOnChildren(lv,false);
             }});
         if (forni != -1) {
             lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                    InfoHelper.MusicGData dt = new InfoHelper().new MusicGData();
+                    InfoHelper.MusicGData dt = new InfoHelper.MusicGData();
                     InfoHelper.MusicTop dat = ((TopItemsAdapter) lv.getAdapter()).getMdata().get(Top_List.get(i).ID);
                     dt.Data = dat.Data;
                     dt.name = dat.Name;
@@ -108,7 +108,7 @@ public class SecondFragment extends Fragment {
                 FLGDdata = (ArrayList<InfoHelper.MusicGData>) msg.obj;
                 GDListAdapter ga = new GDListAdapter(getActivity(), FLGDdata,getContext());
                 lv.setAdapter(ga);
-                FirstFragment.setListViewHeightBasedOnChildren(lv);
+                FirstFragment.setListViewHeightBasedOnChildren(lv,false);
             }
         }, 4);
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -151,12 +151,12 @@ public class SecondFragment extends Fragment {
                     public void handleMessage(Message msg) {
                         try {
                             JSONArray o = new JSONObject(msg.obj.toString()).getJSONObject("data").getJSONArray("categories");
-                            final InfoHelper.MusicFLGDIndexItemsList data = new InfoHelper().new MusicFLGDIndexItemsList();
+                            final InfoHelper.MusicFLGDIndexItemsList data = new InfoHelper.MusicFLGDIndexItemsList();
                             final ArrayList<String> idList = new ArrayList<>();
                             for (int csr = 0; csr < o.length(); ++csr) {
                                 for (int i = 0; i < o.getJSONObject(csr).getJSONArray("items").length(); ++i) {//lauch
                                     JSONObject js = o.getJSONObject(csr).getJSONArray("items").getJSONObject(i);
-                                    InfoHelper.MusicFLGDIndexItems ite = new InfoHelper().new MusicFLGDIndexItems();
+                                    InfoHelper.MusicFLGDIndexItems ite = new InfoHelper.MusicFLGDIndexItems();
                                     ite.id = js.getString("categoryId");
                                     ite.name = js.getString("categoryName");
                                     data.Data.add(ite);
@@ -166,7 +166,7 @@ public class SecondFragment extends Fragment {
                             MusicLib.GetFLGDItems("10000000", new Handler() {
                                 @Override
                                 public void handleMessage(Message msg) {
-                                    final InfoHelper.AdaptiveData aData = new InfoHelper().new AdaptiveData();
+                                    final InfoHelper.AdaptiveData aData = new InfoHelper.AdaptiveData();
                                     aData.ChooseData.add(idList.toArray(new String[idList.size()]));
                                     aData.title = "分类歌单";
                                     aData.ChooseCallBack.add(new Handler() {
@@ -179,7 +179,7 @@ public class SecondFragment extends Fragment {
                                                     FLGDdat = (ArrayList<InfoHelper.MusicGData>) msg.obj;
                                                     GDListAdapter ga = new GDListAdapter(getActivity(), FLGDdat,getContext());
                                                     lv.setAdapter(ga);
-                                                    FirstFragment.setListViewHeightBasedOnChildren(lv);
+                                                    FirstFragment.setListViewHeightBasedOnChildren(lv,false);
                                                 }
                                             }, -1);
                                         }
@@ -214,7 +214,7 @@ public class SecondFragment extends Fragment {
                     public void handleMessage(Message msg) {
                         SingerData = (ArrayList<InfoHelper.SingerAndRadioData>) msg.obj;
                         SingerAndRadioListAdapter sla = new SingerAndRadioListAdapter(getActivity(), SingerData,getContext());
-                        InfoHelper.AdaptiveData aData = new InfoHelper().new AdaptiveData();
+                        InfoHelper.AdaptiveData aData = new InfoHelper.AdaptiveData();
                         aData.CSData = sla;
                         aData.title = "歌手";
                         final String[] cData = new String[]{"热门", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "#"};
@@ -232,7 +232,7 @@ public class SecondFragment extends Fragment {
                                         SingerData.clear();
                                         SingerData = (ArrayList<InfoHelper.SingerAndRadioData>) msg.obj;
                                         lv.setAdapter(new SingerAndRadioListAdapter(getActivity(), SingerData,getContext()));
-                                        FirstFragment.setListViewHeightBasedOnChildren(lv);
+                                        FirstFragment.setListViewHeightBasedOnChildren(lv,false);
                                     }
                                 }, 50);
                             }
@@ -248,7 +248,7 @@ public class SecondFragment extends Fragment {
                                         SingerData.clear();
                                         SingerData = (ArrayList<InfoHelper.SingerAndRadioData>) msg.obj;
                                         lv.setAdapter(new SingerAndRadioListAdapter(getActivity(), SingerData,getContext()));
-                                        FirstFragment.setListViewHeightBasedOnChildren(lv);
+                                        FirstFragment.setListViewHeightBasedOnChildren(lv,false);
                                     }
                                 }, 50);
                             }
@@ -275,7 +275,7 @@ public class SecondFragment extends Fragment {
                     @Override
                     public void handleMessage(Message msg) {
                         final ArrayList<ArrayList<InfoHelper.SingerAndRadioData>> data = (ArrayList<ArrayList<InfoHelper.SingerAndRadioData>>) msg.obj;
-                        InfoHelper.AdaptiveData aData = new InfoHelper().new AdaptiveData();
+                        InfoHelper.AdaptiveData aData = new InfoHelper.AdaptiveData();
                         aData.ChooseData.add(new String[]{"热门", "下午", "情感", "主题", "场景", "曲风", "语言", "人群", "乐器", "地区"});
                         aData.title = "电台";
                         RadioMData = data.get(0);
@@ -295,7 +295,7 @@ public class SecondFragment extends Fragment {
                                 MusicLib.GetRadioMusicById(RadioMData.get(i).id, new Handler() {
                                     @Override
                                     public void handleMessage(Message msg) {
-                                        InfoHelper.MusicGData GData = new InfoHelper().new MusicGData();
+                                        InfoHelper.MusicGData GData = new InfoHelper.MusicGData();
                                         GData.Data.add((InfoHelper.Music) msg.obj);
                                         GData.name="Radio";
                                         GData.id=RadioMData.get(i).id;
@@ -327,7 +327,7 @@ public class SecondFragment extends Fragment {
             @Override
             public void handleMessage(Message msg) {
                 lv.setAdapter(new SingerAndRadioListAdapter(getActivity(), (ArrayList<InfoHelper.SingerAndRadioData>) msg.obj,getContext()));
-                FirstFragment.setListViewHeightBasedOnChildren(lv);
+                FirstFragment.setListViewHeightBasedOnChildren(lv,false);
             }
         }, 4);
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -351,7 +351,7 @@ public class SecondFragment extends Fragment {
             public void handleMessage(Message msg) {
                 ArrayList<ArrayList<InfoHelper.SingerAndRadioData>> data = (ArrayList<ArrayList<InfoHelper.SingerAndRadioData>>) msg.obj;
                 lv.setAdapter(new SingerAndRadioListAdapter(getActivity(), data.get(0),getContext()));
-                FirstFragment.setListViewHeightBasedOnChildren(lv);
+                FirstFragment.setListViewHeightBasedOnChildren(lv,false);
             }
         }, 4);
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -364,7 +364,7 @@ public class SecondFragment extends Fragment {
                         MusicLib.GetRadioMusicById(data.get(0).get(i).id, new Handler() {
                             @Override
                             public void handleMessage(Message msg) {
-                                InfoHelper.MusicGData GData = new InfoHelper().new MusicGData();
+                                InfoHelper.MusicGData GData = new InfoHelper.MusicGData();
                                 GData.Data.add((InfoHelper.Music) msg.obj);
                                 GData.name="Radio";
                                 GData.id=data.get(0).get(i).id;

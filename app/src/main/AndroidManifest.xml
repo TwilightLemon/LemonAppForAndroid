@@ -15,6 +15,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity
+            android:name=".layouts.SettingsActivity"
+            android:label="Settings"></activity>
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="tk.twilightlemon.lemonapp.fileprovider"
@@ -46,7 +50,7 @@
             android:process=":main"
             android:screenOrientation="portrait"
             android:theme="@style/KeepliveActivityStyle" />
-        <activity android:name=".layouts.LoginActivity"></activity>
+        <activity android:name=".layouts.LoginActivity" />
     </application>
 
 </manifest>

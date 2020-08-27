@@ -8,17 +8,18 @@ import android.widget.AdapterView;
 import android.widget.ListAdapter;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import tk.twilightlemon.lemonapp.layouts.KeepliveActivity;
 import tk.twilightlemon.lemonapp.layouts.MainActivity;
 
 public class InfoHelper {
-    public class LoginData{
+    public static class LoginData{
         public String g_tk="";
         public String Cookie="";
         public String qq="";
     }
-    public class AdaptiveData{
+    public static class AdaptiveData{
         public AdaptiveData(){}
         public String title="";
         public ArrayList<String[]> ChooseData=new ArrayList<>();
@@ -28,7 +29,7 @@ public class InfoHelper {
     }
 
     //<editor-fold desc="音乐播放&显示列表所用的数据">
-    public class Music {
+    public static class Music {
         public Music() {
         }
 
@@ -39,7 +40,7 @@ public class InfoHelper {
         public String ImageUrl = "";
         public String GC = "";
     }
-    public class MusicGData {
+    public static class MusicGData {
         public MusicGData() {
         }
 
@@ -48,21 +49,25 @@ public class InfoHelper {
         public String pic = "";
         public String id = "";
         public String sub = "";
+
+        public boolean IsOwn=false;
+        public String dirid="";
+        public ArrayList<String> sogids;
     }
-    public class MusicTop {
+    public static class MusicTop {
         public String Name = "";
         public String Photo = "";
         public String ID = "";
         public ArrayList<Music> Data = new ArrayList<>();
     }
-    public class MusicFLGDIndexItemsList {
+    public static class MusicFLGDIndexItemsList {
         public ArrayList<MusicFLGDIndexItems> Data = new ArrayList<MusicFLGDIndexItems>();
     }
-    public class MusicFLGDIndexItems {
+    public static class MusicFLGDIndexItems {
         public String name;
         public String id;
     }
-    public class SingerAndRadioData {
+    public static class SingerAndRadioData {
         public String name;
         public String url;
         public String id;
@@ -70,7 +75,7 @@ public class InfoHelper {
     //</editor-fold>
 
     //<editor-fold desc="广播所使用的Receiver">
-    public class NotificationBCR extends BroadcastReceiver {
+    public static class NotificationBCR extends BroadcastReceiver {
 
         public static final String ACTION_LAST = "ACTION_LAST";
         public static final String ACTION_PRESS = "ACTION_PRESS";
@@ -84,7 +89,7 @@ public class InfoHelper {
             Settings.ACTIONCALLBACK.sendMessage(msg);
         }
     }
-    public class KeepliveBCR extends BroadcastReceiver {
+    public static class KeepliveBCR extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
