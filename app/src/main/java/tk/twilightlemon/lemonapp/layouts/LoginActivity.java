@@ -32,7 +32,7 @@ public class LoginActivity extends AppCompatActivity {
         WebSettings settings=wv.getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setUserAgentString("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.53 Safari/537.36 Edg/80.0.361.33");
-        wv.loadUrl("https://xui.ptlogin2.qq.com/cgi-bin/xlogin?daid=384&pt_no_auth=1&style=40&hide_border=1&appid=1006102&s_url=https%3A%2F%2Fy.qq.com%2Fn%2Fyqq%2Fsong%2F000edOaL1WZOWq.html%23stat%3Dy_new.top.pop.logout&low_login=1&hln_css=&hln_title=&hln_acc=&hln_pwd=&hln_u_tips=&hln_p_tips=&hln_autologin=&hln_login=&hln_otheracc=&hide_close_icon=1&hln_qloginacc=&hln_reg=&hln_vctitle=&hln_verifycode=&hln_vclogin=&hln_feedback=");
+        wv.loadUrl("https://xui.ptlogin2.qq.com/cgi-bin/xlogin?proxy_url=https%3A//qzs.qq.com&daid=5&&hide_title_bar=1&low_login=0&qlogin_auto_login=1&no_verifyimg=1&link_target=blank&appid=549000912&style=33&theme=2&target=self&s_url=https%3A%2F%2Fqzs.qq.com%2Fqzone%2Fv5%2Floginsucc.html%3Fpara%3Dizone&hide_border=1");
         wv.setWebViewClient(new WebViewClient(){
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -48,12 +48,13 @@ public class LoginActivity extends AppCompatActivity {
                             "e.initEvent(\"click\", true, true);\n" +
                             "document.getElementById(\"switcher_plogin\").dispatchEvent(e);",null);
                     view.evaluateJavascript("document.getElementById(\"title_2\").innerHTML=\"登录到Lemon App\";",null);
-                }else if(url.equals("https://y.qq.com/n/yqq/song/000edOaL1WZOWq.html#stat=y_new.top.pop.logout")){
+                }else if(url.contains("user.qzone.qq.com")){
+                    view.stopLoading();
                     CookieManager cookieManager = CookieManager.getInstance();
                     String cookie  = cookieManager.getCookie(url);
-                    Matcher mc = Pattern.compile("p_luin=o.*?;").matcher(cookie);
+                    Matcher mc = Pattern.compile("p_uin=o.*?;").matcher(cookie);
                     mc.find();
-                    String qq=TextHelper.FindByAb(mc.group(), "p_luin=o", ";");
+                    String qq=TextHelper.FindByAb(mc.group(), "p_uin=o", ";");
                     long g_tk=0;
                     if (cookie.contains("p_skey="))
                     {
