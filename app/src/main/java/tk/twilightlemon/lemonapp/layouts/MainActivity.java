@@ -31,6 +31,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
@@ -139,7 +140,8 @@ public class MainActivity extends AppCompatActivity {
     private Runnable r = new Runnable() {
         @Override
         public void run() {
-            if (isplaying && MseekBar.getProgress() == MseekBar.getMax()) {
+            Log.d("PLAYING DATA","isplaying:"+isplaying+"   Now:"+MseekBar.getProgress()+"   All:"+MseekBar.getMax());
+            if (isplaying && MseekBar.getProgress()+50 > MseekBar.getMax()) {
                 isplaying = false;
                 mHandler.removeCallbacks(r);
                 MseekBar.setProgress(0);
@@ -170,16 +172,17 @@ public class MainActivity extends AppCompatActivity {
                     Musicdt = Settings.ListData.Data.get(PlayListIndex);
                     PlayMusic(true,0);
                 }
-            } else {
+            }
+            else {
                 try {
                     int in = Settings.mp.getCurrentPosition();
                     MseekBar.setProgress(in);
                     Settings.mSP.putInt("NowDuration",in);
                     if (findViewById(R.id.LyricView).getVisibility() == View.VISIBLE)
                         lrcBig.updateTime(in);
-                    mHandler.postDelayed(this, 1000);
-                } catch (Exception E) {
-                }
+                    if(isplaying)
+                        mHandler.postDelayed(this, 1000);
+                } catch (Exception E) { }
             }
         }
     };
@@ -532,7 +535,7 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
-        ((ImageView) findViewById(R.id.PlayBottom_img)).setImageDrawable(getResources().getDrawable(R.mipmap.ic_launcher_round));
+        ((ImageView) findViewById(R.id.PlayBottom_img)).setImageDrawable(getResources().getDrawable(R.mipmap.ic_launcher));
         Drawable playic = getResources().getDrawable(R.drawable.ic_playbtn);
         PlayBottom_ControlBtn.setImageDrawable(getResources().getDrawable(R.drawable.ic_bom_play));
         MButton.setImageDrawable(playic);
@@ -787,6 +790,7 @@ public class MainActivity extends AppCompatActivity {
         startActivity(share_intent);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     public void LoadNotification() {
         notificationManager = (NotificationManager)
                 getSystemService(Context.NOTIFICATION_SERVICE);
@@ -816,14 +820,10 @@ public class MainActivity extends AppCompatActivity {
             mBuilder.setChannelId("MusicControl");
         }
         notification = mBuilder
-                .setContentTitle("Lemon App")
-                .setContentText("Music")
-                .setSmallIcon(R.mipmap.ic_launcher_round)
-                .setLargeIcon(BitmapFactory.decodeResource(getResources(),
-                        R.mipmap.ic_launcher))
+                .setSmallIcon(R.mipmap.ic_launcher)
                 .setDefaults(NotificationCompat.FLAG_ONLY_ALERT_ONCE)
-                .setContent(remoteViews)
                 .build();
+        notification.bigContentView=remoteViews;
         notification.flags = Notification.FLAG_ONGOING_EVENT;
         notificationManager.notify(2, notification);
     }
@@ -881,11 +881,13 @@ public class MainActivity extends AppCompatActivity {
             ic_bom = getResources().getDrawable(R.drawable.ic_bom_play);
             remoteViews.setImageViewResource(R.id.Notification_OpenBtn, R.drawable.ic_not_open);
             Settings.mp.pause();
+            mHandler.removeCallbacks(r);
         } else {
             ic = getResources().getDrawable(R.drawable.ic_unplaybtn);
             ic_bom = getResources().getDrawable(R.drawable.ic_bom_unplay);
             remoteViews.setImageViewResource(R.id.Notification_OpenBtn, R.drawable.ic_not_stop);
             Settings.mp.start();
+            mHandler.post(r);
         }
         PlayBottom_ControlBtn.setImageDrawable(ic_bom);
         MButton.setImageDrawable(ic);

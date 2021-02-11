@@ -32,7 +32,7 @@ public class LoginActivity extends AppCompatActivity {
         WebSettings settings=wv.getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setUserAgentString("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.53 Safari/537.36 Edg/80.0.361.33");
-        wv.loadUrl("https://xui.ptlogin2.qq.com/cgi-bin/xlogin?proxy_url=https%3A//qzs.qq.com&daid=5&&hide_title_bar=1&low_login=0&qlogin_auto_login=1&no_verifyimg=1&link_target=blank&appid=549000912&style=33&theme=2&target=self&s_url=https%3A%2F%2Fqzs.qq.com%2Fqzone%2Fv5%2Floginsucc.html%3Fpara%3Dizone&hide_border=1");
+        wv.loadUrl("https://graph.qq.com/oauth2.0/show?which=Login&display=pc&response_type=code&client_id=100497308&redirect_uri=https%3A%2F%2Fy.qq.com%2Fportal%2Fwx_redirect.html%3Flogin_type%3D1%26surl%3Dhttps%253A%252F%252Fy.qq.com%252Fportal%252Fprofile.html%26use_customer_cb%3D0&state=state&display=pc");
         wv.setWebViewClient(new WebViewClient(){
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -43,18 +43,20 @@ public class LoginActivity extends AppCompatActivity {
             @RequiresApi(api = Build.VERSION_CODES.KITKAT)
             @Override
             public void onPageFinished(WebView view, String url) {
-                if(url.contains("xui.ptlogin2.qq.com")) {
+                if(url.contains("graph.qq.com/oauth2.0/show")) {
                     view.evaluateJavascript("var e = document.createEvent(\"MouseEvents\");\n" +
                             "e.initEvent(\"click\", true, true);\n" +
                             "document.getElementById(\"switcher_plogin\").dispatchEvent(e);",null);
                     view.evaluateJavascript("document.getElementById(\"title_2\").innerHTML=\"登录到Lemon App\";",null);
-                }else if(url.contains("user.qzone.qq.com")){
+                    view.evaluateJavascript("document.getElementsByClassName(\"lay_top\")[0].remove();",null);
+                    view.evaluateJavascript("document.getElementById(\"lay_main\").remove();",null);
+                }else if(url.contains("y.qq.com/portal/profile.html")){
                     view.stopLoading();
                     CookieManager cookieManager = CookieManager.getInstance();
-                    String cookie  = cookieManager.getCookie(url);
-                    Matcher mc = Pattern.compile("p_uin=o.*?;").matcher(cookie);
+                    String cookie  = cookieManager.getCookie("https://graph.qq.com/oauth2.0/authorize");
+                    Matcher mc = Pattern.compile("ptui_loginuin=.*?;").matcher(cookie);
                     mc.find();
-                    String qq=TextHelper.FindByAb(mc.group(), "p_uin=o", ";");
+                    String qq=TextHelper.FindByAb(mc.group(), "ptui_loginuin=", ";");
                     long g_tk=0;
                     if (cookie.contains("p_skey="))
                     {
@@ -72,7 +74,7 @@ public class LoginActivity extends AppCompatActivity {
                     }
                     Message msg=new Message();
                     InfoHelper.LoginData ld= new InfoHelper.LoginData();
-                    ld.Cookie=cookie;
+                    ld.Cookie=cookieManager.getCookie("https://graph.qq.com/oauth2.0/authorize");
                     ld.g_tk=g_tk+"";
                     ld.qq=qq;
                     msg.obj=ld;
