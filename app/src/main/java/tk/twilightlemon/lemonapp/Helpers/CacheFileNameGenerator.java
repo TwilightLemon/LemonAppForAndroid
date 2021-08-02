@@ -10,6 +10,8 @@ import com.danikula.videocache.file.FileNameGenerator;
 import java.io.File;
 import java.util.List;
 
+import tk.twilightlemon.lemonapp.layouts.MainActivity;
+
 public class CacheFileNameGenerator implements FileNameGenerator {
     /**
      * @param url
@@ -17,7 +19,7 @@ public class CacheFileNameGenerator implements FileNameGenerator {
      */
     @Override
     public String generate(String url) {
-        String path=TextHelper.FindByAb(url,"amobile.music.tc.qq.com/C400",".m4a");
+        String path= MainActivity.Musicdt.MusicID;
         return path+".m4a";
     }
 }

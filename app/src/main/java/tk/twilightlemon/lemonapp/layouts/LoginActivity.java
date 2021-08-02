@@ -48,8 +48,10 @@ public class LoginActivity extends AppCompatActivity {
                             "e.initEvent(\"click\", true, true);\n" +
                             "document.getElementById(\"switcher_plogin\").dispatchEvent(e);",null);
                     view.evaluateJavascript("document.getElementById(\"title_2\").innerHTML=\"登录到Lemon App\";",null);
-                    view.evaluateJavascript("document.getElementsByClassName(\"lay_top\")[0].remove();",null);
+                    view.evaluateJavascript("document.getElementById(\"ptlogin_iframe\").width = \"auto\";",null);
                     view.evaluateJavascript("document.getElementById(\"lay_main\").remove();",null);
+                    view.evaluateJavascript("document.getElementsByClassName(\"lay_login_form\")[0].style.margin  =\"0\";",null);
+                    view.evaluateJavascript("document.getElementsByClassName(\"page_login combine_page_children align\")[0].style.width  =\"auto\";",null);
                 }else if(url.contains("y.qq.com/portal/profile.html")){
                     view.stopLoading();
                     CookieManager cookieManager = CookieManager.getInstance();

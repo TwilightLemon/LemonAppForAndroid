@@ -19,6 +19,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 public class HttpHelper {
+
     public static void PostWeb(final Handler handler,final String Url,final String postData,final HashMap<String,String> Headers){
         new Thread(new Runnable() {
             @Override
@@ -76,6 +77,32 @@ public class HttpHelper {
                         message.obj = result;
                         handler.sendMessage(message);
                     }
+                    urlConn.disconnect();
+                }catch (Exception e){}
+            }
+        }).start();
+    }
+    public static void TestWeb(final Handler handler, final String url, final HashMap<String, String> Headers) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    URL ur = new URL(url);
+                    HttpURLConnection urlConn = (HttpURLConnection) ur.openConnection();
+                    urlConn.setRequestMethod("GET");
+                    if (Headers != null) {
+                        Iterator iter = Headers.entrySet().iterator();
+                        while (iter.hasNext()) {
+                            Map.Entry entry = (Map.Entry) iter.next();
+                            urlConn.setRequestProperty(entry.getKey().toString(), entry.getValue().toString());
+                        }
+                    }
+                    urlConn.setRequestProperty("Content-Type", "application/json");
+                    urlConn.addRequestProperty("Connection", "Keep-Alive");
+                    urlConn.connect();
+                    Message message = new Message();
+                    message.what = urlConn.getResponseCode();
+                    handler.sendMessage(message);
                     urlConn.disconnect();
                 }catch (Exception e){}
             }

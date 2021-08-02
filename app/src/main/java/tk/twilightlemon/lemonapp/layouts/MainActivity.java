@@ -106,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean isplaying = false;
     private int xhindex = 0;
     private int PlayListIndex = -1;
-    private InfoHelper.Music Musicdt = new InfoHelper.Music();
+    public static InfoHelper.Music Musicdt = new InfoHelper.Music();
 
     private SharedPreferences musicPlayerSP = null;
 
@@ -822,8 +822,8 @@ public class MainActivity extends AppCompatActivity {
         notification = mBuilder
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setDefaults(NotificationCompat.FLAG_ONLY_ALERT_ONCE)
+                .setContent(remoteViews)
                 .build();
-        notification.bigContentView=remoteViews;
         notification.flags = Notification.FLAG_ONGOING_EVENT;
         notificationManager.notify(2, notification);
     }

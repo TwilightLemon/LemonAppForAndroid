@@ -363,6 +363,86 @@ public class MusicLib {
 
     @SuppressLint("HandlerLeak")
     public static void GetUrl(final String Musicid, final Handler handler) {
+        GetUrlOfficialPath(Musicid,new Handler(){
+            @Override
+            public void handleMessage(Message msg) {
+                String[] d=(String[])msg.obj;
+                final String url=d[0];
+                final String name=d[1];
+                Log.i("MUSIC URL",url+"   "+name);
+                if(url!=""){
+                    Log.i("MUSIC URL LINE 1",url+"   "+name);
+                    Message ms = new Message();
+                    ms.obj = url;
+                    ms.what = 200;
+                    handler.sendMessage(ms);
+                }else{
+                    Log.i("MUSIC URL LINE2",url+"   "+name);
+                    GetUrlOutPath(name,new Handler(){
+                        @Override
+                        public void handleMessage(Message msg) {
+                            final String url=msg.obj.toString();
+                            HttpHelper.TestWeb(new Handler(){
+                                @Override
+                                public void handleMessage(Message msg) {
+                                    if(msg.what==200){
+                                        Log.i("MUSIC URL SUCCESS",url+"   "+name);
+                                        Message ms = new Message();
+                                        ms.obj = url;
+                                        ms.what = 200;
+                                        handler.sendMessage(ms);
+                                    }
+                                }
+                            },url,null);
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    @SuppressLint("HandlerLeak")
+    private static void GetUrlOutPath(final String songtitle,final Handler handler){
+        final HashMap<String, String> hdata = new HashMap<String, String>();
+        hdata.put("cache-control", "max-age=0");
+        hdata.put("upgrade", "1");
+        hdata.put("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36 Edg/92.0.902.62");
+        hdata.put("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3");
+        hdata.put("host", "pd.musicapp.migu.cn");
+        hdata.put("accept-language", "zh-CN,zh;q=0.9");
+        hdata.put("sec-fetch-mode", "navigate");
+        hdata.put("sec-fetch-site", "same - origin");
+        hdata.put("sec-fetch-user", "?1");
+        hdata.put("upgrade-insecure-requests", "1");
+        HttpHelper.GetWeb(new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                try {
+                    String st = msg.obj.toString();
+                    JSONObject obj = new JSONObject(st);
+                    JSONArray data = obj.getJSONObject("songResultData")
+                            .getJSONArray("result")
+                            .getJSONObject(0)
+                            .getJSONArray("rateFormats");
+                    String url = null;
+                    for (int i = data.length() - 1; i >= 0; i--) {
+                        if (!data.getJSONObject(i).getString("formatType").equals("SQ")) {
+                            url = data.getJSONObject(i).getString("url");
+                            break;
+                        }
+                    }
+                    String reality="https://freetyst.nf.migu.cn/"+URLEncoder.encode(url.replace("ftp://218.200.160.122:21/", ""));
+                    Log.i("MSUCI URL",reality);
+                    Message ms = new Message();
+                    ms.obj = reality;
+                    ms.what=200;
+                    handler.sendMessage(ms);
+                }catch (Exception e){}
+            }
+        }, "http://pd.musicapp.migu.cn/MIGUM2.0/v1.0/content/search_all.do?&ua=Android_migu&version=5.0.1&text="+URLEncoder.encode(songtitle)+"&pageNo=1&pageSize=10&searchSwitch={%22song%22:1,%22album%22:0,%22singer%22:0,%22tagSong%22:0,%22mvSong%22:0,%22songlist%22:0,%22bestShow%22:0}", hdata);
+    }
+
+    private static void GetUrlOfficialPath(final String Musicid,final Handler handler){
         final HashMap<String, String> hdata = new HashMap<String, String>();
         hdata.put("cache-control", "max-age=0");
         hdata.put("upgrade", "1");
@@ -380,46 +460,23 @@ public class MusicLib {
             @Override
             public void handleMessage(Message msg) {
                 String st = msg.obj.toString();
-                if(!st.contains("amobile.music.tc.qq.com/C400")){
-                    //vkey获取失败
-                    try {
-                        Thread.sleep(500);
-                    }catch (Exception e){}
-
-                    //重连
-                    GetUrl(Musicid,new Handler(){
-                        @Override
-                        public void handleMessage(@NonNull Message msg) {
-                            Message m=new Message();
-                            m.what=msg.what;
-                            m.obj=msg.obj;
-                            handler.sendMessage(m);
-                        }
-                    });
-                    return;
-                }
-                Matcher m=Pattern.compile("/amobile.music.tc.qq.com/.*?.m4a.*?&fromtag=38").matcher(st);
-                m.find();
-                final String vk=TextHelper.FindByAb(m.group(),".m4a","&fromtag=38");
-               HashMap<String,String> data=HttpHelper.GetHandler();
-               HttpHelper.GetWeb(new Handler(){
-                   @Override
-                   public void handleMessage(Message msg) {
-                       String json =(String)msg.obj;
-                       try {
-                           String mid=new JSONObject(json).getJSONArray("data").getJSONObject(0).getJSONObject("file").getString("media_mid");
-                           String url="http://musichy.tc.qq.com/amobile.music.tc.qq.com/C400"+mid+".m4a" + vk + "&fromtag=98";
-                           Log.d("GETURL",url);
-                           Message ms=new Message();
-                           ms.obj=url;
-                           ms.what=200;
-                           handler.sendMessage(ms);
-                       } catch (JSONException e) {}
-                   }
-               },"https://c.y.qq.com/v8/fcg-bin/fcg_play_single_song.fcg?songmid="+Musicid+"&platform=yqq&format=json",data);
+                String url="";
+                try {
+                    Matcher m = Pattern.compile("C400.*?.m4a.*?&fromtag=38").matcher(st);
+                    m.find();
+                    url = "https://aqqmusic.tc.qq.com/amobile.music.tc.qq.com/" + m.group();
+                }catch (Exception e){}
+                String songtitle=TextHelper.FindByAb(st,"<title>","_在线试听_QQ音乐");
+                Log.d("GETURL", url);
+                Message ms = new Message();
+                String[] data={url,songtitle};
+                ms.obj = data;
+                ms.what = 200;
+                handler.sendMessage(ms);
             }
-        }, "https://i.y.qq.com/v8/playsong.html?songmid=000edOaL1WZOWq", hdata);
+        }, "https://i.y.qq.com/v8/playsong.html?songmid="+Musicid, hdata);
     }
+
 
     @SuppressLint("HandlerLeak")
     public static void GetGDbyID(InfoHelper.MusicGData gData, final Activity act, final boolean isShow) {
